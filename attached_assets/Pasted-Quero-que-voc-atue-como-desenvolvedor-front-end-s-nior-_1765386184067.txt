@@ -1,0 +1,238 @@
+Quero que você atue como desenvolvedor front-end sênior e construa um pequeno aplicativo web estático, focado em usabilidade (IHC), usando apenas HTML, CSS e JavaScript puro, sem nenhum backend.
+
+1. Contexto do projeto
+
+Nome do app: Flui360
+
+Objetivo: ser um dashboard de hábitos para apresentação em uma disciplina de Interação Humano-Computador (IHC).
+
+Foco principal:
+
+Usabilidade
+
+Organização visual
+
+Responsividade (mobile-first)
+
+Código limpo e fácil de entender, para eu poder explicar em aula.
+
+Não preciso de autenticação real nem banco de dados.
+
+Os dados podem ser mockados em arrays JavaScript (hábitos, progresso, gráficos).
+
+2. Stack e estrutura
+
+Use somente:
+
+HTML (páginas estruturadas sem PHP)
+
+CSS (de preferência organizado em 1 ou 2 arquivos)
+
+JavaScript puro (sem frameworks)
+
+Sugestão de estrutura de pastas:
+
+index.html (página inicial / login)
+
+dashboard.html (tela principal após “login”)
+
+habitos.html (tela de “Meus hábitos”)
+
+relatorios.html (tela de gráficos e estatísticas)
+
+Assets:
+
+assets/css/style.css
+
+assets/js/main.js
+
+assets/img/ (se precisar de ícones ou logos simples)
+
+Se achar melhor fazer tudo em SPA (Single Page Application) usando JS e seções que aparecem/desaparecem, tudo bem também, desde que o código continue simples para apresentação acadêmica.
+
+3. Telas e requisitos de usabilidade
+3.1. Tela de Login – index.html
+
+Layout limpo, com:
+
+Logo ou texto “Flui360”
+
+Campos:
+
+E-mail
+
+Senha
+
+Botão “Entrar”
+
+Link ou botão “Criar conta” (pode apenas mostrar uma mensagem ou levar pra uma seção estática de cadastro, não precisa funcionar de verdade).
+
+Validação mínima no front (HTML5 required e mensagens amigáveis).
+
+Ao clicar em “Entrar”, pode simplesmente redirecionar para dashboard.html.
+
+3.2. Dashboard – dashboard.html
+
+Header com:
+
+Nome do app Flui360
+
+Nome do usuário fictício (“Olá, Usuário!”)
+
+Sidebar / Menu de navegação com links para:
+
+Dashboard
+
+Meus hábitos
+
+Relatórios
+
+Sair (voltar pro index.html)
+
+No conteúdo principal:
+
+Resumo dos hábitos (ex: “Hábitos ativos: 5”, “Sequência atual: 7 dias”, etc).
+
+1 gráfico simples (pode ser um gráfico de barras fake usando HTML/CSS ou um gráfico simplezinho feito em canvas ou SVG, se quiser).
+
+3.3. Meus Hábitos – habitos.html
+
+Essa tela é prioritária pra usabilidade e mobile:
+
+Listagem de hábitos em cards. Exemplo de informações:
+
+Nome do hábito
+
+Frequência (diário / 3x por semana etc.)
+
+Status (ativo, concluído hoje etc.)
+
+No desktop:
+
+Cards podem ficar em 2–3 colunas.
+
+No mobile:
+
+Cards em uma coluna, ocupando praticamente 100% da largura.
+
+Sem barra de rolagem interna nos cards (quero evitar aquela scrollbar vertical interna feia).
+
+Que o scroll seja só da página inteira.
+
+Adicionar um botão de ação para criar novo hábito:
+
+Pode ser um FAB (Floating Action Button) no canto inferior direito ou um botão fixo no topo.
+
+Ao clicar, pode:
+
+abrir um modal com um formulário simples, ou
+
+levar para uma seção na própria página com o formulário.
+
+Não precisa salvar de verdade, apenas simular (ex.: adicionar temporariamente ao array em JS e renderizar na tela).
+
+3.4. Relatórios – relatorios.html
+
+Mostrar pelo menos um gráfico (pode ser fake) para representação de progresso:
+
+Exemplo: gráfico de barras com “Dias concluídos por hábito”.
+
+Não precisa usar biblioteca externa se não quiser, pode ser:
+
+barras feitas com <div> e CSS, ou
+
+gráfico bem simples em canvas.
+
+Abaixo do gráfico, incluir:
+
+Pequeno texto explicando o que o gráfico representa.
+
+Isso é importante para fins de IHC.
+
+4. Responsividade e menu hambúrguer
+
+Mobile-first: pense primeiro em telas pequenas, depois ajuste para desktop (media queries).
+
+O layout deve se adaptar bem em:
+
+~360px (celular pequeno)
+
+~768px (tablet)
+
+~1200px (desktop)
+
+Menu / Sidebar:
+
+No desktop:
+
+Sidebar lateral fixa à esquerda (menu vertical).
+
+No mobile:
+
+Usar um botão hambúrguer no topo (header).
+
+Ao clicar no hambúrguer:
+
+Abrir a sidebar como um off-canvas (deslizando da esquerda) ou sobrepondo o conteúdo.
+
+Escurecer levemente o fundo (backdrop) para dar foco ao menu.
+
+Ao clicar novamente no hambúrguer ou no backdrop:
+
+Fechar a sidebar.
+
+Esse comportamento precisa funcionar sem bugs de scroll e sem elementos “travados” na lateral.
+
+5. Estilo visual
+
+Estilo moderno, mas simples:
+
+paleta com 2–3 cores principais,
+
+usar bastante espaçamento (padding/margin) para deixar tudo respirando,
+
+tipografia legível.
+
+Tenta manter um visual que combine com um app de produtividade/hábitos (algo leve).
+
+6. Acessibilidade básica
+
+Usar textos alternativos (alt) em imagens importantes.
+
+Labels associadas aos inputs de formulário.
+
+Botões com textos claros (não apenas ícones).
+
+Cuidado com contraste de cores (evitar texto muito claro em fundo claro, etc.).
+
+7. Organização do código
+
+Separar bem HTML, CSS e JS.
+
+Comentar os trechos principais do código em português, explicando:
+
+como o menu hambúrguer funciona,
+
+como a lista de hábitos é renderizada,
+
+como os dados fake dos gráficos são montados.
+
+Nomear classes e IDs de forma semântica (.sidebar, .card-habito, .btn-primario, etc.).
+
+8. O que espero de você agora
+
+Criar os arquivos e a estrutura de pastas sugerida.
+
+Implementar todas as telas com HTML, CSS e JS puro.
+
+Garantir que:
+
+o menu hambúrguer funcione no mobile,
+
+a tela de “Meus hábitos” não tenha scroll interno nos cards,
+
+o app seja navegável e apresentável.
+
+Ao final, me explique rapidamente (em comentários no código) como está organizada a aplicação.
+
+Se algo não estiver claro, faça suposições razoáveis para um app de hábitos focado em IHC.
