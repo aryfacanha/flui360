@@ -2335,13 +2335,34 @@ img {
     height: 44px;
     border-radius: 50%;
     border: 3px solid var(--cor-habito, var(--cor-primaria));
-    background-color: transparent;
+    background: conic-gradient(
+        var(--cor-habito, var(--cor-primaria)) var(--progresso, 0%),
+        transparent var(--progresso, 0%)
+    );
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all var(--transicao-rapida);
     flex-shrink: 0;
+    position: relative;
+}
+
+.btn-completar-mensuravel::before {
+    content: '';
+    position: absolute;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background-color: var(--cor-fundo-card, #fff);
+    z-index: 0;
+}
+
+.btn-completar-mensuravel .check-icon {
+    position: relative;
+    z-index: 1;
+    color: white;
+    font-size: 1.25rem;
 }
 
 .btn-completar-mensuravel:hover {
@@ -2349,12 +2370,11 @@ img {
 }
 
 .btn-completar-mensuravel.concluido {
-    background-color: var(--cor-habito, var(--cor-primaria));
+    background: var(--cor-habito, var(--cor-primaria));
 }
 
-.btn-completar-mensuravel .check-icon {
-    color: white;
-    font-size: 1.25rem;
+.btn-completar-mensuravel.concluido::before {
+    display: none;
 }
 
 .controle-mensuravel-info {

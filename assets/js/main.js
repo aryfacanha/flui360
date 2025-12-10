@@ -1592,11 +1592,12 @@ function criarCardHabitoAvancado(habito) {
         const valorHoje = habito.historico[hoje] || 0;
         const alvo = habito.alvoDiario;
         const atingido = valorHoje >= alvo;
+        const percentual = Math.min((valorHoje / alvo) * 100, 100);
         
         controleHTML = `
             <div class="habito-card-controle">
                 <div class="controle-mensuravel-botao" onclick="abrirModalValor(${habito.id})">
-                    <button class="btn-completar-mensuravel ${atingido ? 'concluido' : ''}" style="--cor-habito: ${habito.cor}">
+                    <button class="btn-completar-mensuravel ${atingido ? 'concluido' : ''}" style="--cor-habito: ${habito.cor}; --progresso: ${percentual}%">
                         <span class="check-icon">${atingido ? '✓' : ''}</span>
                     </button>
                     <div class="controle-mensuravel-info">
