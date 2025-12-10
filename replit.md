@@ -163,11 +163,36 @@ O projeto é estático e pode ser executado com qualquer servidor HTTP. No Repli
 
 ## Princípios de IHC Aplicados
 
-1. **Feedback visual**: Estados de hover, cores de status, barras de progresso, checkmarks animados
-2. **Consistência**: Mesma estrutura de layout em todas as páginas, FAB sempre presente
-3. **Acessibilidade**: Labels em formulários, textos em botões, contraste adequado
+1. **Feedback visual**: Estados de hover, cores de status, barras de progresso, checkmarks animados, **sistema de toast notifications**
+2. **Consistência**: Mesma estrutura de layout em todas as páginas, FAB sempre presente, **navegação com página atual destacada**
+3. **Acessibilidade**: Labels em formulários, textos em botões, contraste adequado, **elementos semânticos (buttons vs divs)**, **fechar modais com Escape**, **gerenciamento de foco**, **aria-current="page"**
 4. **Responsividade**: Adaptação para diferentes tamanhos de tela
 5. **Hierarquia visual**: Tipografia clara, espaçamentos generosos
 6. **Interação direta**: Marcar hábitos com um clique, sem menus intermediários
-7. **Prevenção de erros**: Confirmação antes de excluir, validação de formulários
+7. **Prevenção de erros**: Confirmação antes de excluir, **validação de formulários com mensagens inline amigáveis**
 8. **Flexibilidade**: Tipos de hábito, frequências e lembretes configuráveis
+9. **Onboarding**: Caixa de boas-vindas explicando hábitos de exemplo e como usar o app
+10. **Ajuda contextual**: Descrições nos modais explicando diferenças entre tipos de hábito
+
+## Funcionalidades de IHC (Detalhadas)
+
+### Sistema de Toast Notifications
+- Notificações visuais aparecem ao salvar, excluir ou registrar progresso
+- Toasts de sucesso (verde) e erro (vermelho)
+- Auto-dismiss após 3 segundos
+- Posicionamento fixo no canto inferior direito
+
+### Validação de Formulários
+- Mensagens de erro próximas aos campos inválidos
+- Validação antes de submeter
+- Feedback visual com borda vermelha nos campos com erro
+
+### Acessibilidade Avançada
+- Fechar modais com tecla Escape
+- Foco automático no primeiro campo ao abrir modal
+- Elementos clicáveis são `<button>` ao invés de `<div>`
+- Atributo `aria-current="page"` na navegação
+
+### Navegação
+- Página atual destacada na sidebar com cor de fundo e borda
+- Classe `.nav-link-ativo` aplicada dinamicamente
