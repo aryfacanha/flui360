@@ -133,16 +133,33 @@ O projeto é estático e pode ser executado com qualquer servidor HTTP. No Repli
 }
 ```
 
+## Fluxo de Modais
+
+### FAB Global (Novo Hábito)
+1. Clique no FAB → **Modal de Seleção de Tipo**
+2. Escolhe "Sim/Não" ou "Mensurável" → **Modal do Formulário Principal**
+3. O tipo fica fixo e não pode ser alterado na edição
+
+### Hábitos Mensuráveis
+- Ao clicar para "completar" → **Modal de Valor**
+- Pergunta "Quanto você completou hoje?" com campo numérico
+- Consistente em Meus Hábitos e Dashboard
+
+### Frequência Personalizada
+- Ao selecionar "Personalizado..." → **Modal de Frequência X em Y**
+- Configura "X vezes em Y dias" com campos inline
+
 ## Funções Principais (main.js)
 
-- `criarHabito()` / `salvarHabito()`: Cria ou atualiza hábito
-- `editarHabito(id)`: Abre modal com dados do hábito
-- `excluirHabito(id)`: Remove hábito da lista
-- `confirmarExclusao(id)`: Modal de confirmação
+- `configurarFAB()`: FAB abre modal de seleção de tipo
+- `configurarModalTipo()`: Modal de escolha de tipo de hábito
+- `configurarModalValor()`: Modal de valor para mensuráveis
+- `configurarModalFrequenciaXY()`: Modal de frequência personalizada
+- `salvarHabito()`: Cria ou atualiza hábito
+- `editarHabito(id)`: Abre modal com dados do hábito (tipo fixo)
+- `abrirModalValor(id)`: Abre modal de valor para mensurável
 - `renderizarHabitos()`: Renderiza cards na tela
-- `toggleDiaHabito(id, data)`: Marca/desmarca dia
-- `atualizarValorMensuravel(id, valor)`: Atualiza progresso de mensurável
-- `configurarCamposDinamicos()`: Configura campos condicionais do formulário
+- `toggleDiaHabito(id, data)`: Marca/desmarca dia (binários)
 
 ## Princípios de IHC Aplicados
 
