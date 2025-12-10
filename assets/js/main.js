@@ -5,53 +5,30 @@
  * 
  * ORGANIZAÇÃO DO ARQUIVO:
  * 1. Estrutura de dados dos hábitos (localStorage)
- * 2. Funções utilitárias (cálculos de sequência, progresso)
- * 3. Funções do menu hambúrguer e sidebar
- * 4. Funções de modal
- * 5. CRUD de hábitos (criar, editar, excluir)
- * 6. Renderização de hábitos (cards avançados)
- * 7. Renderização de gráficos
- * 8. Inicialização e eventos
+ * 2. Funções utilitárias
+ * 3. Menu hambúrguer e sidebar
+ * 4. Sistema de modais
+ * 5. FAB global e fluxo de criação
+ * 6. CRUD de hábitos
+ * 7. Modal de valor para mensuráveis
+ * 8. Modal de frequência X em Y dias
+ * 9. Renderização de hábitos
+ * 10. Gráficos e estatísticas
+ * 11. Inicialização
  * 
- * ESTILO LOOP HABIT TRACKER:
- * - Tipos de hábito: Binário (Sim/Não) e Mensurável
- * - Frequência dinâmica com campos condicionais
- * - Sistema de lembretes com seleção de dias da semana
- * - Persistência em localStorage
+ * FLUXO DO FAB:
+ * 1. Clique no FAB → Modal de seleção de tipo
+ * 2. Seleciona tipo → Modal do formulário principal
+ * 3. Tipo é fixo, não pode ser alterado na edição
+ * 
+ * HÁBITOS MENSURÁVEIS:
+ * - Ao clicar para completar → Modal de valor
+ * - Consistente em todas as telas (Meus Hábitos e Dashboard)
  */
 
 // ============================================
 // 1. ESTRUTURA DE DADOS DOS HÁBITOS
 // ============================================
-
-/**
- * ESTRUTURA DE UM HÁBITO:
- * {
- *   id: number,                    // ID único
- *   nome: string,                  // Nome do hábito
- *   tipo: 'binario' | 'mensuravel',// Tipo do hábito
- *   cor: string,                   // Cor em hexadecimal
- *   
- *   // Campos para hábitos mensuráveis
- *   unidade: string,               // Ex: "litros", "páginas"
- *   alvoDiario: number,            // Meta diária
- *   
- *   // Frequência
- *   tipoFrequencia: string,        // 'diario', 'x-semana', 'x-mes', 'x-em-y'
- *   vezesX: number,                // Valor de X (vezes)
- *   diasY: number,                 // Valor de Y (dias) para 'x-em-y'
- *   
- *   // Lembretes
- *   lembreteAtivo: boolean,        // Se lembrete está ativo
- *   horaLembrete: string,          // Horário do lembrete (HH:MM)
- *   diasLembrete: string[],        // Array de dias: ['seg', 'ter', ...]
- *   
- *   // Histórico de conclusões
- *   historico: {                   // Objeto com datas como chaves
- *     'YYYY-MM-DD': boolean | number  // true/false para binário, número para mensurável
- *   }
- * }
- */
 
 const STORAGE_KEY = 'flui360_habitos';
 
@@ -161,7 +138,7 @@ function carregarHabitos() {
         try {
             return JSON.parse(dados);
         } catch (e) {
-            console.error("Erro ao carregar hábitos do localStorage:", e);
+            console.error("Erro ao carregar hábitos:", e);
         }
     }
     return getHabitosPadrao();
@@ -172,6 +149,13 @@ function salvarHabitos() {
 }
 
 let habitos = carregarHabitos();
+
+// Variáveis globais para modais
+let habitoParaExcluir = null;
+let habitoParaValor = null;
+let tipoHabitoSelecionado = 'binario';
+let frequenciaXTemp = 3;
+let frequenciaYTemp = 5;
 
 // ============================================
 // 2. FUNÇÕES UTILITÁRIAS
@@ -185,9 +169,8 @@ function estaConcluidoHoje(habito) {
     const valor = habito.historico[getHoje()];
     if (habito.tipo === 'binario') {
         return valor === true;
-    } else {
-        return valor >= habito.alvoDiario;
     }
+    return valor >= habito.alvoDiario;
 }
 
 function getValorHoje(habito) {
@@ -204,12 +187,7 @@ function calcularSequencia(habito) {
         const chave = data.toISOString().split('T')[0];
         const valor = habito.historico[chave];
         
-        let concluido = false;
-        if (habito.tipo === 'binario') {
-            concluido = valor === true;
-        } else {
-            concluido = valor >= habito.alvoDiario;
-        }
+        let concluido = habito.tipo === 'binario' ? valor === true : valor >= habito.alvoDiario;
         
         if (concluido) {
             sequencia++;
@@ -338,7 +316,6 @@ function getTextoFrequencia(habito) {
 function getTextoDiasLembrete(dias) {
     if (!dias || dias.length === 0) return '';
     
-    const todosDias = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
     if (dias.length === 7) return 'Todos os dias';
     
     const diasSemanaFim = ['dom', 'sab'];
@@ -394,7 +371,7 @@ function configurarMenuHamburguer() {
 }
 
 // ============================================
-// 4. FUNÇÕES DE MODAL
+// 4. SISTEMA DE MODAIS
 // ============================================
 
 function abrirModal(modalId) {
@@ -413,9 +390,106 @@ function fecharModal(modalId) {
     }
 }
 
-let habitoParaExcluir = null;
+// ============================================
+// 5. FAB GLOBAL E FLUXO DE CRIAÇÃO
+// ============================================
+
+/**
+ * FUNÇÃO: configurarFAB
+ * ---------------------
+ * O FAB funciona globalmente em todas as telas.
+ * Ao clicar, abre primeiro o modal de seleção de tipo.
+ * Após selecionar o tipo, abre o formulário principal.
+ */
+function configurarFAB() {
+    const btnNovoHabito = document.getElementById('btnNovoHabito');
+    
+    if (btnNovoHabito) {
+        btnNovoHabito.addEventListener('click', () => {
+            // Abre o modal de seleção de tipo primeiro
+            abrirModal('modalTipoBackdrop');
+        });
+    }
+}
+
+/**
+ * FUNÇÃO: configurarModalTipo
+ * ---------------------------
+ * Modal de seleção de tipo de hábito (binário ou mensurável).
+ * Aparece antes do formulário principal.
+ * O tipo escolhido fica fixo e não pode ser alterado depois.
+ */
+function configurarModalTipo() {
+    const modalTipoBackdrop = document.getElementById('modalTipoBackdrop');
+    const btnFecharModalTipo = document.getElementById('btnFecharModalTipo');
+    const tipoHabitoBtns = document.querySelectorAll('.tipo-habito-btn');
+    
+    if (btnFecharModalTipo) {
+        btnFecharModalTipo.addEventListener('click', () => fecharModal('modalTipoBackdrop'));
+    }
+    
+    if (modalTipoBackdrop) {
+        modalTipoBackdrop.addEventListener('click', (e) => {
+            if (e.target === modalTipoBackdrop) fecharModal('modalTipoBackdrop');
+        });
+    }
+    
+    // Ao clicar em um tipo, fecha este modal e abre o formulário
+    tipoHabitoBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            tipoHabitoSelecionado = btn.dataset.tipo;
+            fecharModal('modalTipoBackdrop');
+            
+            // Configura o formulário com o tipo selecionado
+            limparFormularioHabito();
+            configurarTipoNoFormulario(tipoHabitoSelecionado);
+            
+            document.getElementById('tituloModalHabito').textContent = 'Novo Hábito';
+            document.getElementById('btnSalvarHabito').textContent = 'Salvar Hábito';
+            
+            abrirModal('modalHabitoBackdrop');
+        });
+    });
+}
+
+/**
+ * FUNÇÃO: configurarTipoNoFormulario
+ * ----------------------------------
+ * Configura o indicador de tipo e campos condicionais.
+ * O tipo é somente leitura no formulário.
+ */
+function configurarTipoNoFormulario(tipo) {
+    const tipoHabitoHidden = document.getElementById('tipoHabitoHidden');
+    const tipoIndicador = document.getElementById('tipoIndicador');
+    const camposMensuravel = document.getElementById('camposMensuravel');
+    
+    if (tipoHabitoHidden) tipoHabitoHidden.value = tipo;
+    
+    if (tipoIndicador) {
+        if (tipo === 'binario') {
+            tipoIndicador.innerHTML = `
+                <span class="tipo-indicador-icone">&#10003;</span>
+                <span class="tipo-indicador-texto">Hábito Sim/Não</span>
+            `;
+        } else {
+            tipoIndicador.innerHTML = `
+                <span class="tipo-indicador-icone">&#9776;</span>
+                <span class="tipo-indicador-texto">Hábito Mensurável</span>
+            `;
+        }
+    }
+    
+    if (camposMensuravel) {
+        camposMensuravel.style.display = tipo === 'mensuravel' ? 'block' : 'none';
+    }
+}
+
+// ============================================
+// 6. CRUD DE HÁBITOS
+// ============================================
 
 function configurarModais() {
+    // Modal de login (index.html)
     const btnCriarConta = document.getElementById('btnCriarConta');
     const btnFecharModal = document.getElementById('btnFecharModal');
     const modalBackdrop = document.getElementById('modalBackdrop');
@@ -438,20 +512,10 @@ function configurarModais() {
         });
     }
     
-    // Modal de hábito avançado
-    const btnNovoHabito = document.getElementById('btnNovoHabito');
+    // Modal do formulário de hábito
     const btnFecharModalHabito = document.getElementById('btnFecharModalHabito');
     const btnCancelarHabito = document.getElementById('btnCancelarHabito');
     const modalHabitoBackdrop = document.getElementById('modalHabitoBackdrop');
-    
-    if (btnNovoHabito) {
-        btnNovoHabito.addEventListener('click', () => {
-            limparFormularioHabito();
-            document.getElementById('tituloModalHabito').textContent = 'Novo Hábito';
-            document.getElementById('btnSalvarHabito').textContent = 'Salvar Hábito';
-            abrirModal('modalHabitoBackdrop');
-        });
-    }
     
     if (btnFecharModalHabito) btnFecharModalHabito.addEventListener('click', () => fecharModal('modalHabitoBackdrop'));
     if (btnCancelarHabito) btnCancelarHabito.addEventListener('click', () => fecharModal('modalHabitoBackdrop'));
@@ -494,46 +558,32 @@ function configurarModais() {
         });
     }
     
-    // Configurar campos dinâmicos do formulário
     configurarCamposDinamicos();
+    configurarFAB();
+    configurarModalTipo();
+    configurarModalValor();
+    configurarModalFrequenciaXY();
 }
-
-// ============================================
-// 5. CRUD DE HÁBITOS
-// ============================================
 
 /**
  * FUNÇÃO: configurarCamposDinamicos
  * ---------------------------------
- * Configura a exibição condicional de campos no formulário:
- * - Campos de mensurável (unidade, alvo) aparecem quando tipo = 'mensuravel'
- * - Campos de frequência (X, Y) aparecem conforme a opção selecionada
- * - Configuração de lembrete aparece quando toggle está ativo
+ * Configura campos condicionais no formulário:
+ * - Frequência X/Y (abre modal para x-em-y)
+ * - Lembretes (toggle + dias da semana)
  */
 function configurarCamposDinamicos() {
-    // Tipo do hábito (binário vs mensurável)
-    const radiosTipo = document.querySelectorAll('input[name="tipoHabito"]');
-    const camposMensuravel = document.getElementById('camposMensuravel');
-    
-    radiosTipo.forEach(radio => {
-        radio.addEventListener('change', () => {
-            if (camposMensuravel) {
-                camposMensuravel.style.display = radio.value === 'mensuravel' ? 'block' : 'none';
-            }
-        });
-    });
-    
     // Frequência dinâmica
     const selectFrequencia = document.getElementById('tipoFrequencia');
     const camposXSemana = document.getElementById('camposXSemana');
     const camposXMes = document.getElementById('camposXMes');
-    const camposXEmY = document.getElementById('camposXEmY');
+    const frequenciaPersonalizadaInfo = document.getElementById('frequenciaPersonalizadaInfo');
     
     if (selectFrequencia) {
         selectFrequencia.addEventListener('change', () => {
             if (camposXSemana) camposXSemana.style.display = 'none';
             if (camposXMes) camposXMes.style.display = 'none';
-            if (camposXEmY) camposXEmY.style.display = 'none';
+            if (frequenciaPersonalizadaInfo) frequenciaPersonalizadaInfo.style.display = 'none';
             
             switch (selectFrequencia.value) {
                 case 'x-semana':
@@ -543,9 +593,18 @@ function configurarCamposDinamicos() {
                     if (camposXMes) camposXMes.style.display = 'flex';
                     break;
                 case 'x-em-y':
-                    if (camposXEmY) camposXEmY.style.display = 'flex';
+                    // Abre o modal de frequência personalizada
+                    abrirModal('modalFrequenciaXYBackdrop');
                     break;
             }
+        });
+    }
+    
+    // Botão para editar frequência X em Y
+    const btnEditarFrequenciaXY = document.getElementById('btnEditarFrequenciaXY');
+    if (btnEditarFrequenciaXY) {
+        btnEditarFrequenciaXY.addEventListener('click', () => {
+            abrirModal('modalFrequenciaXYBackdrop');
         });
     }
     
@@ -598,11 +657,7 @@ function atualizarBotaoToggleDias() {
     const diasAtivos = document.querySelectorAll('.dia-semana-btn.ativo');
     const todosDias = document.querySelectorAll('.dia-semana-btn');
     
-    if (diasAtivos.length === todosDias.length) {
-        btnToggleDias.textContent = 'Limpar todos';
-    } else {
-        btnToggleDias.textContent = 'Selecionar todos';
-    }
+    btnToggleDias.textContent = diasAtivos.length === todosDias.length ? 'Limpar todos' : 'Selecionar todos';
 }
 
 function limparFormularioHabito() {
@@ -611,79 +666,98 @@ function limparFormularioHabito() {
     
     form.reset();
     document.getElementById('habitoId').value = '';
+    document.getElementById('tipoHabitoHidden').value = 'binario';
     
-    // Reset tipo
-    document.querySelector('input[name="tipoHabito"][value="binario"]').checked = true;
     const camposMensuravel = document.getElementById('camposMensuravel');
     if (camposMensuravel) camposMensuravel.style.display = 'none';
     
     // Reset frequência
-    document.getElementById('tipoFrequencia').value = 'diario';
-    document.getElementById('camposXSemana').style.display = 'none';
-    document.getElementById('camposXMes').style.display = 'none';
-    document.getElementById('camposXEmY').style.display = 'none';
+    const tipoFrequencia = document.getElementById('tipoFrequencia');
+    if (tipoFrequencia) tipoFrequencia.value = 'diario';
+    
+    const camposXSemana = document.getElementById('camposXSemana');
+    const camposXMes = document.getElementById('camposXMes');
+    const frequenciaPersonalizadaInfo = document.getElementById('frequenciaPersonalizadaInfo');
+    
+    if (camposXSemana) camposXSemana.style.display = 'none';
+    if (camposXMes) camposXMes.style.display = 'none';
+    if (frequenciaPersonalizadaInfo) frequenciaPersonalizadaInfo.style.display = 'none';
     
     // Reset lembretes
-    document.getElementById('lembreteAtivo').checked = false;
-    document.getElementById('lembreteConfig').style.display = 'none';
-    document.getElementById('lembreteLabel').textContent = 'Desabilitado';
+    const lembreteAtivo = document.getElementById('lembreteAtivo');
+    const lembreteConfig = document.getElementById('lembreteConfig');
+    const lembreteLabel = document.getElementById('lembreteLabel');
+    
+    if (lembreteAtivo) lembreteAtivo.checked = false;
+    if (lembreteConfig) lembreteConfig.style.display = 'none';
+    if (lembreteLabel) lembreteLabel.textContent = 'Desabilitado';
+    
     document.querySelectorAll('.dia-semana-btn').forEach(btn => btn.classList.remove('ativo'));
     atualizarBotaoToggleDias();
     
-    // Reset cor (primeira opção)
-    document.querySelector('input[name="corHabito"][value="#10b981"]').checked = true;
+    // Reset cor
+    const corRadio = document.querySelector('input[name="corHabito"][value="#10b981"]');
+    if (corRadio) corRadio.checked = true;
+    
+    // Reset frequência temporária
+    frequenciaXTemp = 3;
+    frequenciaYTemp = 5;
 }
 
-/**
- * FUNÇÃO: preencherFormularioHabito
- * ---------------------------------
- * Preenche o formulário com os dados de um hábito existente para edição.
- */
 function preencherFormularioHabito(habito) {
     document.getElementById('habitoId').value = habito.id;
+    document.getElementById('tipoHabitoHidden').value = habito.tipo;
     document.getElementById('nomeHabito').value = habito.nome;
     
-    // Tipo
-    document.querySelector(`input[name="tipoHabito"][value="${habito.tipo}"]`).checked = true;
-    const camposMensuravel = document.getElementById('camposMensuravel');
-    if (camposMensuravel) {
-        camposMensuravel.style.display = habito.tipo === 'mensuravel' ? 'block' : 'none';
-    }
+    // Tipo (somente leitura)
+    configurarTipoNoFormulario(habito.tipo);
+    
+    // Campos mensuráveis
     if (habito.tipo === 'mensuravel') {
         document.getElementById('alvoDiario').value = habito.alvoDiario || 1;
         document.getElementById('unidadeHabito').value = habito.unidade || '';
     }
     
     // Frequência
-    document.getElementById('tipoFrequencia').value = habito.tipoFrequencia;
-    document.getElementById('camposXSemana').style.display = 'none';
-    document.getElementById('camposXMes').style.display = 'none';
-    document.getElementById('camposXEmY').style.display = 'none';
+    const tipoFrequencia = document.getElementById('tipoFrequencia');
+    const camposXSemana = document.getElementById('camposXSemana');
+    const camposXMes = document.getElementById('camposXMes');
+    const frequenciaPersonalizadaInfo = document.getElementById('frequenciaPersonalizadaInfo');
+    const frequenciaPersonalizadaTexto = document.getElementById('frequenciaPersonalizadaTexto');
+    
+    if (tipoFrequencia) tipoFrequencia.value = habito.tipoFrequencia;
+    if (camposXSemana) camposXSemana.style.display = 'none';
+    if (camposXMes) camposXMes.style.display = 'none';
+    if (frequenciaPersonalizadaInfo) frequenciaPersonalizadaInfo.style.display = 'none';
     
     switch (habito.tipoFrequencia) {
         case 'x-semana':
-            document.getElementById('camposXSemana').style.display = 'flex';
+            if (camposXSemana) camposXSemana.style.display = 'flex';
             document.getElementById('vezesXSemana').value = habito.vezesX || 3;
             break;
         case 'x-mes':
-            document.getElementById('camposXMes').style.display = 'flex';
+            if (camposXMes) camposXMes.style.display = 'flex';
             document.getElementById('vezesXMes').value = habito.vezesX || 10;
             break;
         case 'x-em-y':
-            document.getElementById('camposXEmY').style.display = 'flex';
-            document.getElementById('vezesX').value = habito.vezesX || 3;
-            document.getElementById('diasY').value = habito.diasY || 5;
+            frequenciaXTemp = habito.vezesX || 3;
+            frequenciaYTemp = habito.diasY || 5;
+            if (frequenciaPersonalizadaInfo) frequenciaPersonalizadaInfo.style.display = 'flex';
+            if (frequenciaPersonalizadaTexto) {
+                frequenciaPersonalizadaTexto.textContent = `${frequenciaXTemp} vezes em ${frequenciaYTemp} dias`;
+            }
             break;
     }
     
     // Lembretes
-    const toggleLembrete = document.getElementById('lembreteAtivo');
+    const lembreteAtivo = document.getElementById('lembreteAtivo');
     const lembreteConfig = document.getElementById('lembreteConfig');
     const lembreteLabel = document.getElementById('lembreteLabel');
     
-    toggleLembrete.checked = habito.lembreteAtivo;
-    lembreteConfig.style.display = habito.lembreteAtivo ? 'block' : 'none';
-    lembreteLabel.textContent = habito.lembreteAtivo ? 'Habilitado' : 'Desabilitado';
+    if (lembreteAtivo) lembreteAtivo.checked = habito.lembreteAtivo;
+    if (lembreteConfig) lembreteConfig.style.display = habito.lembreteAtivo ? 'block' : 'none';
+    if (lembreteLabel) lembreteLabel.textContent = habito.lembreteAtivo ? 'Habilitado' : 'Desabilitado';
+    
     document.getElementById('horaLembrete').value = habito.horaLembrete || '08:00';
     
     document.querySelectorAll('.dia-semana-btn').forEach(btn => {
@@ -699,16 +773,11 @@ function preencherFormularioHabito(habito) {
     if (corRadio) corRadio.checked = true;
 }
 
-/**
- * FUNÇÃO: salvarHabito
- * --------------------
- * Cria um novo hábito ou atualiza um existente.
- */
 function salvarHabito() {
     const idInput = document.getElementById('habitoId').value;
     const isEdicao = idInput !== '';
     
-    const tipo = document.querySelector('input[name="tipoHabito"]:checked').value;
+    const tipo = document.getElementById('tipoHabitoHidden').value;
     const nome = document.getElementById('nomeHabito').value.trim();
     const cor = document.querySelector('input[name="corHabito"]:checked').value;
     
@@ -733,8 +802,8 @@ function salvarHabito() {
             vezesX = parseInt(document.getElementById('vezesXMes').value) || 10;
             break;
         case 'x-em-y':
-            vezesX = parseInt(document.getElementById('vezesX').value) || 3;
-            diasY = parseInt(document.getElementById('diasY').value) || 5;
+            vezesX = frequenciaXTemp;
+            diasY = frequenciaYTemp;
             break;
     }
     
@@ -747,12 +816,10 @@ function salvarHabito() {
     });
     
     if (isEdicao) {
-        // Atualiza hábito existente
         const id = parseInt(idInput);
         const habito = habitos.find(h => h.id === id);
         if (habito) {
             habito.nome = nome;
-            habito.tipo = tipo;
             habito.cor = cor;
             habito.unidade = unidade;
             habito.alvoDiario = alvoDiario;
@@ -762,9 +829,9 @@ function salvarHabito() {
             habito.lembreteAtivo = lembreteAtivo;
             habito.horaLembrete = horaLembrete;
             habito.diasLembrete = diasLembrete;
+            // Tipo NÃO é alterado na edição
         }
     } else {
-        // Cria novo hábito
         const novoId = habitos.length > 0 ? Math.max(...habitos.map(h => h.id)) + 1 : 1;
         const novoHabito = {
             id: novoId,
@@ -787,7 +854,6 @@ function salvarHabito() {
     salvarHabitos();
     fecharModal('modalHabitoBackdrop');
     
-    // Re-renderiza conforme a página
     renderizarHabitos();
     renderizarHabitosHoje();
     atualizarEstatisticasDashboard();
@@ -796,11 +862,6 @@ function salvarHabito() {
     renderizarGraficoMensal();
 }
 
-/**
- * FUNÇÃO: editarHabito
- * --------------------
- * Abre o modal com os dados do hábito para edição.
- */
 function editarHabito(id) {
     const habito = habitos.find(h => h.id === id);
     if (!habito) return;
@@ -813,11 +874,6 @@ function editarHabito(id) {
     abrirModal('modalHabitoBackdrop');
 }
 
-/**
- * FUNÇÃO: confirmarExclusao
- * -------------------------
- * Abre modal de confirmação antes de excluir.
- */
 function confirmarExclusao(id) {
     const habito = habitos.find(h => h.id === id);
     if (!habito) return;
@@ -827,11 +883,6 @@ function confirmarExclusao(id) {
     abrirModal('modalExcluirBackdrop');
 }
 
-/**
- * FUNÇÃO: excluirHabito
- * ---------------------
- * Remove um hábito da lista.
- */
 function excluirHabito(id) {
     habitos = habitos.filter(h => h.id !== id);
     salvarHabitos();
@@ -844,46 +895,206 @@ function excluirHabito(id) {
     renderizarGraficoMensal();
 }
 
-/**
- * FUNÇÃO: toggleDiaHabito
- * -----------------------
- * Alterna a conclusão de um hábito em uma data específica.
- */
 function toggleDiaHabito(habitoId, data) {
     const habito = habitos.find(h => h.id === habitoId);
     if (!habito) return;
     
     if (habito.tipo === 'binario') {
         habito.historico[data] = !habito.historico[data];
+        salvarHabitos();
+        renderizarHabitos();
+        renderizarHabitosHoje();
+        atualizarEstatisticasDashboard();
+        renderizarGraficoSemanal();
     }
-    
-    salvarHabitos();
-    renderizarHabitos();
-    renderizarHabitosHoje();
-    atualizarEstatisticasDashboard();
-    renderizarGraficoSemanal();
-}
-
-/**
- * FUNÇÃO: atualizarValorMensuravel
- * --------------------------------
- * Atualiza o valor registrado para um hábito mensurável.
- */
-function atualizarValorMensuravel(habitoId, valor) {
-    const habito = habitos.find(h => h.id === habitoId);
-    if (!habito) return;
-    
-    const hoje = getHoje();
-    habito.historico[hoje] = parseFloat(valor) || 0;
-    
-    salvarHabitos();
-    renderizarHabitos();
-    atualizarEstatisticasDashboard();
-    renderizarGraficoSemanal();
 }
 
 // ============================================
-// 6. RENDERIZAÇÃO DE HÁBITOS
+// 7. MODAL DE VALOR PARA MENSURÁVEIS
+// ============================================
+
+/**
+ * FUNÇÃO: configurarModalValor
+ * ----------------------------
+ * Modal que aparece ao clicar para "completar" um hábito mensurável.
+ * Pergunta o valor do dia (ex: "Quantas páginas você leu?")
+ * Usado tanto em Meus Hábitos quanto no Dashboard.
+ */
+function configurarModalValor() {
+    const modalValorBackdrop = document.getElementById('modalValorBackdrop');
+    const btnFecharModalValor = document.getElementById('btnFecharModalValor');
+    const btnCancelarValor = document.getElementById('btnCancelarValor');
+    const btnConfirmarValor = document.getElementById('btnConfirmarValor');
+    const inputValorDia = document.getElementById('inputValorDia');
+    
+    if (btnFecharModalValor) {
+        btnFecharModalValor.addEventListener('click', () => fecharModal('modalValorBackdrop'));
+    }
+    if (btnCancelarValor) {
+        btnCancelarValor.addEventListener('click', () => fecharModal('modalValorBackdrop'));
+    }
+    if (modalValorBackdrop) {
+        modalValorBackdrop.addEventListener('click', (e) => {
+            if (e.target === modalValorBackdrop) fecharModal('modalValorBackdrop');
+        });
+    }
+    
+    // Atualiza preview conforme digita
+    if (inputValorDia) {
+        inputValorDia.addEventListener('input', atualizarPreviewValor);
+    }
+    
+    // Confirma o valor
+    if (btnConfirmarValor) {
+        btnConfirmarValor.addEventListener('click', () => {
+            if (habitoParaValor) {
+                const valor = parseFloat(inputValorDia.value) || 0;
+                habitoParaValor.historico[getHoje()] = valor;
+                salvarHabitos();
+                habitoParaValor = null;
+                
+                fecharModal('modalValorBackdrop');
+                
+                renderizarHabitos();
+                renderizarHabitosHoje();
+                atualizarEstatisticasDashboard();
+                renderizarGraficoSemanal();
+            }
+        });
+    }
+}
+
+/**
+ * FUNÇÃO: abrirModalValor
+ * -----------------------
+ * Abre o modal de valor para um hábito mensurável específico.
+ */
+function abrirModalValor(habitoId) {
+    const habito = habitos.find(h => h.id === habitoId);
+    if (!habito || habito.tipo !== 'mensuravel') return;
+    
+    habitoParaValor = habito;
+    
+    const perguntaValor = document.getElementById('perguntaValor');
+    const valorUnidade = document.getElementById('valorUnidade');
+    const inputValorDia = document.getElementById('inputValorDia');
+    
+    // Configura a pergunta
+    if (perguntaValor) {
+        perguntaValor.textContent = `Quanto você completou hoje?`;
+    }
+    
+    if (valorUnidade) {
+        valorUnidade.textContent = habito.unidade || 'unidades';
+    }
+    
+    if (inputValorDia) {
+        inputValorDia.value = getValorHoje(habito);
+    }
+    
+    atualizarPreviewValor();
+    abrirModal('modalValorBackdrop');
+}
+
+function atualizarPreviewValor() {
+    if (!habitoParaValor) return;
+    
+    const inputValorDia = document.getElementById('inputValorDia');
+    const valorProgressoTexto = document.getElementById('valorProgressoTexto');
+    const valorProgressoBarra = document.getElementById('valorProgressoBarra');
+    
+    const valor = parseFloat(inputValorDia?.value) || 0;
+    const alvo = habitoParaValor.alvoDiario;
+    const porcentagem = Math.min((valor / alvo) * 100, 100);
+    
+    if (valorProgressoTexto) {
+        valorProgressoTexto.textContent = `${valor}/${alvo} ${habitoParaValor.unidade || ''}`;
+    }
+    
+    if (valorProgressoBarra) {
+        valorProgressoBarra.style.width = `${porcentagem}%`;
+        valorProgressoBarra.style.backgroundColor = habitoParaValor.cor;
+    }
+}
+
+// ============================================
+// 8. MODAL DE FREQUÊNCIA X EM Y DIAS
+// ============================================
+
+/**
+ * FUNÇÃO: configurarModalFrequenciaXY
+ * -----------------------------------
+ * Modal para configurar frequência personalizada (X vezes em Y dias).
+ * Abre quando o usuário seleciona "Personalizado..." no select de frequência.
+ */
+function configurarModalFrequenciaXY() {
+    const modalFrequenciaXYBackdrop = document.getElementById('modalFrequenciaXYBackdrop');
+    const btnFecharModalFrequenciaXY = document.getElementById('btnFecharModalFrequenciaXY');
+    const btnCancelarFrequenciaXY = document.getElementById('btnCancelarFrequenciaXY');
+    const btnConfirmarFrequenciaXY = document.getElementById('btnConfirmarFrequenciaXY');
+    const inputVezesX = document.getElementById('inputVezesX');
+    const inputDiasY = document.getElementById('inputDiasY');
+    const frequenciaExemplo = document.getElementById('frequenciaExemplo');
+    
+    // Atualiza exemplo conforme digita
+    function atualizarExemplo() {
+        const x = parseInt(inputVezesX?.value) || 3;
+        const y = parseInt(inputDiasY?.value) || 5;
+        if (frequenciaExemplo) {
+            frequenciaExemplo.textContent = `Exemplo: Completar ${x} vezes a cada ${y} dias`;
+        }
+    }
+    
+    if (inputVezesX) inputVezesX.addEventListener('input', atualizarExemplo);
+    if (inputDiasY) inputDiasY.addEventListener('input', atualizarExemplo);
+    
+    if (btnFecharModalFrequenciaXY) {
+        btnFecharModalFrequenciaXY.addEventListener('click', () => {
+            // Volta para "diario" se cancelar
+            const tipoFrequencia = document.getElementById('tipoFrequencia');
+            if (tipoFrequencia) tipoFrequencia.value = 'diario';
+            fecharModal('modalFrequenciaXYBackdrop');
+        });
+    }
+    if (btnCancelarFrequenciaXY) {
+        btnCancelarFrequenciaXY.addEventListener('click', () => {
+            const tipoFrequencia = document.getElementById('tipoFrequencia');
+            if (tipoFrequencia) tipoFrequencia.value = 'diario';
+            fecharModal('modalFrequenciaXYBackdrop');
+        });
+    }
+    if (modalFrequenciaXYBackdrop) {
+        modalFrequenciaXYBackdrop.addEventListener('click', (e) => {
+            if (e.target === modalFrequenciaXYBackdrop) {
+                const tipoFrequencia = document.getElementById('tipoFrequencia');
+                if (tipoFrequencia) tipoFrequencia.value = 'diario';
+                fecharModal('modalFrequenciaXYBackdrop');
+            }
+        });
+    }
+    
+    // Confirma a frequência
+    if (btnConfirmarFrequenciaXY) {
+        btnConfirmarFrequenciaXY.addEventListener('click', () => {
+            frequenciaXTemp = parseInt(inputVezesX?.value) || 3;
+            frequenciaYTemp = parseInt(inputDiasY?.value) || 5;
+            
+            // Atualiza o indicador no formulário
+            const frequenciaPersonalizadaInfo = document.getElementById('frequenciaPersonalizadaInfo');
+            const frequenciaPersonalizadaTexto = document.getElementById('frequenciaPersonalizadaTexto');
+            
+            if (frequenciaPersonalizadaInfo) frequenciaPersonalizadaInfo.style.display = 'flex';
+            if (frequenciaPersonalizadaTexto) {
+                frequenciaPersonalizadaTexto.textContent = `${frequenciaXTemp} vezes em ${frequenciaYTemp} dias`;
+            }
+            
+            fecharModal('modalFrequenciaXYBackdrop');
+        });
+    }
+}
+
+// ============================================
+// 9. RENDERIZAÇÃO DE HÁBITOS
 // ============================================
 
 function renderizarHabitos() {
@@ -907,12 +1118,6 @@ function renderizarHabitos() {
     });
 }
 
-/**
- * FUNÇÃO: criarCardHabitoAvancado
- * -------------------------------
- * Cria o HTML de um card de hábito com todas as informações:
- * tipo, frequência, lembretes, e controles de conclusão.
- */
 function criarCardHabitoAvancado(habito) {
     const card = document.createElement('article');
     card.className = 'card-habito-avancado';
@@ -944,26 +1149,20 @@ function criarCardHabitoAvancado(habito) {
             </div>
         `;
     } else {
+        // Hábito mensurável - botão com mesmo estilo que abre modal
         const valorHoje = habito.historico[hoje] || 0;
         const alvo = habito.alvoDiario;
-        const porcentagem = Math.min((valorHoje / alvo) * 100, 100);
         const atingido = valorHoje >= alvo;
         
         controleHTML = `
             <div class="habito-card-controle">
-                <div class="controle-mensuravel">
-                    <input type="number" 
-                           class="input-valor-dia" 
-                           value="${valorHoje}" 
-                           min="0" 
-                           step="0.5"
-                           onchange="atualizarValorMensuravel(${habito.id}, this.value)"
-                           aria-label="Valor do dia">
-                    <div class="progresso-mensuravel">
-                        <span class="progresso-texto-mensuravel ${atingido ? 'atingido' : ''}">${valorHoje}/${alvo} ${habito.unidade}</span>
-                        <div class="progresso-barra-mensuravel">
-                            <div class="progresso-barra-preenchido ${atingido ? 'atingido' : ''}" style="width: ${porcentagem}%; background-color: ${habito.cor}"></div>
-                        </div>
+                <div class="controle-mensuravel-botao" onclick="abrirModalValor(${habito.id})">
+                    <button class="btn-completar-mensuravel ${atingido ? 'concluido' : ''}" style="--cor-habito: ${habito.cor}">
+                        <span class="check-icon">${atingido ? '✓' : ''}</span>
+                    </button>
+                    <div class="controle-mensuravel-info">
+                        <span class="controle-mensuravel-texto ${atingido ? 'concluido' : ''}">${atingido ? 'Meta atingida!' : 'Registrar progresso'}</span>
+                        <span class="controle-mensuravel-progresso">${valorHoje}/${alvo} ${habito.unidade}</span>
                     </div>
                 </div>
             </div>
@@ -1000,12 +1199,14 @@ function criarCardHabitoAvancado(habito) {
         </div>
     `;
     
-    // Adiciona eventos de clique nos dias
+    // Eventos de clique nos dias do calendário
     setTimeout(() => {
         const dias = card.querySelectorAll('.calendario-dia');
         dias.forEach(dia => {
             dia.addEventListener('click', () => {
-                toggleDiaHabito(habito.id, dia.dataset.data);
+                if (habito.tipo === 'binario') {
+                    toggleDiaHabito(habito.id, dia.dataset.data);
+                }
             });
         });
     }, 0);
@@ -1037,13 +1238,7 @@ function gerarDiasCalendario(habito, numDias) {
         const chave = data.toISOString().split('T')[0];
         const valor = habito.historico[chave];
         
-        let concluido = false;
-        if (habito.tipo === 'binario') {
-            concluido = valor === true;
-        } else {
-            concluido = valor >= habito.alvoDiario;
-        }
-        
+        let concluido = habito.tipo === 'binario' ? valor === true : valor >= habito.alvoDiario;
         const diaNumero = data.getDate();
         
         html += `
@@ -1064,6 +1259,12 @@ function formatarData(data) {
     return data.toLocaleDateString('pt-BR', opcoes);
 }
 
+/**
+ * FUNÇÃO: renderizarHabitosHoje
+ * -----------------------------
+ * Renderiza a seção "Hábitos de Hoje" no Dashboard.
+ * Para mensuráveis, ao clicar abre o modal de valor (consistência).
+ */
 function renderizarHabitosHoje() {
     const container = document.getElementById('habitosHoje');
     if (!container) return;
@@ -1078,31 +1279,50 @@ function renderizarHabitosHoje() {
         const item = document.createElement('div');
         item.className = 'habito-hoje-loop';
         
-        item.innerHTML = `
-            <div class="habito-hoje-check-loop ${concluido ? 'concluido' : ''}" 
-                 data-id="${habito.id}"
-                 style="--cor-habito: ${habito.cor}">
-                <span class="check-icon">${concluido ? '✓' : ''}</span>
-            </div>
-            <div class="habito-hoje-info-loop">
-                <span class="habito-hoje-nome-loop">${habito.nome}</span>
-                <span class="habito-hoje-meta">${getTextoFrequencia(habito)} • ${sequencia} dias</span>
-            </div>
-        `;
-        
-        const checkbox = item.querySelector('.habito-hoje-check-loop');
-        checkbox.addEventListener('click', () => {
-            if (habito.tipo === 'binario') {
+        if (habito.tipo === 'binario') {
+            item.innerHTML = `
+                <div class="habito-hoje-check-loop ${concluido ? 'concluido' : ''}" 
+                     data-id="${habito.id}"
+                     style="--cor-habito: ${habito.cor}">
+                    <span class="check-icon">${concluido ? '✓' : ''}</span>
+                </div>
+                <div class="habito-hoje-info-loop">
+                    <span class="habito-hoje-nome-loop">${habito.nome}</span>
+                    <span class="habito-hoje-meta">${getTextoFrequencia(habito)} • ${sequencia} dias</span>
+                </div>
+            `;
+            
+            const checkbox = item.querySelector('.habito-hoje-check-loop');
+            checkbox.addEventListener('click', () => {
                 toggleDiaHabito(habito.id, hoje);
-            }
-        });
+            });
+        } else {
+            // Mensurável - abre modal de valor ao clicar
+            const valorHoje = getValorHoje(habito);
+            item.innerHTML = `
+                <div class="habito-hoje-check-loop ${concluido ? 'concluido' : ''}" 
+                     data-id="${habito.id}"
+                     style="--cor-habito: ${habito.cor}">
+                    <span class="check-icon">${concluido ? '✓' : ''}</span>
+                </div>
+                <div class="habito-hoje-info-loop">
+                    <span class="habito-hoje-nome-loop">${habito.nome}</span>
+                    <span class="habito-hoje-meta">${valorHoje}/${habito.alvoDiario} ${habito.unidade} • ${sequencia} dias</span>
+                </div>
+            `;
+            
+            const checkbox = item.querySelector('.habito-hoje-check-loop');
+            checkbox.addEventListener('click', () => {
+                abrirModalValor(habito.id);
+            });
+        }
         
         container.appendChild(item);
     });
 }
 
 // ============================================
-// 7. RENDERIZAÇÃO DE GRÁFICOS
+// 10. GRÁFICOS E ESTATÍSTICAS
 // ============================================
 
 function renderizarGraficoSemanal() {
@@ -1180,8 +1400,6 @@ function atualizarEstatisticasDashboard() {
     const sequenciaAtual = document.getElementById('sequenciaAtual');
     const taxaConclusao = document.getElementById('taxaConclusao');
     
-    const hoje = getHoje();
-    
     if (habitosAtivos) habitosAtivos.textContent = habitos.length;
     
     if (completadosHoje) {
@@ -1220,7 +1438,10 @@ function atualizarEstatisticasRelatorios() {
             const data = new Date(hoje);
             data.setDate(data.getDate() - i);
             const chave = data.toISOString().split('T')[0];
-            const algumConcluido = habitos.some(h => estaConcluidoHoje(h));
+            const algumConcluido = habitos.some(h => {
+                const val = h.historico[chave];
+                return h.tipo === 'binario' ? val === true : val >= h.alvoDiario;
+            });
             if (algumConcluido) diasAtivos++;
         }
         
@@ -1249,7 +1470,7 @@ function atualizarEstatisticasRelatorios() {
 }
 
 // ============================================
-// 8. INICIALIZAÇÃO E EVENTOS
+// 11. INICIALIZAÇÃO
 // ============================================
 
 function inicializarPagina() {

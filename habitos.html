@@ -13,12 +13,18 @@
         ===========================
         Tela com CRUD completo de hábitos, inspirada no Loop Habit Tracker.
         
-        FUNCIONALIDADES:
-        - Criar, editar e excluir hábitos
-        - Tipos: Binário (Sim/Não) e Mensurável (com unidade/alvo)
-        - Frequência dinâmica (diário, X vezes por semana/mês, X vezes em Y dias)
-        - Sistema de lembretes com seleção de dias da semana
-        - Persistência em localStorage
+        FLUXO DO FAB:
+        1. Clique no FAB abre MODAL DE TIPO (binário ou mensurável)
+        2. Após escolher o tipo, abre FORMULÁRIO PRINCIPAL com tipo fixo
+        3. Na edição, o tipo não pode ser alterado
+        
+        HÁBITOS MENSURÁVEIS:
+        - Ao clicar para completar, abre MODAL DE VALOR
+        - Usuário insere o valor do dia (ex: "Quantas páginas leu?")
+        
+        FREQUÊNCIA "X EM Y DIAS":
+        - Ao selecionar esta opção, abre MODAL DE FREQUÊNCIA
+        - Usuário define X e Y no modal
     -->
 
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
@@ -95,7 +101,44 @@
         </button>
     </div>
 
-    <!-- MODAL AVANÇADO - CRIAR/EDITAR HÁBITO -->
+    <!-- 
+        MODAL 1: SELEÇÃO DE TIPO DE HÁBITO
+        ==================================
+        Aparece primeiro quando o usuário clica no FAB para criar novo hábito.
+        Após selecionar o tipo, abre o formulário principal.
+    -->
+    <div class="modal-backdrop" id="modalTipoBackdrop">
+        <div class="modal modal-pequeno" role="dialog" aria-labelledby="tituloModalTipo" aria-modal="true">
+            <div class="modal-header">
+                <h2 id="tituloModalTipo">Escolha o Tipo de Hábito</h2>
+                <button type="button" class="btn-fechar-modal" id="btnFecharModalTipo" aria-label="Fechar modal">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-descricao">Selecione como você deseja acompanhar este hábito:</p>
+                <div class="tipo-habito-opcoes">
+                    <button type="button" class="tipo-habito-btn" data-tipo="binario">
+                        <span class="tipo-icone">&#10003;</span>
+                        <span class="tipo-nome">Sim ou Não</span>
+                        <span class="tipo-descricao">Marcar/desmarcar como concluído</span>
+                    </button>
+                    <button type="button" class="tipo-habito-btn" data-tipo="mensuravel">
+                        <span class="tipo-icone">&#9776;</span>
+                        <span class="tipo-nome">Mensurável</span>
+                        <span class="tipo-descricao">Registrar valores numéricos</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 
+        MODAL 2: FORMULÁRIO PRINCIPAL DE HÁBITO
+        =======================================
+        Aparece após selecionar o tipo no modal anterior.
+        O tipo é fixo e não pode ser alterado durante edição.
+    -->
     <div class="modal-backdrop" id="modalHabitoBackdrop">
         <div class="modal modal-habito modal-habito-avancado" role="dialog" aria-labelledby="tituloModalHabito" aria-modal="true">
             <div class="modal-header">
@@ -107,31 +150,17 @@
             <div class="modal-body">
                 <form class="form-habito form-habito-avancado" id="formHabito">
                     <input type="hidden" id="habitoId" value="">
-                    
-                    <!-- PASSO 1: TIPO DO HÁBITO -->
-                    <div class="form-secao">
-                        <h3 class="form-secao-titulo">Tipo do Hábito</h3>
-                        <div class="tipo-habito-opcoes">
-                            <label class="tipo-habito-opcao">
-                                <input type="radio" name="tipoHabito" value="binario" checked>
-                                <div class="tipo-habito-card">
-                                    <span class="tipo-icone">&#10003;</span>
-                                    <span class="tipo-nome">Sim ou Não</span>
-                                    <span class="tipo-descricao">Marcar/desmarcar como concluído</span>
-                                </div>
-                            </label>
-                            <label class="tipo-habito-opcao">
-                                <input type="radio" name="tipoHabito" value="mensuravel">
-                                <div class="tipo-habito-card">
-                                    <span class="tipo-icone">&#9776;</span>
-                                    <span class="tipo-nome">Mensurável</span>
-                                    <span class="tipo-descricao">Registrar valores numéricos</span>
-                                </div>
-                            </label>
+                    <input type="hidden" id="tipoHabitoHidden" value="binario">
+
+                    <!-- INDICADOR DE TIPO (somente leitura) -->
+                    <div class="form-secao tipo-indicador-secao" id="tipoIndicadorSecao">
+                        <div class="tipo-indicador" id="tipoIndicador">
+                            <span class="tipo-indicador-icone">&#10003;</span>
+                            <span class="tipo-indicador-texto">Hábito Sim/Não</span>
                         </div>
                     </div>
 
-                    <!-- PASSO 2: NOME DO HÁBITO -->
+                    <!-- NOME DO HÁBITO -->
                     <div class="form-secao">
                         <div class="campo-grupo">
                             <label for="nomeHabito">Nome do hábito</label>
@@ -145,7 +174,7 @@
                         </div>
                     </div>
 
-                    <!-- PASSO 3: CAMPOS PARA HÁBITO MENSURÁVEL -->
+                    <!-- CAMPOS PARA HÁBITO MENSURÁVEL -->
                     <div class="form-secao campos-mensuravel" id="camposMensuravel" style="display: none;">
                         <h3 class="form-secao-titulo">Meta Diária</h3>
                         <div class="campos-linha">
@@ -172,7 +201,7 @@
                         </div>
                     </div>
 
-                    <!-- PASSO 4: FREQUÊNCIA -->
+                    <!-- FREQUÊNCIA -->
                     <div class="form-secao">
                         <h3 class="form-secao-titulo">Frequência</h3>
                         <div class="campo-grupo">
@@ -180,11 +209,11 @@
                                 <option value="diario">Todos os dias</option>
                                 <option value="x-semana">X vezes por semana</option>
                                 <option value="x-mes">X vezes por mês</option>
-                                <option value="x-em-y">X vezes em Y dias</option>
+                                <option value="x-em-y">Personalizado...</option>
                             </select>
                         </div>
                         
-                        <!-- Campos dinâmicos para frequência -->
+                        <!-- Campos dinâmicos para frequência (exceto x-em-y que usa modal) -->
                         <div class="campos-frequencia-dinamica" id="camposFrequenciaDinamica">
                             <div class="campos-linha campos-x-semana" id="camposXSemana" style="display: none;">
                                 <div class="campo-grupo campo-pequeno">
@@ -202,22 +231,15 @@
                                 <span class="campo-complemento">vezes por mês</span>
                             </div>
                             
-                            <div class="campos-linha campos-x-em-y" id="camposXEmY" style="display: none;">
-                                <div class="campo-grupo campo-pequeno">
-                                    <label for="vezesX">X</label>
-                                    <input type="number" id="vezesX" min="1" value="3">
-                                </div>
-                                <span class="campo-complemento">vezes em</span>
-                                <div class="campo-grupo campo-pequeno">
-                                    <label for="diasY">Y</label>
-                                    <input type="number" id="diasY" min="1" value="5">
-                                </div>
-                                <span class="campo-complemento">dias</span>
+                            <!-- Indicador de frequência personalizada (X em Y dias) -->
+                            <div class="frequencia-personalizada-info" id="frequenciaPersonalizadaInfo" style="display: none;">
+                                <span class="frequencia-personalizada-texto" id="frequenciaPersonalizadaTexto">3 vezes em 5 dias</span>
+                                <button type="button" class="btn-texto" id="btnEditarFrequenciaXY">Alterar</button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- PASSO 5: LEMBRETES -->
+                    <!-- LEMBRETES -->
                     <div class="form-secao">
                         <h3 class="form-secao-titulo">Lembretes</h3>
                         
@@ -229,7 +251,6 @@
                             <span class="toggle-label" id="lembreteLabel">Desabilitado</span>
                         </div>
 
-                        <!-- Configuração de lembrete (oculto por padrão) -->
                         <div class="lembrete-config" id="lembreteConfig" style="display: none;">
                             <div class="campo-grupo">
                                 <label for="horaLembrete">Horário do lembrete</label>
@@ -254,7 +275,7 @@
                         </div>
                     </div>
 
-                    <!-- PASSO 6: COR DO HÁBITO -->
+                    <!-- COR DO HÁBITO -->
                     <div class="form-secao">
                         <h3 class="form-secao-titulo">Cor</h3>
                         <div class="cores-grid" id="coresGrid">
@@ -302,7 +323,72 @@
         </div>
     </div>
 
-    <!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO -->
+    <!-- 
+        MODAL 3: VALOR PARA HÁBITO MENSURÁVEL
+        =====================================
+        Aparece quando o usuário clica para "completar" um hábito mensurável.
+        Pergunta o valor do dia (ex: "Quantas páginas você leu hoje?")
+    -->
+    <div class="modal-backdrop" id="modalValorBackdrop">
+        <div class="modal modal-pequeno" role="dialog" aria-labelledby="tituloModalValor" aria-modal="true">
+            <div class="modal-header">
+                <h2 id="tituloModalValor">Registrar Valor</h2>
+                <button type="button" class="btn-fechar-modal" id="btnFecharModalValor" aria-label="Fechar modal">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-pergunta" id="perguntaValor">Quanto você completou hoje?</p>
+                <div class="campo-valor-modal">
+                    <input type="number" id="inputValorDia" min="0" step="0.5" value="0" class="input-valor-grande">
+                    <span class="valor-unidade" id="valorUnidade">unidades</span>
+                </div>
+                <div class="valor-progresso-preview">
+                    <span id="valorProgressoTexto">0/0</span>
+                    <div class="progresso-barra-mensuravel">
+                        <div class="progresso-barra-preenchido" id="valorProgressoBarra" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="form-acoes">
+                    <button type="button" class="btn-secundario" id="btnCancelarValor">Cancelar</button>
+                    <button type="button" class="btn-primario" id="btnConfirmarValor">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 
+        MODAL 4: FREQUÊNCIA PERSONALIZADA (X EM Y DIAS)
+        ================================================
+        Aparece quando o usuário seleciona "Personalizado..." no select de frequência.
+        Permite definir X vezes em Y dias.
+    -->
+    <div class="modal-backdrop" id="modalFrequenciaXYBackdrop">
+        <div class="modal modal-pequeno" role="dialog" aria-labelledby="tituloModalFrequenciaXY" aria-modal="true">
+            <div class="modal-header">
+                <h2 id="tituloModalFrequenciaXY">Frequência Personalizada</h2>
+                <button type="button" class="btn-fechar-modal" id="btnFecharModalFrequenciaXY" aria-label="Fechar modal">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-descricao">Defina quantas vezes você quer completar este hábito:</p>
+                <div class="frequencia-xy-container">
+                    <input type="number" id="inputVezesX" min="1" value="3" class="input-frequencia">
+                    <span class="frequencia-texto">vezes em</span>
+                    <input type="number" id="inputDiasY" min="1" value="5" class="input-frequencia">
+                    <span class="frequencia-texto">dias</span>
+                </div>
+                <p class="frequencia-exemplo" id="frequenciaExemplo">Exemplo: Completar 3 vezes a cada 5 dias</p>
+                <div class="form-acoes">
+                    <button type="button" class="btn-secundario" id="btnCancelarFrequenciaXY">Cancelar</button>
+                    <button type="button" class="btn-primario" id="btnConfirmarFrequenciaXY">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 5: CONFIRMAÇÃO DE EXCLUSÃO -->
     <div class="modal-backdrop" id="modalExcluirBackdrop">
         <div class="modal modal-pequeno" role="dialog" aria-labelledby="tituloModalExcluir" aria-modal="true">
             <div class="modal-header">

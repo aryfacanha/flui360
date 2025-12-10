@@ -1908,3 +1908,263 @@ img {
         width: 100%;
     }
 }
+
+/* ============================================
+   13. MODAIS ESPECÍFICOS
+   ============================================ */
+
+/*
+ * MODAL DE SELEÇÃO DE TIPO DE HÁBITO
+ * ----------------------------------
+ * Aparece primeiro ao clicar no FAB para novo hábito
+ */
+.modal-descricao {
+    color: var(--cor-texto-claro);
+    font-size: var(--fonte-tamanho-sm);
+    margin-bottom: var(--espacamento-lg);
+    text-align: center;
+}
+
+.tipo-habito-btn {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--espacamento-lg);
+    border: 2px solid var(--cor-borda);
+    border-radius: var(--borda-raio-lg);
+    background-color: var(--cor-fundo-card);
+    cursor: pointer;
+    transition: all var(--transicao-rapida);
+    text-align: center;
+    margin-bottom: var(--espacamento-md);
+}
+
+.tipo-habito-btn:hover {
+    border-color: var(--cor-primaria);
+    background-color: rgba(99, 102, 241, 0.05);
+    transform: translateY(-2px);
+}
+
+.tipo-habito-btn:active {
+    transform: translateY(0);
+}
+
+.tipo-habito-btn .tipo-icone {
+    font-size: 2rem;
+    margin-bottom: var(--espacamento-sm);
+    color: var(--cor-primaria);
+}
+
+.tipo-habito-btn .tipo-nome {
+    font-weight: 600;
+    color: var(--cor-texto);
+    margin-bottom: var(--espacamento-xs);
+    font-size: var(--fonte-tamanho-md);
+}
+
+.tipo-habito-btn .tipo-descricao {
+    font-size: var(--fonte-tamanho-sm);
+    color: var(--cor-texto-claro);
+}
+
+/*
+ * INDICADOR DE TIPO NO FORMULÁRIO
+ * --------------------------------
+ * Mostra o tipo selecionado (somente leitura)
+ */
+.tipo-indicador-secao {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.tipo-indicador {
+    display: flex;
+    align-items: center;
+    gap: var(--espacamento-sm);
+    padding: var(--espacamento-md);
+    background-color: var(--cor-fundo);
+    border-radius: var(--borda-raio);
+    border-left: 4px solid var(--cor-primaria);
+}
+
+.tipo-indicador-icone {
+    font-size: 1.25rem;
+    color: var(--cor-primaria);
+}
+
+.tipo-indicador-texto {
+    font-weight: 500;
+    color: var(--cor-texto);
+}
+
+/*
+ * MODAL DE VALOR PARA HÁBITO MENSURÁVEL
+ * -------------------------------------
+ * Pergunta quanto o usuário completou hoje
+ */
+.modal-pergunta {
+    text-align: center;
+    font-size: var(--fonte-tamanho-md);
+    color: var(--cor-texto);
+    margin-bottom: var(--espacamento-lg);
+}
+
+.campo-valor-modal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--espacamento-md);
+    margin-bottom: var(--espacamento-lg);
+}
+
+.input-valor-grande {
+    width: 100px;
+    padding: var(--espacamento-md);
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+    border: 2px solid var(--cor-borda);
+    border-radius: var(--borda-raio);
+    transition: border-color var(--transicao-rapida);
+}
+
+.input-valor-grande:focus {
+    border-color: var(--cor-primaria);
+    outline: none;
+}
+
+.valor-unidade {
+    font-size: var(--fonte-tamanho-lg);
+    color: var(--cor-texto-claro);
+}
+
+.valor-progresso-preview {
+    text-align: center;
+    margin-bottom: var(--espacamento-lg);
+}
+
+.valor-progresso-preview span {
+    display: block;
+    margin-bottom: var(--espacamento-sm);
+    font-weight: 500;
+}
+
+/*
+ * MODAL DE FREQUÊNCIA PERSONALIZADA (X EM Y DIAS)
+ * ------------------------------------------------
+ * Permite definir frequência com campos inline
+ */
+.frequencia-xy-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--espacamento-sm);
+    margin-bottom: var(--espacamento-md);
+    flex-wrap: wrap;
+}
+
+.input-frequencia {
+    width: 60px;
+    padding: var(--espacamento-sm);
+    font-size: var(--fonte-tamanho-lg);
+    font-weight: 600;
+    text-align: center;
+    border: 2px solid var(--cor-borda);
+    border-radius: var(--borda-raio);
+    transition: border-color var(--transicao-rapida);
+}
+
+.input-frequencia:focus {
+    border-color: var(--cor-primaria);
+    outline: none;
+}
+
+.frequencia-texto {
+    font-size: var(--fonte-tamanho-md);
+    color: var(--cor-texto);
+}
+
+.frequencia-exemplo {
+    text-align: center;
+    font-size: var(--fonte-tamanho-sm);
+    color: var(--cor-texto-claro);
+    font-style: italic;
+    margin-bottom: var(--espacamento-lg);
+}
+
+/* Indicador de frequência personalizada no formulário */
+.frequencia-personalizada-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--espacamento-md);
+    background-color: var(--cor-fundo);
+    border-radius: var(--borda-raio);
+    margin-top: var(--espacamento-sm);
+}
+
+.frequencia-personalizada-texto {
+    font-weight: 500;
+    color: var(--cor-texto);
+}
+
+/*
+ * BOTÃO DE COMPLETAR PARA MENSURÁVEIS (estilo consistente)
+ * --------------------------------------------------------
+ * Mesmo visual que binários, mas abre modal ao clicar
+ */
+.controle-mensuravel-botao {
+    display: flex;
+    align-items: center;
+    gap: var(--espacamento-md);
+    cursor: pointer;
+    flex: 1;
+}
+
+.btn-completar-mensuravel {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 3px solid var(--cor-habito, var(--cor-primaria));
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transicao-rapida);
+    flex-shrink: 0;
+}
+
+.btn-completar-mensuravel:hover {
+    transform: scale(1.05);
+}
+
+.btn-completar-mensuravel.concluido {
+    background-color: var(--cor-habito, var(--cor-primaria));
+}
+
+.btn-completar-mensuravel .check-icon {
+    color: white;
+    font-size: 1.25rem;
+}
+
+.controle-mensuravel-info {
+    flex: 1;
+}
+
+.controle-mensuravel-texto {
+    display: block;
+    font-weight: 500;
+    color: var(--cor-texto);
+    margin-bottom: 4px;
+}
+
+.controle-mensuravel-texto.concluido {
+    color: var(--cor-sucesso);
+}
+
+.controle-mensuravel-progresso {
+    font-size: var(--fonte-tamanho-sm);
+    color: var(--cor-texto-claro);
+}
