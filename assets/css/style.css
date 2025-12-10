@@ -100,7 +100,7 @@ body.tema-escuro {
     --cor-fundo: #0f172a;
     --cor-fundo-card: #1e293b;
     --cor-texto: #f1f5f9;
-    --cor-texto-claro: #94a3b8;
+    --cor-texto-claro: #cbd5e1;
     --cor-borda: #334155;
     --sidebar-bg: #0f172a;
     --sidebar-texto: #f1f5f9;
@@ -138,6 +138,19 @@ body.tema-escuro .boas-vindas {
 
 body.tema-escuro .grafico-container {
     background-color: var(--cor-fundo-card);
+}
+
+body.tema-escuro .nav-link {
+    color: #e2e8f0;
+}
+
+body.tema-escuro .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+body.tema-escuro .nav-link-preferencias {
+    border-top-color: rgba(255, 255, 255, 0.2);
 }
 
 /* ============================================
