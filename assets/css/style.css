@@ -528,6 +528,15 @@ img {
     color: var(--cor-erro-light) !important;
 }
 
+.nav-link-preferencias .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.nav-link-preferencias .nav-link:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
 /* --- Conteúdo Principal --- */
 .conteudo-principal {
     min-height: 100vh;
@@ -2393,7 +2402,11 @@ img {
     gap: 4px;
 }
 
-.mensagem-erro::before {
+.mensagem-erro:empty {
+    display: none;
+}
+
+.mensagem-erro:not(:empty)::before {
     content: "!";
     display: inline-flex;
     align-items: center;
