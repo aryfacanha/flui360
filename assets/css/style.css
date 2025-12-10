@@ -1,0 +1,1078 @@
+/*
+ * ============================================
+ * FLUI360 - ESTILOS PRINCIPAIS
+ * ============================================
+ * 
+ * ORGANIZAÇÃO DO ARQUIVO:
+ * 1. Variáveis CSS (cores, espaçamentos, tipografia)
+ * 2. Reset e estilos base
+ * 3. Componentes reutilizáveis (botões, cards, formulários)
+ * 4. Layout (sidebar, header, conteúdo)
+ * 5. Páginas específicas
+ * 6. Responsividade (mobile-first)
+ * 
+ * PALETA DE CORES:
+ * - Primária: #6366f1 (Índigo)
+ * - Secundária: #10b981 (Verde esmeralda)
+ * - Fundo: #f8fafc (Cinza claro)
+ * - Texto: #1e293b (Cinza escuro)
+ */
+
+/* ============================================
+   1. VARIÁVEIS CSS
+   ============================================ */
+:root {
+    /* Cores principais */
+    --cor-primaria: #6366f1;
+    --cor-primaria-hover: #4f46e5;
+    --cor-primaria-light: #e0e7ff;
+    
+    --cor-sucesso: #10b981;
+    --cor-sucesso-light: #d1fae5;
+    
+    --cor-aviso: #f59e0b;
+    --cor-aviso-light: #fef3c7;
+    
+    --cor-info: #3b82f6;
+    --cor-info-light: #dbeafe;
+    
+    --cor-erro: #ef4444;
+    --cor-erro-light: #fee2e2;
+    
+    /* Cores de fundo e texto */
+    --cor-fundo: #f8fafc;
+    --cor-fundo-card: #ffffff;
+    --cor-texto: #1e293b;
+    --cor-texto-claro: #64748b;
+    --cor-borda: #e2e8f0;
+    
+    /* Sidebar */
+    --sidebar-largura: 260px;
+    --sidebar-bg: #1e293b;
+    --sidebar-texto: #f1f5f9;
+    
+    /* Espaçamentos */
+    --espacamento-xs: 0.25rem;
+    --espacamento-sm: 0.5rem;
+    --espacamento-md: 1rem;
+    --espacamento-lg: 1.5rem;
+    --espacamento-xl: 2rem;
+    
+    /* Tipografia */
+    --fonte-familia: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    --fonte-tamanho-base: 16px;
+    --fonte-tamanho-sm: 0.875rem;
+    --fonte-tamanho-lg: 1.125rem;
+    --fonte-tamanho-xl: 1.5rem;
+    --fonte-tamanho-2xl: 2rem;
+    
+    /* Bordas e sombras */
+    --borda-raio: 8px;
+    --borda-raio-lg: 12px;
+    --sombra-card: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --sombra-elevada: 0 4px 12px rgba(0, 0, 0, 0.15);
+    
+    /* Transições */
+    --transicao-rapida: 0.2s ease;
+    --transicao-media: 0.3s ease;
+}
+
+/* ============================================
+   2. RESET E ESTILOS BASE
+   ============================================ */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: var(--fonte-tamanho-base);
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--fonte-familia);
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+a {
+    color: var(--cor-primaria);
+    text-decoration: none;
+    transition: color var(--transicao-rapida);
+}
+
+a:hover {
+    color: var(--cor-primaria-hover);
+}
+
+ul {
+    list-style: none;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* ============================================
+   3. COMPONENTES REUTILIZÁVEIS
+   ============================================ */
+
+/* --- Botões --- */
+.btn-primario {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--espacamento-md) var(--espacamento-lg);
+    background-color: var(--cor-primaria);
+    color: white;
+    border: none;
+    border-radius: var(--borda-raio);
+    font-size: var(--fonte-tamanho-base);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color var(--transicao-rapida), transform var(--transicao-rapida);
+    width: 100%;
+}
+
+.btn-primario:hover {
+    background-color: var(--cor-primaria-hover);
+    transform: translateY(-1px);
+}
+
+.btn-primario:active {
+    transform: translateY(0);
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: var(--cor-primaria);
+    font-size: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.btn-link:hover {
+    color: var(--cor-primaria-hover);
+}
+
+/* --- Formulários --- */
+.campo-grupo {
+    margin-bottom: var(--espacamento-lg);
+}
+
+.campo-grupo label {
+    display: block;
+    margin-bottom: var(--espacamento-sm);
+    font-weight: 500;
+    color: var(--cor-texto);
+}
+
+.campo-grupo input,
+.campo-grupo select {
+    width: 100%;
+    padding: var(--espacamento-md);
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--borda-raio);
+    font-size: var(--fonte-tamanho-base);
+    font-family: inherit;
+    transition: border-color var(--transicao-rapida), box-shadow var(--transicao-rapida);
+}
+
+.campo-grupo input:focus,
+.campo-grupo select:focus {
+    outline: none;
+    border-color: var(--cor-primaria);
+    box-shadow: 0 0 0 3px var(--cor-primaria-light);
+}
+
+.campo-grupo input::placeholder {
+    color: var(--cor-texto-claro);
+}
+
+.mensagem-erro {
+    display: block;
+    margin-top: var(--espacamento-xs);
+    color: var(--cor-erro);
+    font-size: var(--fonte-tamanho-sm);
+}
+
+/* --- Cards --- */
+.card {
+    background-color: var(--cor-fundo-card);
+    border-radius: var(--borda-raio-lg);
+    box-shadow: var(--sombra-card);
+    padding: var(--espacamento-lg);
+}
+
+/* --- Modal --- */
+.modal-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: var(--espacamento-md);
+}
+
+.modal-backdrop.ativo {
+    display: flex;
+}
+
+.modal {
+    background-color: var(--cor-fundo-card);
+    border-radius: var(--borda-raio-lg);
+    width: 100%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalEntrar 0.3s ease;
+}
+
+@keyframes modalEntrar {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--espacamento-lg);
+    border-bottom: 1px solid var(--cor-borda);
+}
+
+.modal-header h2 {
+    font-size: var(--fonte-tamanho-lg);
+    color: var(--cor-texto);
+}
+
+.btn-fechar-modal {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--cor-texto-claro);
+    cursor: pointer;
+    padding: var(--espacamento-xs);
+    line-height: 1;
+}
+
+.btn-fechar-modal:hover {
+    color: var(--cor-texto);
+}
+
+.modal-body {
+    padding: var(--espacamento-lg);
+}
+
+/* ============================================
+   4. LAYOUT - PÁGINA DE LOGIN
+   ============================================ */
+.pagina-login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: var(--espacamento-md);
+    background: linear-gradient(135deg, var(--cor-primaria-light) 0%, var(--cor-fundo) 100%);
+}
+
+.container-login {
+    background-color: var(--cor-fundo-card);
+    border-radius: var(--borda-raio-lg);
+    box-shadow: var(--sombra-elevada);
+    padding: var(--espacamento-xl);
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: var(--espacamento-xl);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--espacamento-sm);
+    margin-bottom: var(--espacamento-md);
+}
+
+.logo-icone {
+    font-size: 2rem;
+    color: var(--cor-primaria);
+}
+
+.logo h1,
+.logo-texto {
+    font-size: var(--fonte-tamanho-xl);
+    font-weight: 700;
+    color: var(--cor-texto);
+}
+
+.login-subtitulo {
+    color: var(--cor-texto-claro);
+    font-size: var(--fonte-tamanho-sm);
+}
+
+.form-login .btn-entrar {
+    margin-top: var(--espacamento-md);
+}
+
+.link-cadastro {
+    text-align: center;
+    margin-top: var(--espacamento-lg);
+    color: var(--cor-texto-claro);
+    font-size: var(--fonte-tamanho-sm);
+}
+
+/* ============================================
+   5. LAYOUT - PÁGINAS DO APP (DASHBOARD, HÁBITOS, RELATÓRIOS)
+   ============================================ */
+
+/* --- Sidebar --- */
+/*
+ * MENU HAMBÚRGUER E SIDEBAR
+ * -------------------------
+ * No mobile: sidebar fica escondida (translateX(-100%)) e aparece via classe .ativo
+ * No desktop: sidebar fica fixa à esquerda
+ * O backdrop escurece o fundo quando o menu está aberto no mobile
+ */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--sidebar-largura);
+    height: 100vh;
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-texto);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform var(--transicao-media);
+}
+
+.sidebar.ativo {
+    transform: translateX(0);
+}
+
+.sidebar-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+}
+
+.sidebar-backdrop.ativo {
+    display: block;
+}
+
+.sidebar-header {
+    padding: var(--espacamento-lg);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header .logo {
+    justify-content: flex-start;
+}
+
+.sidebar-header .logo-icone {
+    color: var(--cor-primaria-light);
+}
+
+.sidebar-header .logo-texto {
+    color: var(--sidebar-texto);
+    font-size: var(--fonte-tamanho-lg);
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: var(--espacamento-md) 0;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: var(--espacamento-md);
+    padding: var(--espacamento-md) var(--espacamento-lg);
+    color: var(--sidebar-texto);
+    opacity: 0.8;
+    transition: opacity var(--transicao-rapida), background-color var(--transicao-rapida);
+}
+
+.nav-link:hover {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--sidebar-texto);
+}
+
+.nav-link.ativo {
+    opacity: 1;
+    background-color: var(--cor-primaria);
+    color: white;
+}
+
+.nav-icone {
+    font-size: 1.2rem;
+    width: 24px;
+    text-align: center;
+}
+
+.sidebar-footer {
+    padding: var(--espacamento-md) 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-sair {
+    color: var(--cor-erro-light) !important;
+}
+
+/* --- Conteúdo Principal --- */
+.conteudo-principal {
+    min-height: 100vh;
+    padding-top: 60px;
+}
+
+/* --- Header --- */
+.header-app {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background-color: var(--cor-fundo-card);
+    border-bottom: 1px solid var(--cor-borda);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--espacamento-md);
+    z-index: 50;
+}
+
+/* 
+ * BOTÃO HAMBÚRGUER
+ * ----------------
+ * Três linhas que representam o menu
+ * Ao clicar, adiciona classe .ativo na sidebar e no backdrop
+ */
+.btn-hamburguer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.hamburguer-linha {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background-color: var(--cor-texto);
+    border-radius: 2px;
+    transition: transform var(--transicao-rapida), opacity var(--transicao-rapida);
+}
+
+.header-usuario {
+    display: flex;
+    align-items: center;
+    gap: var(--espacamento-sm);
+}
+
+.saudacao {
+    font-size: var(--fonte-tamanho-sm);
+    color: var(--cor-texto-claro);
+}
+
+.saudacao strong {
+    color: var(--cor-texto);
+}
+
+/* --- Área de Conteúdo --- */
+.main-content {
+    padding: var(--espacamento-lg);
+}
+
+.titulo-pagina {
+    font-size: var(--fonte-tamanho-xl);
+    color: var(--cor-texto);
+    margin-bottom: var(--espacamento-sm);
+}
+
+.subtitulo-pagina {
+    color: var(--cor-texto-claro);
+    margin-bottom: var(--espacamento-lg);
+}
+
+.header-secao {
+    margin-bottom: var(--espacamento-lg);
+}
+
+.secao-titulo {
+    font-size: var(--fonte-tamanho-lg);
+    color: var(--cor-texto);
+    margin-bottom: var(--espacamento-md);
+}
+
+/* ============================================
+   6. DASHBOARD - COMPONENTES ESPECÍFICOS
+   ============================================ */
+
+/* --- Cards de Resumo --- */
+.resumo-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--espacamento-md);
+    margin-bottom: var(--espacamento-xl);
+}
+
+.card-resumo {
+    background-color: var(--cor-fundo-card);
+    border-radius: var(--borda-raio-lg);
+    box-shadow: var(--sombra-card);
+    padding: var(--espacamento-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--espacamento-md);
+}
+
+.card-resumo-icone {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.card-resumo-icone.cor-primaria {
+    background-color: var(--cor-primaria-light);
+    color: var(--cor-primaria);
+}
+
+.card-resumo-icone.cor-sucesso {
+    background-color: var(--cor-sucesso-light);
+    color: var(--cor-sucesso);
+}
+
+.card-resumo-icone.cor-aviso {
+    background-color: var(--cor-aviso-light);
+    color: var(--cor-aviso);
+}
+
+.card-resumo-icone.cor-info {
+    background-color: var(--cor-info-light);
+    color: var(--cor-info);
+}
+
+.card-resumo-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.card-resumo-valor {
+    font-size: var(--fonte-tamanho-xl);
+    font-weight: 700;
+    color: var(--cor-texto);
+}
+
+.card-resumo-label {
+    font-size: var(--fonte-tamanho-sm);
+    color: var(--cor-texto-claro);
+}
+
+/* --- Gráfico de Barras Vertical --- */
+.secao-grafico {
+    background-color: var(--cor-fundo-card);
+    border-radius: var(--borda-raio-lg);
+    box-shadow: var(--sombra-card);
+    padding: var(--espacamento-lg);
+    margin-bottom: var(--espacamento-xl);
+}
+
+.grafico-container {
+    margin: var(--espacamento-lg) 0;
+}
+
+/*
+ * GRÁFICO DE BARRAS (CSS)
+ * -----------------------
+ * As barras são criadas com divs e suas alturas são definidas via JavaScript
+ * usando a propriedade --altura para controlar a porcentagem
+ */
+.grafico-barras {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    height: 150px;
+    padding: 0 var(--espacamento-sm);
+    border-bottom: 2px solid var(--cor-borda);
+}
+
+.grafico-barra {
+    width: 30px;
+    background: linear-gradient(to top, var(--cor-primaria), var(--cor-primaria-hover));
+    border-radius: var(--borda-raio) var(--borda-raio) 0 0;
+    height: var(--altura, 0%);
+    transition: height 0.5s ease;
+    position: relative;
+}
+
+.grafico-barra::after {
+    content: attr(data-valor);
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: var(--fonte-tamanho-sm);
+    color: var(--cor-texto-claro);
+    font-weight: 500;
+}
+
+.grafico-legenda {
+    display: flex;
+    justify-content: space-around;
+    padding-top: var(--espacamento-sm);
+    font-size: var(--fonte-tamanho-sm);
+    color: var(--cor-texto-claro);
+}
+
+.grafico-descricao {
+    font-size: var(--fonte-tamanho-sm);
+    color: var(--cor-texto-claro);
+    line-height: 1.5;
+    margin-top: var(--espacamento-md);
+    padding: var(--espacamento-md);
+    background-color: var(--cor-fundo);
+    border-radius: var(--borda-raio);
+}
+
+/* --- Hábitos de Hoje (Dashboard) --- */
+.secao-habitos-recentes {
+    background-color: var(--cor-fundo-card);
+    border-radius: var(--borda-raio-lg);
+    box-shadow: var(--sombra-card);
+    padding: var(--espacamento-lg);
+}
+
+.lista-habitos-hoje {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacamento-md);
+}
+
+.habito-hoje-item {
+    display: flex;
+    align-items: center;
+    gap: var(--espacamento-md);
+    padding: var(--espacamento-md);
+    background-color: var(--cor-fundo);
+    border-radius: var(--borda-raio);
+}
+
+.habito-hoje-check {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--cor-borda);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transicao-rapida);
+}
+
+.habito-hoje-check.concluido {
+    background-color: var(--cor-sucesso);
+    border-color: var(--cor-sucesso);
+    color: white;
+}
+
+.habito-hoje-info {
+    flex: 1;
+}
+
+.habito-hoje-nome {
+    font-weight: 500;
+    color: var(--cor-texto);
+}
+
+.habito-hoje-freq {
+    font-size: var(--fonte-tamanho-sm);
+    color: var(--cor-texto-claro);
+}
+
+/* ============================================
+   7. MEUS HÁBITOS - COMPONENTES ESPECÍFICOS
+   ============================================ */
+
+/*
+ * GRID DE HÁBITOS
+ * ---------------
+ * No mobile: 1 coluna
+ * No tablet: 2 colunas
+ * No desktop: 3 colunas
+ * Os cards NÃO têm scroll interno - o scroll é apenas da página
+ */
+.habitos-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--espacamento-md);
+}
+
+.card-habito {
+    background-color: var(--cor-fundo-card);
+    border-radius: var(--borda-raio-lg);
+    box-shadow: var(--sombra-card);
+    padding: var(--espacamento-lg);
+    border-left: 4px solid var(--cor-primaria);
+    transition: transform var(--transicao-rapida), box-shadow var(--transicao-rapida);
+}
+
+.card-habito:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sombra-elevada);
+}
+
+.card-habito-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--espacamento-md);
+}
+
+.card-habito-nome {
+    font-size: var(--fonte-tamanho-lg);
+    font-weight: 600;
+    color: var(--cor-texto);
+}
+
+.card-habito-status {
+    padding: var(--espacamento-xs) var(--espacamento-sm);
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.card-habito-status.ativo {
+    background-color: var(--cor-sucesso-light);
+    color: var(--cor-sucesso);
+}
+
+.card-habito-status.pendente {
+    background-color: var(--cor-aviso-light);
+    color: var(--cor-aviso);
+}
+
+.card-habito-status.concluido {
+    background-color: var(--cor-primaria-light);
+    color: var(--cor-primaria);
+}
+
+.card-habito-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacamento-sm);
+}
+
+.card-habito-freq,
+.card-habito-categoria {
+    display: flex;
+    align-items: center;
+    gap: var(--espacamento-sm);
+    font-size: var(--fonte-tamanho-sm);
+    color: var(--cor-texto-claro);
+}
+
+.card-habito-progresso {
+    margin-top: var(--espacamento-md);
+}
+
+.progresso-barra-container {
+    height: 8px;
+    background-color: var(--cor-fundo);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progresso-barra {
+    height: 100%;
+    background: linear-gradient(to right, var(--cor-primaria), var(--cor-sucesso));
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.progresso-texto {
+    font-size: var(--fonte-tamanho-sm);
+    color: var(--cor-texto-claro);
+    margin-top: var(--espacamento-xs);
+}
+
+/* Mensagem quando não há hábitos */
+.sem-habitos {
+    text-align: center;
+    padding: var(--espacamento-xl);
+    color: var(--cor-texto-claro);
+}
+
+/*
+ * FAB - FLOATING ACTION BUTTON
+ * ----------------------------
+ * Botão flutuante no canto inferior direito para adicionar hábitos
+ * Fica fixo na tela e sempre visível
+ */
+.fab {
+    position: fixed;
+    bottom: var(--espacamento-lg);
+    right: var(--espacamento-lg);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--cor-primaria);
+    color: white;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    box-shadow: var(--sombra-elevada);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--transicao-rapida), background-color var(--transicao-rapida);
+    z-index: 50;
+}
+
+.fab:hover {
+    background-color: var(--cor-primaria-hover);
+    transform: scale(1.1);
+}
+
+.fab:active {
+    transform: scale(1);
+}
+
+/* ============================================
+   8. RELATÓRIOS - COMPONENTES ESPECÍFICOS
+   ============================================ */
+.secao-relatorio {
+    background-color: var(--cor-fundo-card);
+    border-radius: var(--borda-raio-lg);
+    box-shadow: var(--sombra-card);
+    padding: var(--espacamento-lg);
+    margin-bottom: var(--espacamento-lg);
+}
+
+/* Gráfico de barras horizontais */
+.grafico-horizontal-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacamento-md);
+    margin: var(--espacamento-lg) 0;
+}
+
+.grafico-horizontal-item {
+    display: flex;
+    align-items: center;
+    gap: var(--espacamento-md);
+}
+
+.grafico-horizontal-label {
+    min-width: 120px;
+    font-size: var(--fonte-tamanho-sm);
+    color: var(--cor-texto);
+    text-align: right;
+}
+
+.grafico-horizontal-barra-container {
+    flex: 1;
+    height: 24px;
+    background-color: var(--cor-fundo);
+    border-radius: var(--borda-raio);
+    overflow: hidden;
+}
+
+.grafico-horizontal-barra {
+    height: 100%;
+    background: linear-gradient(to right, var(--cor-primaria), var(--cor-sucesso));
+    border-radius: var(--borda-raio);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: var(--espacamento-sm);
+    transition: width 0.8s ease;
+}
+
+.grafico-horizontal-valor {
+    font-size: var(--fonte-tamanho-sm);
+    color: white;
+    font-weight: 500;
+}
+
+/* Grid de estatísticas */
+.estatisticas-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--espacamento-md);
+    margin: var(--espacamento-lg) 0;
+}
+
+.estatistica-item {
+    text-align: center;
+    padding: var(--espacamento-lg);
+    background-color: var(--cor-fundo);
+    border-radius: var(--borda-raio);
+}
+
+.estatistica-valor {
+    display: block;
+    font-size: var(--fonte-tamanho-2xl);
+    font-weight: 700;
+    color: var(--cor-primaria);
+}
+
+.estatistica-label {
+    font-size: var(--fonte-tamanho-sm);
+    color: var(--cor-texto-claro);
+}
+
+/* ============================================
+   9. RESPONSIVIDADE - MEDIA QUERIES
+   ============================================ */
+
+/* Tablet (768px+) */
+@media (min-width: 768px) {
+    /* Cards de resumo em 2 colunas */
+    .resumo-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* Hábitos em 2 colunas */
+    .habitos-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* Gráfico mais alto */
+    .grafico-barras {
+        height: 180px;
+    }
+    
+    .grafico-barra {
+        width: 40px;
+    }
+    
+    /* Estatísticas em 4 colunas */
+    .estatisticas-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Desktop (1200px+) */
+@media (min-width: 1200px) {
+    /*
+     * No desktop, a sidebar fica fixa e visível
+     * O conteúdo principal é deslocado para a direita
+     * O botão hambúrguer é escondido
+     */
+    .sidebar {
+        transform: translateX(0);
+    }
+    
+    .sidebar-backdrop {
+        display: none !important;
+    }
+    
+    .btn-hamburguer {
+        display: none;
+    }
+    
+    .conteudo-principal {
+        margin-left: var(--sidebar-largura);
+    }
+    
+    .header-app {
+        left: var(--sidebar-largura);
+    }
+    
+    /* Cards de resumo em 4 colunas */
+    .resumo-cards {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    /* Hábitos em 3 colunas */
+    .habitos-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    /* Gráfico ainda mais alto */
+    .grafico-barras {
+        height: 200px;
+    }
+    
+    .grafico-barra {
+        width: 50px;
+    }
+    
+    /* Conteúdo mais espaçoso */
+    .main-content {
+        padding: var(--espacamento-xl);
+        max-width: 1200px;
+    }
+    
+    /* Label do gráfico horizontal maior */
+    .grafico-horizontal-label {
+        min-width: 150px;
+    }
+}
+
+/* Ajustes para telas muito pequenas (360px-) */
+@media (max-width: 360px) {
+    .container-login {
+        padding: var(--espacamento-lg);
+    }
+    
+    .titulo-pagina {
+        font-size: var(--fonte-tamanho-lg);
+    }
+    
+    .card-resumo {
+        padding: var(--espacamento-md);
+    }
+    
+    .card-resumo-icone {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    .fab {
+        width: 48px;
+        height: 48px;
+        font-size: 1.5rem;
+    }
+}

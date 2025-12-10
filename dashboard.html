@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Flui360 - Dashboard principal de hábitos">
+    <title>Flui360 - Dashboard</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="pagina-app">
+    <!-- 
+        DASHBOARD (dashboard.html)
+        ==========================
+        Tela principal após o login.
+        Exibe resumo dos hábitos, estatísticas e um gráfico simples.
+        Contém sidebar de navegação (fixa no desktop, off-canvas no mobile).
+    -->
+
+    <!-- Backdrop para menu mobile -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- Sidebar / Menu de navegação -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="logo-icone">&#9679;</span>
+                <span class="logo-texto">Flui360</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <ul>
+                <li>
+                    <a href="dashboard.html" class="nav-link ativo">
+                        <span class="nav-icone">&#9632;</span>
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="habitos.html" class="nav-link">
+                        <span class="nav-icone">&#10003;</span>
+                        Meus Hábitos
+                    </a>
+                </li>
+                <li>
+                    <a href="relatorios.html" class="nav-link">
+                        <span class="nav-icone">&#9776;</span>
+                        Relatórios
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="index.html" class="nav-link nav-sair">
+                <span class="nav-icone">&#8592;</span>
+                Sair
+            </a>
+        </div>
+    </aside>
+
+    <!-- Conteúdo principal -->
+    <div class="conteudo-principal">
+        <!-- Header -->
+        <header class="header-app">
+            <button class="btn-hamburguer" id="btnHamburguer" aria-label="Abrir menu" aria-expanded="false">
+                <span class="hamburguer-linha"></span>
+                <span class="hamburguer-linha"></span>
+                <span class="hamburguer-linha"></span>
+            </button>
+            
+            <div class="header-usuario">
+                <span class="saudacao">Olá, <strong>Usuário</strong>!</span>
+            </div>
+        </header>
+
+        <!-- Área de conteúdo -->
+        <main class="main-content">
+            <h1 class="titulo-pagina">Dashboard</h1>
+            
+            <!-- Cards de resumo -->
+            <section class="resumo-cards">
+                <article class="card-resumo">
+                    <div class="card-resumo-icone cor-primaria">&#10003;</div>
+                    <div class="card-resumo-info">
+                        <span class="card-resumo-valor" id="habitosAtivos">5</span>
+                        <span class="card-resumo-label">Hábitos Ativos</span>
+                    </div>
+                </article>
+
+                <article class="card-resumo">
+                    <div class="card-resumo-icone cor-sucesso">&#9733;</div>
+                    <div class="card-resumo-info">
+                        <span class="card-resumo-valor" id="sequenciaAtual">7</span>
+                        <span class="card-resumo-label">Dias de Sequência</span>
+                    </div>
+                </article>
+
+                <article class="card-resumo">
+                    <div class="card-resumo-icone cor-aviso">&#9679;</div>
+                    <div class="card-resumo-info">
+                        <span class="card-resumo-valor" id="completadosHoje">3</span>
+                        <span class="card-resumo-label">Completados Hoje</span>
+                    </div>
+                </article>
+
+                <article class="card-resumo">
+                    <div class="card-resumo-icone cor-info">&#37;</div>
+                    <div class="card-resumo-info">
+                        <span class="card-resumo-valor" id="taxaConclusao">78%</span>
+                        <span class="card-resumo-label">Taxa de Conclusão</span>
+                    </div>
+                </article>
+            </section>
+
+            <!-- Gráfico de progresso semanal -->
+            <section class="secao-grafico">
+                <h2 class="secao-titulo">Progresso Semanal</h2>
+                <div class="grafico-container">
+                    <div class="grafico-barras" id="graficoSemanal">
+                        <!-- As barras são geradas via JavaScript -->
+                    </div>
+                    <div class="grafico-legenda">
+                        <span>Seg</span>
+                        <span>Ter</span>
+                        <span>Qua</span>
+                        <span>Qui</span>
+                        <span>Sex</span>
+                        <span>Sáb</span>
+                        <span>Dom</span>
+                    </div>
+                </div>
+                <p class="grafico-descricao">
+                    Este gráfico mostra a porcentagem de hábitos concluídos em cada dia da semana atual.
+                </p>
+            </section>
+
+            <!-- Hábitos recentes -->
+            <section class="secao-habitos-recentes">
+                <h2 class="secao-titulo">Hábitos de Hoje</h2>
+                <div class="lista-habitos-hoje" id="habitosHoje">
+                    <!-- Renderizado via JavaScript -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+</body>
+</html>

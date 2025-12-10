@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Flui360 - Dashboard de Hábitos para melhorar sua produtividade">
+    <title>Flui360 - Login</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="pagina-login">
+    <!-- 
+        TELA DE LOGIN (index.html)
+        ==========================
+        Esta é a página inicial do aplicativo Flui360.
+        Contém um formulário de login simples com validação HTML5.
+        Ao submeter, redireciona para o dashboard.html.
+        O link "Criar conta" abre um modal de cadastro simulado.
+    -->
+    
+    <main class="container-login">
+        <!-- Logo e título do aplicativo -->
+        <div class="login-header">
+            <div class="logo">
+                <span class="logo-icone">&#9679;</span>
+                <h1>Flui360</h1>
+            </div>
+            <p class="login-subtitulo">Transforme seus hábitos, transforme sua vida</p>
+        </div>
+
+        <!-- Formulário de login -->
+        <form class="form-login" id="formLogin" action="dashboard.html" method="GET">
+            <div class="campo-grupo">
+                <label for="email">E-mail</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    placeholder="seu@email.com" 
+                    required
+                    autocomplete="email"
+                >
+                <span class="mensagem-erro" id="erroEmail"></span>
+            </div>
+
+            <div class="campo-grupo">
+                <label for="senha">Senha</label>
+                <input 
+                    type="password" 
+                    id="senha" 
+                    name="senha" 
+                    placeholder="Digite sua senha" 
+                    required
+                    minlength="6"
+                    autocomplete="current-password"
+                >
+                <span class="mensagem-erro" id="erroSenha"></span>
+            </div>
+
+            <button type="submit" class="btn-primario btn-entrar">
+                Entrar
+            </button>
+
+            <p class="link-cadastro">
+                Não tem uma conta? 
+                <button type="button" class="btn-link" id="btnCriarConta">Criar conta</button>
+            </p>
+        </form>
+    </main>
+
+    <!-- Modal de Cadastro (simulado) -->
+    <div class="modal-backdrop" id="modalBackdrop">
+        <div class="modal" role="dialog" aria-labelledby="tituloModal" aria-modal="true">
+            <div class="modal-header">
+                <h2 id="tituloModal">Criar Conta</h2>
+                <button type="button" class="btn-fechar-modal" id="btnFecharModal" aria-label="Fechar modal">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="form-cadastro" id="formCadastro">
+                    <div class="campo-grupo">
+                        <label for="nomeCompleto">Nome completo</label>
+                        <input type="text" id="nomeCompleto" name="nomeCompleto" placeholder="Seu nome" required>
+                    </div>
+                    <div class="campo-grupo">
+                        <label for="emailCadastro">E-mail</label>
+                        <input type="email" id="emailCadastro" name="emailCadastro" placeholder="seu@email.com" required>
+                    </div>
+                    <div class="campo-grupo">
+                        <label for="senhaCadastro">Senha</label>
+                        <input type="password" id="senhaCadastro" name="senhaCadastro" placeholder="Mínimo 6 caracteres" required minlength="6">
+                    </div>
+                    <button type="submit" class="btn-primario">Criar minha conta</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+</body>
+</html>

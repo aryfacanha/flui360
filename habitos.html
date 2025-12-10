@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Flui360 - Gerencie seus hábitos">
+    <title>Flui360 - Meus Hábitos</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="pagina-app">
+    <!-- 
+        MEUS HÁBITOS (habitos.html)
+        ===========================
+        Tela prioritária para usabilidade e mobile.
+        Exibe lista de hábitos em cards responsivos.
+        Possui botão FAB para adicionar novos hábitos.
+        Modal para criação de hábitos simulados.
+    -->
+
+    <!-- Backdrop para menu mobile -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- Sidebar / Menu de navegação -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="logo-icone">&#9679;</span>
+                <span class="logo-texto">Flui360</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <ul>
+                <li>
+                    <a href="dashboard.html" class="nav-link">
+                        <span class="nav-icone">&#9632;</span>
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="habitos.html" class="nav-link ativo">
+                        <span class="nav-icone">&#10003;</span>
+                        Meus Hábitos
+                    </a>
+                </li>
+                <li>
+                    <a href="relatorios.html" class="nav-link">
+                        <span class="nav-icone">&#9776;</span>
+                        Relatórios
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="index.html" class="nav-link nav-sair">
+                <span class="nav-icone">&#8592;</span>
+                Sair
+            </a>
+        </div>
+    </aside>
+
+    <!-- Conteúdo principal -->
+    <div class="conteudo-principal">
+        <!-- Header -->
+        <header class="header-app">
+            <button class="btn-hamburguer" id="btnHamburguer" aria-label="Abrir menu" aria-expanded="false">
+                <span class="hamburguer-linha"></span>
+                <span class="hamburguer-linha"></span>
+                <span class="hamburguer-linha"></span>
+            </button>
+            
+            <div class="header-usuario">
+                <span class="saudacao">Olá, <strong>Usuário</strong>!</span>
+            </div>
+        </header>
+
+        <!-- Área de conteúdo -->
+        <main class="main-content">
+            <div class="header-secao">
+                <h1 class="titulo-pagina">Meus Hábitos</h1>
+                <p class="subtitulo-pagina">Gerencie seus hábitos diários</p>
+            </div>
+
+            <!-- Grid de cards de hábitos -->
+            <section class="habitos-grid" id="habitosGrid">
+                <!-- Cards renderizados via JavaScript -->
+            </section>
+
+            <!-- Mensagem quando não há hábitos -->
+            <div class="sem-habitos" id="semHabitos" style="display: none;">
+                <p>Você ainda não tem hábitos cadastrados.</p>
+                <p>Clique no botão + para adicionar seu primeiro hábito!</p>
+            </div>
+        </main>
+
+        <!-- FAB - Floating Action Button -->
+        <button class="fab" id="btnNovoHabito" aria-label="Adicionar novo hábito">
+            <span>+</span>
+        </button>
+    </div>
+
+    <!-- Modal para adicionar hábito -->
+    <div class="modal-backdrop" id="modalHabitoBackdrop">
+        <div class="modal modal-habito" role="dialog" aria-labelledby="tituloModalHabito" aria-modal="true">
+            <div class="modal-header">
+                <h2 id="tituloModalHabito">Novo Hábito</h2>
+                <button type="button" class="btn-fechar-modal" id="btnFecharModalHabito" aria-label="Fechar modal">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="form-habito" id="formHabito">
+                    <div class="campo-grupo">
+                        <label for="nomeHabito">Nome do hábito</label>
+                        <input 
+                            type="text" 
+                            id="nomeHabito" 
+                            name="nomeHabito" 
+                            placeholder="Ex: Beber 2L de água" 
+                            required
+                        >
+                    </div>
+                    
+                    <div class="campo-grupo">
+                        <label for="frequenciaHabito">Frequência</label>
+                        <select id="frequenciaHabito" name="frequenciaHabito" required>
+                            <option value="">Selecione...</option>
+                            <option value="diario">Diário</option>
+                            <option value="3x-semana">3x por semana</option>
+                            <option value="5x-semana">5x por semana</option>
+                            <option value="semanal">Semanal</option>
+                        </select>
+                    </div>
+
+                    <div class="campo-grupo">
+                        <label for="categoriaHabito">Categoria</label>
+                        <select id="categoriaHabito" name="categoriaHabito" required>
+                            <option value="">Selecione...</option>
+                            <option value="saude">Saúde</option>
+                            <option value="exercicio">Exercício</option>
+                            <option value="alimentacao">Alimentação</option>
+                            <option value="estudo">Estudo</option>
+                            <option value="trabalho">Trabalho</option>
+                            <option value="lazer">Lazer</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-primario">Adicionar Hábito</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
