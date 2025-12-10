@@ -136,6 +136,53 @@ body.tema-escuro .boas-vindas {
     border-color: #2563eb;
 }
 
+body.tema-escuro .boas-vindas-box {
+    background: linear-gradient(135deg, #1e3a5f, #1e293b);
+    border-color: #3b82f6;
+    color: var(--cor-texto);
+}
+
+body.tema-escuro .boas-vindas-texto {
+    color: var(--cor-texto);
+}
+
+body.tema-escuro .btn-fechar-boas-vindas {
+    color: var(--cor-texto-claro);
+}
+
+body.tema-escuro .btn-fechar-boas-vindas:hover {
+    color: var(--cor-texto);
+}
+
+/* Textos cinza em modo escuro */
+body.tema-escuro .grafico-descricao,
+body.tema-escuro .subtitulo-pagina,
+body.tema-escuro .card-resumo-label,
+body.tema-escuro .estatistica-label {
+    color: var(--cor-texto-claro);
+}
+
+body.tema-escuro .texto-aviso {
+    color: #fbbf24;
+}
+
+body.tema-escuro .habito-frequencia,
+body.tema-escuro .habito-lembrete {
+    color: var(--cor-texto-claro);
+}
+
+body.tema-escuro .stat-card p {
+    color: var(--cor-texto-claro);
+}
+
+body.tema-escuro .grafico-titulo {
+    color: var(--cor-texto);
+}
+
+body.tema-escuro .legenda-item span {
+    color: var(--cor-texto-claro);
+}
+
 body.tema-escuro .grafico-container {
     background-color: var(--cor-fundo-card);
 }
