@@ -1331,3 +1331,580 @@ img {
         max-width: 45px;
     }
 }
+
+/* ============================================
+   11. FORMULÁRIO AVANÇADO DE HÁBITOS
+   ============================================ */
+
+/*
+ * MODAL AVANÇADO
+ * --------------
+ * Formulário multi-passos para criar/editar hábitos
+ * Inspirado no Loop Habit Tracker
+ */
+.modal-habito-avancado {
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.form-habito-avancado {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacamento-lg);
+}
+
+.form-secao {
+    padding-bottom: var(--espacamento-md);
+    border-bottom: 1px solid var(--cor-borda);
+}
+
+.form-secao:last-of-type {
+    border-bottom: none;
+}
+
+.form-secao-titulo {
+    font-size: var(--fonte-tamanho-md);
+    font-weight: 600;
+    color: var(--cor-texto);
+    margin-bottom: var(--espacamento-md);
+}
+
+/* Tipo do hábito - seleção de cards */
+.tipo-habito-opcoes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--espacamento-md);
+}
+
+.tipo-habito-opcao {
+    cursor: pointer;
+}
+
+.tipo-habito-opcao input {
+    display: none;
+}
+
+.tipo-habito-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--espacamento-lg);
+    border: 2px solid var(--cor-borda);
+    border-radius: var(--borda-raio-lg);
+    transition: all var(--transicao-rapida);
+    text-align: center;
+}
+
+.tipo-habito-card:hover {
+    border-color: var(--cor-primaria);
+    background-color: var(--cor-fundo);
+}
+
+.tipo-habito-opcao input:checked + .tipo-habito-card {
+    border-color: var(--cor-primaria);
+    background-color: rgba(99, 102, 241, 0.1);
+}
+
+.tipo-icone {
+    font-size: 1.75rem;
+    margin-bottom: var(--espacamento-sm);
+    color: var(--cor-primaria);
+}
+
+.tipo-nome {
+    font-weight: 600;
+    color: var(--cor-texto);
+    margin-bottom: var(--espacamento-xs);
+}
+
+.tipo-descricao {
+    font-size: var(--fonte-tamanho-sm);
+    color: var(--cor-texto-claro);
+}
+
+/* Campos em linha */
+.campos-linha {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--espacamento-md);
+    flex-wrap: wrap;
+}
+
+.campo-pequeno {
+    width: 80px;
+    flex-shrink: 0;
+}
+
+.campo-medio {
+    flex: 1;
+    min-width: 120px;
+}
+
+.campo-complemento {
+    padding-bottom: var(--espacamento-md);
+    color: var(--cor-texto-claro);
+    font-size: var(--fonte-tamanho-sm);
+}
+
+/* Toggle switch para lembretes */
+.lembrete-toggle-container {
+    display: flex;
+    align-items: center;
+    gap: var(--espacamento-md);
+    margin-bottom: var(--espacamento-md);
+}
+
+.toggle-switch {
+    position: relative;
+    width: 48px;
+    height: 26px;
+    cursor: pointer;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--cor-borda);
+    transition: var(--transicao-rapida);
+    border-radius: 26px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: var(--transicao-rapida);
+    border-radius: 50%;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background-color: var(--cor-primaria);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(22px);
+}
+
+.toggle-label {
+    font-size: var(--fonte-tamanho-sm);
+    color: var(--cor-texto-claro);
+}
+
+/* Configuração de lembrete */
+.lembrete-config {
+    padding: var(--espacamento-md);
+    background-color: var(--cor-fundo);
+    border-radius: var(--borda-raio);
+    margin-top: var(--espacamento-md);
+}
+
+/* Dias da semana */
+.dias-semana-container {
+    margin-top: var(--espacamento-md);
+}
+
+.dias-semana-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--espacamento-sm);
+}
+
+.dias-semana-header span {
+    font-size: var(--fonte-tamanho-sm);
+    color: var(--cor-texto);
+    font-weight: 500;
+}
+
+.btn-texto {
+    background: none;
+    border: none;
+    color: var(--cor-primaria);
+    font-size: var(--fonte-tamanho-sm);
+    cursor: pointer;
+    padding: 0;
+}
+
+.btn-texto:hover {
+    text-decoration: underline;
+}
+
+.dias-semana-grid {
+    display: flex;
+    gap: var(--espacamento-xs);
+    flex-wrap: wrap;
+}
+
+.dia-semana-btn {
+    width: 40px;
+    height: 40px;
+    border: 2px solid var(--cor-borda);
+    border-radius: 50%;
+    background-color: transparent;
+    color: var(--cor-texto);
+    font-size: var(--fonte-tamanho-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transicao-rapida);
+}
+
+.dia-semana-btn:hover {
+    border-color: var(--cor-primaria);
+}
+
+.dia-semana-btn.ativo {
+    background-color: var(--cor-primaria);
+    border-color: var(--cor-primaria);
+    color: white;
+}
+
+/* Grid de cores */
+.cores-grid {
+    display: flex;
+    gap: var(--espacamento-sm);
+    flex-wrap: wrap;
+}
+
+.cor-opcao {
+    cursor: pointer;
+}
+
+.cor-opcao input {
+    display: none;
+}
+
+.cor-preview {
+    display: block;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    transition: all var(--transicao-rapida);
+}
+
+.cor-opcao:hover .cor-preview {
+    transform: scale(1.1);
+}
+
+.cor-opcao input:checked + .cor-preview {
+    border-color: var(--cor-texto);
+    box-shadow: 0 0 0 2px white, 0 0 0 4px var(--cor-texto);
+}
+
+/* Ações do formulário */
+.form-acoes {
+    display: flex;
+    gap: var(--espacamento-md);
+    justify-content: flex-end;
+    padding-top: var(--espacamento-md);
+}
+
+.btn-secundario {
+    padding: var(--espacamento-sm) var(--espacamento-lg);
+    background-color: transparent;
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--borda-raio);
+    color: var(--cor-texto);
+    cursor: pointer;
+    transition: all var(--transicao-rapida);
+}
+
+.btn-secundario:hover {
+    background-color: var(--cor-fundo);
+    border-color: var(--cor-texto-claro);
+}
+
+.btn-perigo {
+    padding: var(--espacamento-sm) var(--espacamento-lg);
+    background-color: #ef4444;
+    border: none;
+    border-radius: var(--borda-raio);
+    color: white;
+    cursor: pointer;
+    transition: all var(--transicao-rapida);
+}
+
+.btn-perigo:hover {
+    background-color: #dc2626;
+}
+
+/* Modal pequeno (confirmação) */
+.modal-pequeno {
+    max-width: 400px;
+}
+
+.texto-aviso {
+    color: var(--cor-texto-claro);
+    font-size: var(--fonte-tamanho-sm);
+    margin-top: var(--espacamento-sm);
+}
+
+/* ============================================
+   12. CARDS DE HÁBITOS AVANÇADOS
+   ============================================ */
+
+/*
+ * CARD COM TODAS AS INFORMAÇÕES
+ * -----------------------------
+ * Exibe tipo, frequência, lembretes e controles
+ */
+.card-habito-avancado {
+    background-color: var(--cor-fundo-card);
+    border-radius: var(--borda-raio-lg);
+    box-shadow: var(--sombra-card);
+    padding: var(--espacamento-lg);
+    border-left: 4px solid var(--cor-habito, var(--cor-primaria));
+    transition: transform var(--transicao-rapida), box-shadow var(--transicao-rapida);
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacamento-md);
+}
+
+.card-habito-avancado:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sombra-elevada);
+}
+
+.habito-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--espacamento-md);
+}
+
+.habito-card-info {
+    flex: 1;
+}
+
+.habito-card-nome {
+    font-size: var(--fonte-tamanho-lg);
+    font-weight: 600;
+    color: var(--cor-texto);
+    margin-bottom: var(--espacamento-xs);
+    display: flex;
+    align-items: center;
+    gap: var(--espacamento-sm);
+}
+
+.habito-tipo-badge {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto-claro);
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.habito-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--espacamento-xs) var(--espacamento-md);
+    font-size: var(--fonte-tamanho-sm);
+    color: var(--cor-texto-claro);
+}
+
+.habito-card-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.habito-card-acoes {
+    display: flex;
+    gap: var(--espacamento-xs);
+}
+
+.btn-icone {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto-claro);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transicao-rapida);
+    font-size: 0.875rem;
+}
+
+.btn-icone:hover {
+    background-color: var(--cor-borda);
+    color: var(--cor-texto);
+}
+
+.btn-icone.btn-excluir:hover {
+    background-color: #fee2e2;
+    color: #ef4444;
+}
+
+/* Controle de conclusão */
+.habito-card-controle {
+    display: flex;
+    align-items: center;
+    gap: var(--espacamento-md);
+    padding: var(--espacamento-md);
+    background-color: var(--cor-fundo);
+    border-radius: var(--borda-raio);
+}
+
+/* Controle binário (checkbox grande) */
+.controle-binario {
+    display: flex;
+    align-items: center;
+    gap: var(--espacamento-md);
+    cursor: pointer;
+    flex: 1;
+}
+
+.checkbox-grande {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 3px solid var(--cor-habito, var(--cor-primaria));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transicao-rapida);
+    flex-shrink: 0;
+}
+
+.checkbox-grande:hover {
+    transform: scale(1.05);
+}
+
+.checkbox-grande.concluido {
+    background-color: var(--cor-habito, var(--cor-primaria));
+}
+
+.checkbox-grande .check-icon {
+    color: white;
+    font-size: 1.25rem;
+}
+
+.controle-binario-texto {
+    font-weight: 500;
+    color: var(--cor-texto);
+}
+
+.controle-binario-texto.concluido {
+    text-decoration: line-through;
+    color: var(--cor-texto-claro);
+}
+
+/* Controle mensurável */
+.controle-mensuravel {
+    display: flex;
+    align-items: center;
+    gap: var(--espacamento-md);
+    flex: 1;
+}
+
+.input-valor-dia {
+    width: 70px;
+    padding: var(--espacamento-sm);
+    border: 2px solid var(--cor-borda);
+    border-radius: var(--borda-raio);
+    font-size: var(--fonte-tamanho-md);
+    text-align: center;
+}
+
+.input-valor-dia:focus {
+    border-color: var(--cor-primaria);
+    outline: none;
+}
+
+.progresso-mensuravel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.progresso-texto-mensuravel {
+    font-size: var(--fonte-tamanho-sm);
+    font-weight: 500;
+    color: var(--cor-texto);
+}
+
+.progresso-texto-mensuravel.atingido {
+    color: var(--cor-sucesso);
+}
+
+.progresso-barra-mensuravel {
+    height: 8px;
+    background-color: var(--cor-borda);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progresso-barra-preenchido {
+    height: 100%;
+    background-color: var(--cor-habito, var(--cor-primaria));
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progresso-barra-preenchido.atingido {
+    background-color: var(--cor-sucesso);
+}
+
+/* Calendário no card avançado */
+.habito-card-calendario {
+    margin-top: var(--espacamento-sm);
+}
+
+/* Responsividade do formulário */
+@media (max-width: 480px) {
+    .tipo-habito-opcoes {
+        grid-template-columns: 1fr;
+    }
+    
+    .tipo-habito-card {
+        padding: var(--espacamento-md);
+        flex-direction: row;
+        text-align: left;
+        gap: var(--espacamento-md);
+    }
+    
+    .tipo-icone {
+        font-size: 1.5rem;
+        margin-bottom: 0;
+    }
+    
+    .tipo-habito-card .tipo-nome,
+    .tipo-habito-card .tipo-descricao {
+        display: block;
+    }
+    
+    .dias-semana-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 0.75rem;
+    }
+    
+    .form-acoes {
+        flex-direction: column;
+    }
+    
+    .form-acoes button {
+        width: 100%;
+    }
+}

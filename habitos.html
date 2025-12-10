@@ -11,16 +11,18 @@
     <!-- 
         MEUS HÁBITOS (habitos.html)
         ===========================
-        Tela prioritária para usabilidade e mobile.
-        Exibe lista de hábitos em cards responsivos.
-        Possui botão FAB para adicionar novos hábitos.
-        Modal para criação de hábitos simulados.
+        Tela com CRUD completo de hábitos, inspirada no Loop Habit Tracker.
+        
+        FUNCIONALIDADES:
+        - Criar, editar e excluir hábitos
+        - Tipos: Binário (Sim/Não) e Mensurável (com unidade/alvo)
+        - Frequência dinâmica (diário, X vezes por semana/mês, X vezes em Y dias)
+        - Sistema de lembretes com seleção de dias da semana
+        - Persistência em localStorage
     -->
 
-    <!-- Backdrop para menu mobile -->
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
-    <!-- Sidebar / Menu de navegação -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="logo">
@@ -60,9 +62,7 @@
         </div>
     </aside>
 
-    <!-- Conteúdo principal -->
     <div class="conteudo-principal">
-        <!-- Header -->
         <header class="header-app">
             <button class="btn-hamburguer" id="btnHamburguer" aria-label="Abrir menu" aria-expanded="false">
                 <span class="hamburguer-linha"></span>
@@ -75,34 +75,29 @@
             </div>
         </header>
 
-        <!-- Área de conteúdo -->
         <main class="main-content">
             <div class="header-secao">
                 <h1 class="titulo-pagina">Meus Hábitos</h1>
                 <p class="subtitulo-pagina">Gerencie seus hábitos diários</p>
             </div>
 
-            <!-- Grid de cards de hábitos -->
             <section class="habitos-grid" id="habitosGrid">
-                <!-- Cards renderizados via JavaScript -->
             </section>
 
-            <!-- Mensagem quando não há hábitos -->
             <div class="sem-habitos" id="semHabitos" style="display: none;">
                 <p>Você ainda não tem hábitos cadastrados.</p>
                 <p>Clique no botão + para adicionar seu primeiro hábito!</p>
             </div>
         </main>
 
-        <!-- FAB - Floating Action Button -->
         <button class="fab" id="btnNovoHabito" aria-label="Adicionar novo hábito">
             <span>+</span>
         </button>
     </div>
 
-    <!-- Modal para adicionar hábito -->
+    <!-- MODAL AVANÇADO - CRIAR/EDITAR HÁBITO -->
     <div class="modal-backdrop" id="modalHabitoBackdrop">
-        <div class="modal modal-habito" role="dialog" aria-labelledby="tituloModalHabito" aria-modal="true">
+        <div class="modal modal-habito modal-habito-avancado" role="dialog" aria-labelledby="tituloModalHabito" aria-modal="true">
             <div class="modal-header">
                 <h2 id="tituloModalHabito">Novo Hábito</h2>
                 <button type="button" class="btn-fechar-modal" id="btnFecharModalHabito" aria-label="Fechar modal">
@@ -110,44 +105,219 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form class="form-habito" id="formHabito">
-                    <div class="campo-grupo">
-                        <label for="nomeHabito">Nome do hábito</label>
-                        <input 
-                            type="text" 
-                            id="nomeHabito" 
-                            name="nomeHabito" 
-                            placeholder="Ex: Beber 2L de água" 
-                            required
-                        >
-                    </div>
+                <form class="form-habito form-habito-avancado" id="formHabito">
+                    <input type="hidden" id="habitoId" value="">
                     
-                    <div class="campo-grupo">
-                        <label for="frequenciaHabito">Frequência</label>
-                        <select id="frequenciaHabito" name="frequenciaHabito" required>
-                            <option value="">Selecione...</option>
-                            <option value="diario">Diário</option>
-                            <option value="3x-semana">3x por semana</option>
-                            <option value="5x-semana">5x por semana</option>
-                            <option value="semanal">Semanal</option>
-                        </select>
+                    <!-- PASSO 1: TIPO DO HÁBITO -->
+                    <div class="form-secao">
+                        <h3 class="form-secao-titulo">Tipo do Hábito</h3>
+                        <div class="tipo-habito-opcoes">
+                            <label class="tipo-habito-opcao">
+                                <input type="radio" name="tipoHabito" value="binario" checked>
+                                <div class="tipo-habito-card">
+                                    <span class="tipo-icone">&#10003;</span>
+                                    <span class="tipo-nome">Sim ou Não</span>
+                                    <span class="tipo-descricao">Marcar/desmarcar como concluído</span>
+                                </div>
+                            </label>
+                            <label class="tipo-habito-opcao">
+                                <input type="radio" name="tipoHabito" value="mensuravel">
+                                <div class="tipo-habito-card">
+                                    <span class="tipo-icone">&#9776;</span>
+                                    <span class="tipo-nome">Mensurável</span>
+                                    <span class="tipo-descricao">Registrar valores numéricos</span>
+                                </div>
+                            </label>
+                        </div>
                     </div>
 
-                    <div class="campo-grupo">
-                        <label for="categoriaHabito">Categoria</label>
-                        <select id="categoriaHabito" name="categoriaHabito" required>
-                            <option value="">Selecione...</option>
-                            <option value="saude">Saúde</option>
-                            <option value="exercicio">Exercício</option>
-                            <option value="alimentacao">Alimentação</option>
-                            <option value="estudo">Estudo</option>
-                            <option value="trabalho">Trabalho</option>
-                            <option value="lazer">Lazer</option>
-                        </select>
+                    <!-- PASSO 2: NOME DO HÁBITO -->
+                    <div class="form-secao">
+                        <div class="campo-grupo">
+                            <label for="nomeHabito">Nome do hábito</label>
+                            <input 
+                                type="text" 
+                                id="nomeHabito" 
+                                name="nomeHabito" 
+                                placeholder="Ex: Beber água, Meditar, Ler..." 
+                                required
+                            >
+                        </div>
                     </div>
 
-                    <button type="submit" class="btn-primario">Adicionar Hábito</button>
+                    <!-- PASSO 3: CAMPOS PARA HÁBITO MENSURÁVEL -->
+                    <div class="form-secao campos-mensuravel" id="camposMensuravel" style="display: none;">
+                        <h3 class="form-secao-titulo">Meta Diária</h3>
+                        <div class="campos-linha">
+                            <div class="campo-grupo campo-pequeno">
+                                <label for="alvoDiario">Alvo</label>
+                                <input 
+                                    type="number" 
+                                    id="alvoDiario" 
+                                    name="alvoDiario" 
+                                    min="1" 
+                                    value="1"
+                                    placeholder="Ex: 2"
+                                >
+                            </div>
+                            <div class="campo-grupo campo-medio">
+                                <label for="unidadeHabito">Unidade</label>
+                                <input 
+                                    type="text" 
+                                    id="unidadeHabito" 
+                                    name="unidadeHabito" 
+                                    placeholder="Ex: litros, páginas, minutos"
+                                >
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PASSO 4: FREQUÊNCIA -->
+                    <div class="form-secao">
+                        <h3 class="form-secao-titulo">Frequência</h3>
+                        <div class="campo-grupo">
+                            <select id="tipoFrequencia" name="tipoFrequencia" required>
+                                <option value="diario">Todos os dias</option>
+                                <option value="x-semana">X vezes por semana</option>
+                                <option value="x-mes">X vezes por mês</option>
+                                <option value="x-em-y">X vezes em Y dias</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Campos dinâmicos para frequência -->
+                        <div class="campos-frequencia-dinamica" id="camposFrequenciaDinamica">
+                            <div class="campos-linha campos-x-semana" id="camposXSemana" style="display: none;">
+                                <div class="campo-grupo campo-pequeno">
+                                    <label for="vezesXSemana">Vezes</label>
+                                    <input type="number" id="vezesXSemana" min="1" max="7" value="3">
+                                </div>
+                                <span class="campo-complemento">vezes por semana</span>
+                            </div>
+                            
+                            <div class="campos-linha campos-x-mes" id="camposXMes" style="display: none;">
+                                <div class="campo-grupo campo-pequeno">
+                                    <label for="vezesXMes">Vezes</label>
+                                    <input type="number" id="vezesXMes" min="1" max="31" value="10">
+                                </div>
+                                <span class="campo-complemento">vezes por mês</span>
+                            </div>
+                            
+                            <div class="campos-linha campos-x-em-y" id="camposXEmY" style="display: none;">
+                                <div class="campo-grupo campo-pequeno">
+                                    <label for="vezesX">X</label>
+                                    <input type="number" id="vezesX" min="1" value="3">
+                                </div>
+                                <span class="campo-complemento">vezes em</span>
+                                <div class="campo-grupo campo-pequeno">
+                                    <label for="diasY">Y</label>
+                                    <input type="number" id="diasY" min="1" value="5">
+                                </div>
+                                <span class="campo-complemento">dias</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PASSO 5: LEMBRETES -->
+                    <div class="form-secao">
+                        <h3 class="form-secao-titulo">Lembretes</h3>
+                        
+                        <div class="lembrete-toggle-container">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="lembreteAtivo" name="lembreteAtivo">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span class="toggle-label" id="lembreteLabel">Desabilitado</span>
+                        </div>
+
+                        <!-- Configuração de lembrete (oculto por padrão) -->
+                        <div class="lembrete-config" id="lembreteConfig" style="display: none;">
+                            <div class="campo-grupo">
+                                <label for="horaLembrete">Horário do lembrete</label>
+                                <input type="time" id="horaLembrete" name="horaLembrete" value="08:00">
+                            </div>
+                            
+                            <div class="dias-semana-container">
+                                <div class="dias-semana-header">
+                                    <span>Dias da semana</span>
+                                    <button type="button" class="btn-texto" id="btnToggleDias">Selecionar todos</button>
+                                </div>
+                                <div class="dias-semana-grid" id="diasSemanaGrid">
+                                    <button type="button" class="dia-semana-btn" data-dia="dom">Dom</button>
+                                    <button type="button" class="dia-semana-btn" data-dia="seg">Seg</button>
+                                    <button type="button" class="dia-semana-btn" data-dia="ter">Ter</button>
+                                    <button type="button" class="dia-semana-btn" data-dia="qua">Qua</button>
+                                    <button type="button" class="dia-semana-btn" data-dia="qui">Qui</button>
+                                    <button type="button" class="dia-semana-btn" data-dia="sex">Sex</button>
+                                    <button type="button" class="dia-semana-btn" data-dia="sab">Sáb</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PASSO 6: COR DO HÁBITO -->
+                    <div class="form-secao">
+                        <h3 class="form-secao-titulo">Cor</h3>
+                        <div class="cores-grid" id="coresGrid">
+                            <label class="cor-opcao">
+                                <input type="radio" name="corHabito" value="#10b981" checked>
+                                <span class="cor-preview" style="background-color: #10b981"></span>
+                            </label>
+                            <label class="cor-opcao">
+                                <input type="radio" name="corHabito" value="#f59e0b">
+                                <span class="cor-preview" style="background-color: #f59e0b"></span>
+                            </label>
+                            <label class="cor-opcao">
+                                <input type="radio" name="corHabito" value="#6366f1">
+                                <span class="cor-preview" style="background-color: #6366f1"></span>
+                            </label>
+                            <label class="cor-opcao">
+                                <input type="radio" name="corHabito" value="#8b5cf6">
+                                <span class="cor-preview" style="background-color: #8b5cf6"></span>
+                            </label>
+                            <label class="cor-opcao">
+                                <input type="radio" name="corHabito" value="#3b82f6">
+                                <span class="cor-preview" style="background-color: #3b82f6"></span>
+                            </label>
+                            <label class="cor-opcao">
+                                <input type="radio" name="corHabito" value="#ec4899">
+                                <span class="cor-preview" style="background-color: #ec4899"></span>
+                            </label>
+                            <label class="cor-opcao">
+                                <input type="radio" name="corHabito" value="#14b8a6">
+                                <span class="cor-preview" style="background-color: #14b8a6"></span>
+                            </label>
+                            <label class="cor-opcao">
+                                <input type="radio" name="corHabito" value="#ef4444">
+                                <span class="cor-preview" style="background-color: #ef4444"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-acoes">
+                        <button type="button" class="btn-secundario" id="btnCancelarHabito">Cancelar</button>
+                        <button type="submit" class="btn-primario" id="btnSalvarHabito">Salvar Hábito</button>
+                    </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO -->
+    <div class="modal-backdrop" id="modalExcluirBackdrop">
+        <div class="modal modal-pequeno" role="dialog" aria-labelledby="tituloModalExcluir" aria-modal="true">
+            <div class="modal-header">
+                <h2 id="tituloModalExcluir">Excluir Hábito</h2>
+                <button type="button" class="btn-fechar-modal" id="btnFecharModalExcluir" aria-label="Fechar modal">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir o hábito "<strong id="nomeHabitoExcluir"></strong>"?</p>
+                <p class="texto-aviso">Esta ação não pode ser desfeita.</p>
+                <div class="form-acoes">
+                    <button type="button" class="btn-secundario" id="btnCancelarExcluir">Cancelar</button>
+                    <button type="button" class="btn-perigo" id="btnConfirmarExcluir">Excluir</button>
+                </div>
             </div>
         </div>
     </div>

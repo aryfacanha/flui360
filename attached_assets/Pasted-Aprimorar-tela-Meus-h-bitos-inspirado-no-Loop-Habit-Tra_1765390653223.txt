@@ -1,0 +1,191 @@
+Aprimorar tela “Meus hábitos” (inspirado no Loop Habit Tracker, com lembretes)
+
+Na tela habitos.html, quero um comportamento mais completo, inspirado no app Loop Habit Tracker:
+
+CRUD completo (somente front-end)
+
+Implementar criação, edição e exclusão de hábitos usando apenas JavaScript (dados em memória ou localStorage, nada de backend).
+
+Cada hábito deve ter, no mínimo, estes campos:
+
+Nome do hábito
+
+Tipo do hábito (ver item 2)
+
+Frequência (ver item 3)
+
+Configuração de lembretes (ver item 4)
+
+Status diário (conclusão/valor do dia atual)
+
+Implementar:
+
+Botão ou ícone de editar em cada card (abre o formulário com os dados preenchidos).
+
+Botão ou ícone de excluir em cada card (remove o hábito da lista).
+
+Tipo do hábito: Binário (Sim/Não) x Mensurável
+
+Ao clicar em “Adicionar hábito” (ou no FAB de +), o primeiro passo do formulário deve ser escolher o tipo:
+
+“Sim ou Não” (binário)
+Ex.: “Meditar”, “Ligar para alguém” — basta marcar/desmarcar no dia para contar como concluído.
+
+“Mensurável”
+Ex.: “Beber 2 litros de água”, “Ler 20 páginas”.
+
+Dependendo da escolha:
+
+Se for binário, basta exibir o checkbox de concluído.
+
+Se for mensurável, mostrar campos extras:
+
+Campo de texto “Unidade” (ex.: “litros”, “páginas”, “minutos”).
+
+Campo numérico “Alvo diário” (ex.: 2, 20, 30).
+
+Para hábitos mensuráveis, o card deve permitir registrar o valor do dia (ex.: input numérico) e mostrar visualmente quanto falta para bater a meta (ex.: “12/20 páginas”).
+
+Campo “Frequência” dinâmico
+
+O campo “Frequência” deve ser um select com 4 opções:
+
+“Todos os dias”
+
+“X vezes por semana”
+
+“X vezes por mês”
+
+“X vezes em Y dias”
+
+Quando a opção exigir números (X e/ou Y), exibir campos numéricos ao lado:
+
+Em “X vezes por semana” → mostrar um campo numérico X (inteiro).
+
+Em “X vezes por mês” → mostrar um campo numérico X.
+
+Em “X vezes em Y dias” → mostrar dois campos numéricos: X e Y.
+
+Esses valores podem ser usados apenas para exibição e lógica básica (não precisa implementar algoritmo complexo de streak, basta preparar os dados para possível evolução futura).
+
+Lembretes + dias da semana
+
+No formulário do hábito, adicionar uma seção de Lembretes com seguinte comportamento:
+
+Campo/controle principal: algo como um toggle ou select simples:
+
+Opções: “Desabilitado” (padrão) e “Habilitado”.
+
+Quando estiver “Desabilitado”:
+
+Não mostrar campos de horário nem dias da semana.
+
+Quando o usuário habilitar o lembrete:
+
+Exibir um campo para selecionar o horário do lembrete (pode ser um <input type="time">).
+
+Abaixo do horário, exibir as caixinhas de seleção de dias da semana, com comportamento estilo Loop Habit Tracker:
+
+Desktop: “Seg Ter Qua Qui Sex Sáb Dom”
+
+Mobile: pode usar versões curtas, como “S T Q Q S S D” ou “Seg Ter Qua Qui Sex Sáb Dom” com fonte menor.
+
+Cada dia é clicável:
+
+Dia ativo → destaque visual (background preenchido, borda ou cor diferente).
+
+Dia inativo → estilo neutro.
+
+Incluir um botão de fácil acesso do tipo:
+
+“Selecionar todos” / “Limpar todos”, ou um único botão que alterna o estado:
+
+Se todos os dias estiverem selecionados, a ação passa a ser “Limpar todos”.
+
+Se houver dias não selecionados, a ação pode ser “Selecionar todos”.
+
+Esses lembretes não precisam enviar notificação real, mas os dados devem ser armazenados no objeto do hábito (horário e dias escolhidos) para que os cards possam exibir essa info.
+
+Interface dos cards (inspirada no Loop Habit Tracker)
+
+Para cada hábito na lista, o card deve mostrar:
+
+Nome do hábito
+
+Tipo (Binário ou Mensurável) — pequeno rótulo ou ícone.
+
+Frequência configurada (ex.: “3x por semana”, “Todos os dias”).
+
+Se houver lembrete habilitado:
+
+Mostrar horário do lembrete (ex.: “Lembrete: 08:00”).
+
+Opcionalmente, um resumo dos dias de lembrete (ex.: “Seg–Sex” ou “Todos os dias”).
+
+Para hábitos binários: um checkbox para marcar o dia atual como concluído.
+
+Para hábitos mensuráveis:
+
+Input numérico para valor do dia atual.
+
+Texto do tipo “12/20 páginas” ou “1.5/2 litros”.
+
+Mantém o layout limpo e responsivo:
+
+Desktop: cards em 2–3 colunas.
+
+Mobile: apenas 1 coluna, sem barra de rolagem interna nos cards; o scroll deve ser só na página.
+
+Comportamento do FAB / botão “Adicionar hábito”
+
+O FAB ou botão “Adicionar hábito” deve:
+
+Abrir um formulário claro, organizado em passos lógicos:
+
+Tipo do hábito (Sim/Não ou Mensurável)
+
+Nome do hábito
+
+Unidade e alvo (se mensurável)
+
+Frequência (select dinâmico com X/Y quando necessário)
+
+Lembretes:
+
+Toggle “Desabilitado / Habilitado”
+
+Se habilitado: horário + seleção de dias da semana (com botão para selecionar/limpar todos)
+
+Ao salvar:
+
+Adicionar o novo hábito à lista,
+
+Atualizar a renderização dos cards na tela,
+
+Limpar o formulário para o próximo uso.
+
+Implementação técnica
+
+Criar uma estrutura de dados em JavaScript, por exemplo um array habitos, onde cada elemento é um objeto com os campos mencionados (incluindo configuração de lembretes: lembreteAtivo, horaLembrete, diasLembrete).
+
+Escrever funções em JS para:
+
+criarHabito()
+
+editarHabito(id)
+
+excluirHabito(id)
+
+alternarLembrete(id) (ativar/desativar lembrete e atualizar campos)
+
+renderizarHabitos() (recria a lista de cards sempre que houver mudança)
+
+Comentar bem o código em português, explicando:
+
+como o tipo do hábito altera o formulário,
+
+como o campo de frequência dinâmico funciona,
+
+como o toggle de lembretes controla a exibição do horário e das caixinhas de dias da semana,
+
+como os dados são armazenados no array de hábitos.
