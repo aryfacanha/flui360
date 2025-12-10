@@ -154,6 +154,69 @@ body.tema-escuro .nav-link-preferencias {
 }
 
 /* ============================================
+   ACESSIBILIDADE
+   ============================================ */
+
+/* Classe para texto visível apenas para leitores de tela */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Skip link para navegação por teclado */
+.skip-link {
+    position: absolute;
+    top: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--cor-primaria);
+    color: white;
+    padding: var(--espacamento-md) var(--espacamento-lg);
+    border-radius: var(--borda-raio);
+    z-index: 10000;
+    text-decoration: none;
+    font-weight: 600;
+    transition: top 0.3s ease;
+}
+
+.skip-link:focus {
+    top: var(--espacamento-md);
+    outline: 3px solid var(--cor-primaria-hover);
+    outline-offset: 2px;
+}
+
+/* Indicador de foco visível para todos os elementos interativos */
+:focus-visible {
+    outline: 3px solid var(--cor-primaria);
+    outline-offset: 2px;
+}
+
+/* Remove outline padrão e usa focus-visible */
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Região de anúncios para leitores de tela */
+.aria-live-region {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ============================================
    2. RESET E ESTILOS BASE
    ============================================ */
 *, *::before, *::after {
@@ -1273,6 +1336,7 @@ img {
     flex: 1;
     aspect-ratio: 1;
     max-width: 40px;
+    min-width: 30px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1283,6 +1347,8 @@ img {
     transition: all var(--transicao-rapida);
     border: 2px solid transparent;
     position: relative;
+    padding: 0;
+    font-family: inherit;
 }
 
 .calendario-dia:hover {

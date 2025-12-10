@@ -86,6 +86,59 @@ function alternarTema() {
     prefs.tema = prefs.tema === 'escuro' ? 'claro' : 'escuro';
     salvarPreferencias(prefs);
     aplicarTema(prefs.tema);
+    anunciarParaLeitorDeTela(`Tema alterado para modo ${prefs.tema}`);
+}
+
+// ============================================
+// FUNÇÕES DE ACESSIBILIDADE
+// ============================================
+
+/**
+ * Anuncia uma mensagem para leitores de tela usando aria-live region.
+ * Útil para feedback de ações que não tem resposta visual óbvia.
+ */
+function anunciarParaLeitorDeTela(mensagem) {
+    const region = document.getElementById('ariaLiveRegion');
+    if (region) {
+        region.textContent = '';
+        setTimeout(() => {
+            region.textContent = mensagem;
+        }, 100);
+    }
+}
+
+/**
+ * Cria um trap de foco dentro de um elemento (usado em modais).
+ * Impede que o foco saia do modal quando aberto.
+ */
+function criarTrapDeFoco(elemento) {
+    const focusableElements = elemento.querySelectorAll(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    
+    if (focusableElements.length === 0) return null;
+    
+    const primeiro = focusableElements[0];
+    const ultimo = focusableElements[focusableElements.length - 1];
+    
+    const handler = (e) => {
+        if (e.key !== 'Tab') return;
+        
+        if (e.shiftKey) {
+            if (document.activeElement === primeiro) {
+                e.preventDefault();
+                ultimo.focus();
+            }
+        } else {
+            if (document.activeElement === ultimo) {
+                e.preventDefault();
+                primeiro.focus();
+            }
+        }
+    };
+    
+    elemento.addEventListener('keydown', handler);
+    return () => elemento.removeEventListener('keydown', handler);
 }
 
 // ============================================
@@ -570,11 +623,26 @@ function configurarMenuHamburguer() {
 // 4. SISTEMA DE MODAIS
 // ============================================
 
+// Armazena handlers de focus trap para limpar depois
+let focusTrapHandlers = {};
+
 function abrirModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.classList.add('ativo');
         document.body.style.overflow = 'hidden';
+        
+        // Anuncia abertura do modal para leitores de tela
+        const titulo = modal.querySelector('h2, h3');
+        if (titulo) {
+            anunciarParaLeitorDeTela(`Janela aberta: ${titulo.textContent}`);
+        }
+        
+        // Cria trap de foco para manter navegação dentro do modal
+        const modalContent = modal.querySelector('.modal');
+        if (modalContent) {
+            focusTrapHandlers[modalId] = criarTrapDeFoco(modalContent);
+        }
         
         // Foco no primeiro elemento relevante (acessibilidade)
         setTimeout(() => {
@@ -589,6 +657,15 @@ function fecharModal(modalId) {
     if (modal) {
         modal.classList.remove('ativo');
         document.body.style.overflow = '';
+        
+        // Remove o trap de foco
+        if (focusTrapHandlers[modalId]) {
+            focusTrapHandlers[modalId]();
+            delete focusTrapHandlers[modalId];
+        }
+        
+        // Anuncia fechamento para leitores de tela
+        anunciarParaLeitorDeTela('Janela fechada');
     }
 }
 
@@ -1218,12 +1295,17 @@ function toggleDiaHabito(habitoId, data) {
     if (!habito) return;
     
     if (habito.tipo === 'binario') {
-        habito.historico[data] = !habito.historico[data];
+        const novoValor = !habito.historico[data];
+        habito.historico[data] = novoValor;
         salvarHabitos();
         renderizarHabitos();
         renderizarHabitosHoje();
         atualizarEstatisticasDashboard();
         renderizarGraficoSemanal();
+        
+        // Anuncia para leitores de tela
+        const acao = novoValor ? 'marcado como concluído' : 'desmarcado';
+        anunciarParaLeitorDeTela(`${habito.nome} ${acao}`);
     }
 }
 
@@ -1596,6 +1678,7 @@ function gerarHeaderDias(numDias) {
 function gerarDiasCalendario(habito, numDias) {
     let html = '';
     const hoje = new Date();
+    const diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
     
     for (let i = numDias - 1; i >= 0; i--) {
         const data = new Date(hoje);
@@ -1605,14 +1688,19 @@ function gerarDiasCalendario(habito, numDias) {
         
         let concluido = habito.tipo === 'binario' ? valor === true : valor >= habito.alvoDiario;
         const diaNumero = data.getDate();
+        const diaSemana = diasSemana[data.getDay()];
+        const dataLabel = i === 0 ? 'Hoje' : (i === 1 ? 'Ontem' : formatarData(data));
+        const statusLabel = concluido ? 'concluído' : 'não concluído';
         
         html += `
-            <div class="calendario-dia ${concluido ? 'concluido' : ''}" 
+            <button type="button" class="calendario-dia ${concluido ? 'concluido' : ''}" 
                  data-data="${chave}"
-                 title="${i === 0 ? 'Hoje' : (i === 1 ? 'Ontem' : formatarData(data))}">
-                <span class="dia-numero">${diaNumero}</span>
-                <span class="dia-check">${concluido ? '✓' : ''}</span>
-            </div>
+                 title="${dataLabel}"
+                 aria-label="${diaSemana}, dia ${diaNumero}, ${statusLabel}. Clique para ${concluido ? 'desmarcar' : 'marcar'}."
+                 aria-pressed="${concluido}">
+                <span class="dia-numero" aria-hidden="true">${diaNumero}</span>
+                <span class="dia-check" aria-hidden="true">${concluido ? '✓' : ''}</span>
+            </button>
         `;
     }
     

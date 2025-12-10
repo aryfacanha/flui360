@@ -8,6 +8,12 @@
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="pagina-app">
+    <!-- Skip link para acessibilidade -->
+    <a href="#conteudo-principal" class="skip-link">Pular para o conteúdo principal</a>
+    
+    <!-- Região de anúncios para leitores de tela -->
+    <div id="ariaLiveRegion" class="aria-live-region" aria-live="polite" aria-atomic="true"></div>
+    
     <!-- 
         RELATÓRIOS (relatorios.html)
         ============================
@@ -20,15 +26,15 @@
 
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
-    <aside class="sidebar" id="sidebar">
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Menu principal">
         <div class="sidebar-header">
             <div class="logo">
-                <span class="logo-icone">&#9679;</span>
+                <span class="logo-icone" aria-hidden="true">&#9679;</span>
                 <span class="logo-texto">Flui360</span>
             </div>
         </div>
         
-        <nav class="sidebar-nav">
+        <nav class="sidebar-nav" aria-label="Navegação principal">
             <ul>
                 <li>
                     <a href="dashboard.html" class="nav-link">
@@ -63,7 +69,7 @@
         </div>
     </aside>
 
-    <div class="conteudo-principal">
+    <div class="conteudo-principal" id="conteudo-principal" role="main">
         <header class="header-app">
             <button class="btn-hamburguer" id="btnHamburguer" aria-label="Abrir menu" aria-expanded="false">
                 <span class="hamburguer-linha"></span>

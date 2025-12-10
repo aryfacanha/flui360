@@ -211,6 +211,18 @@ O projeto é estático e pode ser executado com qualquer servidor HTTP. No Repli
 - Página atual destacada na sidebar com cor de fundo e borda
 - Classe `.nav-link-ativo` aplicada dinamicamente
 
+### Acessibilidade Avançada
+- **Skip link**: Link para pular para o conteúdo principal (visível ao focar com Tab)
+- **Região aria-live**: Anúncios para leitores de tela em ações importantes
+- **Focus trap em modais**: Foco fica preso dentro do modal quando aberto
+- **Focus visible**: Indicador de foco visível para navegação por teclado
+- **Calendário acessível**: Dias do calendário são botões com aria-label descritivo e aria-pressed
+- **Anúncios de ações**: Marcar/desmarcar hábitos anuncia para leitores de tela
+- **aria-describedby**: Campos de formulário conectados às mensagens de erro
+- **role="alert"**: Mensagens de erro anunciadas automaticamente
+- **aria-hidden**: Ícones decorativos ocultos de leitores de tela
+- **Classe sr-only**: Texto visível apenas para leitores de tela
+
 ## Novas Funcionalidades
 
 ### Sistema de Preferências (Modo Escuro)

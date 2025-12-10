@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="pagina-login">
+    <!-- Região de anúncios para leitores de tela -->
+    <div id="ariaLiveRegion" class="aria-live-region" aria-live="polite" aria-atomic="true"></div>
+    
     <!-- 
         TELA DE LOGIN (index.html)
         ==========================
@@ -17,12 +20,12 @@
         O link "Criar conta" abre um modal de cadastro simulado.
     -->
     
-    <main class="container-login">
+    <main class="container-login" role="main" aria-labelledby="titulo-login">
         <!-- Logo e título do aplicativo -->
         <div class="login-header">
             <div class="logo">
-                <span class="logo-icone">&#9679;</span>
-                <h1>Flui360</h1>
+                <span class="logo-icone" aria-hidden="true">&#9679;</span>
+                <h1 id="titulo-login">Flui360</h1>
             </div>
             <p class="login-subtitulo">Transforme seus hábitos, transforme sua vida</p>
         </div>
@@ -38,8 +41,9 @@
                     placeholder="seu@email.com" 
                     required
                     autocomplete="email"
+                    aria-describedby="erroEmail"
                 >
-                <span class="mensagem-erro" id="erroEmail"></span>
+                <span class="mensagem-erro" id="erroEmail" role="alert"></span>
             </div>
 
             <div class="campo-grupo">
@@ -52,8 +56,9 @@
                     required
                     minlength="6"
                     autocomplete="current-password"
+                    aria-describedby="erroSenha"
                 >
-                <span class="mensagem-erro" id="erroSenha"></span>
+                <span class="mensagem-erro" id="erroSenha" role="alert"></span>
             </div>
 
             <button type="submit" class="btn-primario btn-entrar">
