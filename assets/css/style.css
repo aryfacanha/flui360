@@ -591,11 +591,18 @@ img {
     color: var(--cor-erro-light) !important;
 }
 
-.nav-link-preferencias .nav-link {
+.nav-link.nav-link-preferencias {
     color: rgba(255, 255, 255, 0.8);
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    font-size: inherit;
+    font-family: inherit;
+    cursor: pointer;
 }
 
-.nav-link-preferencias .nav-link:hover {
+.nav-link.nav-link-preferencias:hover {
     color: #ffffff;
     background-color: rgba(255, 255, 255, 0.1);
 }
