@@ -1076,3 +1076,258 @@ img {
         font-size: 1.5rem;
     }
 }
+
+/* ============================================
+   10. ESTILO LOOP HABIT TRACKER
+   ============================================ */
+
+/*
+ * CARD DE HÁBITO - ESTILO LOOP
+ * ----------------------------
+ * Design inspirado no Loop Habit Tracker:
+ * - Área de checkmarks proeminente
+ * - Grid de dias com histórico visual
+ * - Marcação retroativa (clique em dias passados)
+ * - Indicador de sequência (streak)
+ */
+.card-habito-loop {
+    background-color: var(--cor-fundo-card);
+    border-radius: var(--borda-raio-lg);
+    box-shadow: var(--sombra-card);
+    padding: var(--espacamento-lg);
+    border-left: 4px solid var(--cor-habito, var(--cor-primaria));
+    transition: transform var(--transicao-rapida), box-shadow var(--transicao-rapida);
+}
+
+.card-habito-loop:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sombra-elevada);
+}
+
+.habito-loop-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--espacamento-md);
+}
+
+.habito-loop-info {
+    flex: 1;
+}
+
+.habito-loop-nome {
+    font-size: var(--fonte-tamanho-lg);
+    font-weight: 600;
+    color: var(--cor-texto);
+    margin-bottom: var(--espacamento-xs);
+}
+
+.habito-loop-freq {
+    font-size: var(--fonte-tamanho-sm);
+    color: var(--cor-texto-claro);
+}
+
+/* Indicador de sequência (streak) */
+.habito-loop-sequencia {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--espacamento-sm) var(--espacamento-md);
+    background-color: var(--cor-habito, var(--cor-primaria));
+    border-radius: var(--borda-raio);
+    color: white;
+    min-width: 50px;
+}
+
+.sequencia-numero {
+    font-size: var(--fonte-tamanho-xl);
+    font-weight: 700;
+    line-height: 1;
+}
+
+.sequencia-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    opacity: 0.9;
+}
+
+/*
+ * CALENDÁRIO DE DIAS
+ * ------------------
+ * Grade horizontal mostrando os últimos dias
+ * Cada dia é clicável para marcação retroativa
+ */
+.habito-loop-calendario {
+    margin: var(--espacamento-md) 0;
+}
+
+.calendario-dias-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--espacamento-xs);
+}
+
+.dia-header {
+    flex: 1;
+    text-align: center;
+    font-size: 0.65rem;
+    color: var(--cor-texto-claro);
+    text-transform: uppercase;
+}
+
+.calendario-dias {
+    display: flex;
+    gap: var(--espacamento-xs);
+    justify-content: space-between;
+}
+
+.calendario-dia {
+    flex: 1;
+    aspect-ratio: 1;
+    max-width: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--cor-fundo);
+    border-radius: var(--borda-raio);
+    cursor: pointer;
+    transition: all var(--transicao-rapida);
+    border: 2px solid transparent;
+    position: relative;
+}
+
+.calendario-dia:hover {
+    border-color: var(--cor-habito, var(--cor-primaria));
+    transform: scale(1.05);
+}
+
+.calendario-dia.concluido {
+    background-color: var(--cor-habito, var(--cor-primaria));
+    color: white;
+}
+
+.calendario-dia.concluido .dia-numero {
+    color: white;
+}
+
+.dia-numero {
+    font-size: var(--fonte-tamanho-sm);
+    font-weight: 600;
+    color: var(--cor-texto);
+    line-height: 1;
+}
+
+.dia-check {
+    font-size: 0.75rem;
+    line-height: 1;
+    height: 12px;
+}
+
+.calendario-dia.concluido .dia-check {
+    color: white;
+}
+
+/* Barra de progresso estilo Loop */
+.habito-loop-progresso {
+    margin-top: var(--espacamento-md);
+}
+
+.progresso-barra-loop {
+    height: 6px;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+.progresso-texto-loop {
+    display: block;
+    font-size: var(--fonte-tamanho-sm);
+    color: var(--cor-texto-claro);
+    margin-top: var(--espacamento-xs);
+    text-align: right;
+}
+
+/*
+ * HÁBITOS DE HOJE - ESTILO LOOP (Dashboard)
+ * -----------------------------------------
+ * Lista com checkboxes grandes e coloridos
+ */
+.habito-hoje-loop {
+    display: flex;
+    align-items: center;
+    gap: var(--espacamento-md);
+    padding: var(--espacamento-md);
+    background-color: var(--cor-fundo);
+    border-radius: var(--borda-raio);
+    transition: background-color var(--transicao-rapida);
+}
+
+.habito-hoje-loop:hover {
+    background-color: var(--cor-borda);
+}
+
+.habito-hoje-check-loop {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 3px solid var(--cor-habito, var(--cor-primaria));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transicao-rapida);
+    flex-shrink: 0;
+}
+
+.habito-hoje-check-loop:hover {
+    transform: scale(1.1);
+}
+
+.habito-hoje-check-loop.concluido {
+    background-color: var(--cor-habito, var(--cor-primaria));
+    border-color: var(--cor-habito, var(--cor-primaria));
+}
+
+.check-icon {
+    font-size: 1.25rem;
+    color: white;
+    font-weight: bold;
+}
+
+.habito-hoje-info-loop {
+    flex: 1;
+}
+
+.habito-hoje-nome-loop {
+    display: block;
+    font-weight: 600;
+    color: var(--cor-texto);
+    margin-bottom: 2px;
+}
+
+.habito-hoje-meta {
+    font-size: var(--fonte-tamanho-sm);
+    color: var(--cor-texto-claro);
+}
+
+/* Responsividade para cards Loop */
+@media (min-width: 768px) {
+    .calendario-dia {
+        max-width: 50px;
+    }
+    
+    .habito-loop-sequencia {
+        min-width: 60px;
+        padding: var(--espacamento-md);
+    }
+    
+    .sequencia-numero {
+        font-size: var(--fonte-tamanho-2xl);
+    }
+}
+
+@media (min-width: 1200px) {
+    .calendario-dia {
+        max-width: 45px;
+    }
+}

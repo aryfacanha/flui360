@@ -4,14 +4,18 @@
  * ============================================
  * 
  * ORGANIZAÇÃO DO ARQUIVO:
- * 1. Dados mockados (hábitos, progresso, estatísticas)
- * 2. Funções do menu hambúrguer e sidebar
- * 3. Funções de modal
- * 4. Renderização de hábitos
- * 5. Renderização de gráficos
- * 6. Inicialização e eventos
+ * 1. Dados mockados (hábitos com histórico)
+ * 2. Funções utilitárias (cálculos de sequência, progresso)
+ * 3. Funções do menu hambúrguer e sidebar
+ * 4. Funções de modal
+ * 5. Renderização de hábitos (estilo Loop Habit Tracker)
+ * 6. Renderização de gráficos (dados dinâmicos)
+ * 7. Inicialização e eventos
  * 
- * Comentários em português para facilitar a apresentação acadêmica.
+ * ESTILO LOOP HABIT TRACKER:
+ * - Todos os gráficos e estatísticas são calculados dinamicamente
+ * - Baseados no histórico real de cada hábito
+ * - Marcação retroativa atualiza todos os gráficos
  */
 
 // ============================================
@@ -19,9 +23,26 @@
 // ============================================
 
 /**
- * Array de hábitos mockados
- * Cada hábito tem: id, nome, frequência, categoria, status, progresso
- * Esses dados simulam o que viria de um banco de dados real
+ * Gera um histórico de dias para simular completions
+ * Retorna um objeto com datas como chaves e boolean como valores
+ */
+function gerarHistorico(diasAtras, probabilidade) {
+    const historico = {};
+    const hoje = new Date();
+    
+    for (let i = 0; i < diasAtras; i++) {
+        const data = new Date(hoje);
+        data.setDate(data.getDate() - i);
+        const chave = data.toISOString().split('T')[0];
+        historico[chave] = Math.random() * 100 < probabilidade;
+    }
+    
+    return historico;
+}
+
+/**
+ * Array de hábitos mockados - ESTILO LOOP HABIT TRACKER
+ * Cada hábito inclui um histórico de dias concluídos
  */
 let habitos = [
     {
@@ -31,9 +52,8 @@ let habitos = [
         frequenciaTexto: "Diário",
         categoria: "saude",
         categoriaTexto: "Saúde",
-        status: "ativo",
-        progresso: 85,
-        concluidoHoje: true
+        cor: "#10b981",
+        historico: gerarHistorico(30, 85)
     },
     {
         id: 2,
@@ -42,9 +62,8 @@ let habitos = [
         frequenciaTexto: "3x por semana",
         categoria: "exercicio",
         categoriaTexto: "Exercício",
-        status: "ativo",
-        progresso: 60,
-        concluidoHoje: false
+        cor: "#f59e0b",
+        historico: gerarHistorico(30, 40)
     },
     {
         id: 3,
@@ -53,9 +72,8 @@ let habitos = [
         frequenciaTexto: "Diário",
         categoria: "estudo",
         categoriaTexto: "Estudo",
-        status: "ativo",
-        progresso: 90,
-        concluidoHoje: true
+        cor: "#6366f1",
+        historico: gerarHistorico(30, 90)
     },
     {
         id: 4,
@@ -64,9 +82,8 @@ let habitos = [
         frequenciaTexto: "Diário",
         categoria: "saude",
         categoriaTexto: "Saúde",
-        status: "pendente",
-        progresso: 45,
-        concluidoHoje: false
+        cor: "#8b5cf6",
+        historico: gerarHistorico(30, 50)
     },
     {
         id: 5,
@@ -75,60 +92,154 @@ let habitos = [
         frequenciaTexto: "5x por semana",
         categoria: "estudo",
         categoriaTexto: "Estudo",
-        status: "ativo",
-        progresso: 75,
-        concluidoHoje: true
+        cor: "#3b82f6",
+        historico: gerarHistorico(30, 70)
     }
 ];
 
-/**
- * Dados para o gráfico semanal (Dashboard)
- * Representa a porcentagem de hábitos concluídos em cada dia
- */
-const dadosSemanais = [
-    { dia: "Seg", valor: 80 },
-    { dia: "Ter", valor: 60 },
-    { dia: "Qua", valor: 100 },
-    { dia: "Qui", valor: 40 },
-    { dia: "Sex", valor: 75 },
-    { dia: "Sáb", valor: 50 },
-    { dia: "Dom", valor: 85 }
-];
-
-/**
- * Dados para o gráfico de dias concluídos por hábito (Relatórios)
- * Mostra quantos dias cada hábito foi completado no último mês
- */
-const dadosDiasConcluidos = [
-    { habito: "Beber água", dias: 25 },
-    { habito: "Exercícios", dias: 12 },
-    { habito: "Leitura", dias: 28 },
-    { habito: "Meditação", dias: 15 },
-    { habito: "Programação", dias: 20 }
-];
-
-/**
- * Dados para o gráfico mensal (Relatórios)
- * Taxa de conclusão por semana do mês
- */
-const dadosMensais = [
-    { semana: "Sem 1", valor: 65 },
-    { semana: "Sem 2", valor: 72 },
-    { semana: "Sem 3", valor: 80 },
-    { semana: "Sem 4", valor: 78 }
-];
-
 // ============================================
-// 2. MENU HAMBÚRGUER E SIDEBAR
+// 2. FUNÇÕES UTILITÁRIAS
 // ============================================
 
+function getHoje() {
+    return new Date().toISOString().split('T')[0];
+}
+
+function estaConcluidoHoje(habito) {
+    return habito.historico[getHoje()] === true;
+}
+
 /**
- * FUNÇÃO: toggleSidebar
- * ---------------------
- * Abre ou fecha a sidebar no mobile.
- * Adiciona/remove a classe 'ativo' na sidebar e no backdrop.
- * Também atualiza o atributo aria-expanded para acessibilidade.
+ * Calcula a sequência atual (streak) de dias consecutivos
  */
+function calcularSequencia(habito) {
+    let sequencia = 0;
+    const hoje = new Date();
+    
+    for (let i = 0; i < 365; i++) {
+        const data = new Date(hoje);
+        data.setDate(data.getDate() - i);
+        const chave = data.toISOString().split('T')[0];
+        
+        if (habito.historico[chave]) {
+            sequencia++;
+        } else {
+            break;
+        }
+    }
+    
+    return sequencia;
+}
+
+/**
+ * Calcula a porcentagem de conclusão no último mês
+ */
+function calcularProgresso(habito) {
+    let concluidos = 0;
+    const hoje = new Date();
+    
+    for (let i = 0; i < 30; i++) {
+        const data = new Date(hoje);
+        data.setDate(data.getDate() - i);
+        const chave = data.toISOString().split('T')[0];
+        
+        if (habito.historico[chave]) {
+            concluidos++;
+        }
+    }
+    
+    return Math.round((concluidos / 30) * 100);
+}
+
+/**
+ * FUNÇÃO: calcularDadosSemanais
+ * -----------------------------
+ * Calcula dinamicamente a porcentagem de hábitos concluídos
+ * em cada dia da última semana baseado no histórico real.
+ */
+function calcularDadosSemanais() {
+    const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    const dados = [];
+    const hoje = new Date();
+    
+    for (let i = 6; i >= 0; i--) {
+        const data = new Date(hoje);
+        data.setDate(data.getDate() - i);
+        const chave = data.toISOString().split('T')[0];
+        const diaSemana = diasSemana[data.getDay()];
+        
+        let concluidos = 0;
+        habitos.forEach(habito => {
+            if (habito.historico[chave]) {
+                concluidos++;
+            }
+        });
+        
+        const porcentagem = habitos.length > 0 ? Math.round((concluidos / habitos.length) * 100) : 0;
+        dados.push({ dia: diaSemana, valor: porcentagem });
+    }
+    
+    return dados;
+}
+
+/**
+ * FUNÇÃO: calcularDadosMensais
+ * ----------------------------
+ * Calcula dinamicamente a taxa de conclusão por semana do mês
+ * baseado no histórico real dos hábitos.
+ */
+function calcularDadosMensais() {
+    const dados = [];
+    const hoje = new Date();
+    
+    for (let semana = 0; semana < 4; semana++) {
+        let totalConcluidos = 0;
+        let totalPossiveis = 0;
+        
+        for (let dia = 0; dia < 7; dia++) {
+            const data = new Date(hoje);
+            data.setDate(data.getDate() - (semana * 7 + dia));
+            const chave = data.toISOString().split('T')[0];
+            
+            habitos.forEach(habito => {
+                totalPossiveis++;
+                if (habito.historico[chave]) {
+                    totalConcluidos++;
+                }
+            });
+        }
+        
+        const porcentagem = totalPossiveis > 0 ? Math.round((totalConcluidos / totalPossiveis) * 100) : 0;
+        dados.unshift({ semana: `Sem ${4 - semana}`, valor: porcentagem });
+    }
+    
+    return dados;
+}
+
+/**
+ * Conta quantos dias um hábito foi concluído no último mês
+ */
+function contarDiasConcluidos(habito) {
+    let dias = 0;
+    const hoje = new Date();
+    
+    for (let i = 0; i < 30; i++) {
+        const data = new Date(hoje);
+        data.setDate(data.getDate() - i);
+        const chave = data.toISOString().split('T')[0];
+        
+        if (habito.historico[chave]) {
+            dias++;
+        }
+    }
+    
+    return dias;
+}
+
+// ============================================
+// 3. MENU HAMBÚRGUER E SIDEBAR
+// ============================================
+
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const backdrop = document.getElementById('sidebarBackdrop');
@@ -139,31 +250,22 @@ function toggleSidebar() {
     const estaAberto = sidebar.classList.contains('ativo');
     
     if (estaAberto) {
-        // Fecha a sidebar
         sidebar.classList.remove('ativo');
         backdrop.classList.remove('ativo');
         if (btnHamburguer) {
             btnHamburguer.setAttribute('aria-expanded', 'false');
         }
-        // Restaura o scroll do body
         document.body.style.overflow = '';
     } else {
-        // Abre a sidebar
         sidebar.classList.add('ativo');
         backdrop.classList.add('ativo');
         if (btnHamburguer) {
             btnHamburguer.setAttribute('aria-expanded', 'true');
         }
-        // Impede o scroll do body quando o menu está aberto
         document.body.style.overflow = 'hidden';
     }
 }
 
-/**
- * Configura os eventos do menu hambúrguer
- * - Clique no botão hambúrguer: abre/fecha a sidebar
- * - Clique no backdrop: fecha a sidebar
- */
 function configurarMenuHamburguer() {
     const btnHamburguer = document.getElementById('btnHamburguer');
     const backdrop = document.getElementById('sidebarBackdrop');
@@ -178,13 +280,9 @@ function configurarMenuHamburguer() {
 }
 
 // ============================================
-// 3. FUNÇÕES DE MODAL
+// 4. FUNÇÕES DE MODAL
 // ============================================
 
-/**
- * Abre um modal específico
- * @param {string} modalId - ID do elemento backdrop do modal
- */
 function abrirModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
@@ -193,10 +291,6 @@ function abrirModal(modalId) {
     }
 }
 
-/**
- * Fecha um modal específico
- * @param {string} modalId - ID do elemento backdrop do modal
- */
 function fecharModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
@@ -205,11 +299,6 @@ function fecharModal(modalId) {
     }
 }
 
-/**
- * Configura os eventos dos modais
- * - Modal de cadastro (página de login)
- * - Modal de novo hábito (página de hábitos)
- */
 function configurarModais() {
     // Modal de cadastro (Login)
     const btnCriarConta = document.getElementById('btnCriarConta');
@@ -232,7 +321,6 @@ function configurarModais() {
         });
     }
     
-    // Formulário de cadastro (simulado)
     const formCadastro = document.getElementById('formCadastro');
     if (formCadastro) {
         formCadastro.addEventListener('submit', (e) => {
@@ -243,7 +331,7 @@ function configurarModais() {
         });
     }
     
-    // Modal de novo hábito
+    // Modal de novo hábito (funciona em todas as páginas)
     const btnNovoHabito = document.getElementById('btnNovoHabito');
     const btnFecharModalHabito = document.getElementById('btnFecharModalHabito');
     const modalHabitoBackdrop = document.getElementById('modalHabitoBackdrop');
@@ -264,7 +352,6 @@ function configurarModais() {
         });
     }
     
-    // Formulário de novo hábito
     const formHabito = document.getElementById('formHabito');
     if (formHabito) {
         formHabito.addEventListener('submit', (e) => {
@@ -275,30 +362,17 @@ function configurarModais() {
 }
 
 // ============================================
-// 4. RENDERIZAÇÃO DE HÁBITOS
+// 5. RENDERIZAÇÃO DE HÁBITOS - ESTILO LOOP
 // ============================================
 
-/**
- * FUNÇÃO: renderizarHabitos
- * -------------------------
- * Renderiza a lista de hábitos na tela "Meus Hábitos".
- * Cria cards para cada hábito com nome, frequência, categoria e progresso.
- * 
- * Observação para IHC:
- * - Cards sem scroll interno para melhor usabilidade
- * - Cores diferentes para cada status (ativo, pendente, concluído)
- * - Barra de progresso visual para feedback imediato
- */
 function renderizarHabitos() {
     const grid = document.getElementById('habitosGrid');
     const semHabitos = document.getElementById('semHabitos');
     
     if (!grid) return;
     
-    // Limpa o grid
     grid.innerHTML = '';
     
-    // Verifica se há hábitos
     if (habitos.length === 0) {
         if (semHabitos) semHabitos.style.display = 'block';
         return;
@@ -306,60 +380,133 @@ function renderizarHabitos() {
     
     if (semHabitos) semHabitos.style.display = 'none';
     
-    // Renderiza cada hábito como um card
     habitos.forEach(habito => {
         const card = document.createElement('article');
-        card.className = 'card-habito';
+        card.className = 'card-habito-loop';
+        card.style.setProperty('--cor-habito', habito.cor);
         
-        // Define a classe do status
-        let statusClasse = 'ativo';
-        let statusTexto = 'Ativo';
-        
-        if (habito.concluidoHoje) {
-            statusClasse = 'concluido';
-            statusTexto = 'Concluído hoje';
-        } else if (habito.status === 'pendente') {
-            statusClasse = 'pendente';
-            statusTexto = 'Pendente';
-        }
+        const sequencia = calcularSequencia(habito);
+        const progresso = calcularProgresso(habito);
+        const diasHTML = gerarDiasCalendario(habito, 7);
+        const headerDias = gerarHeaderDias(7);
         
         card.innerHTML = `
-            <div class="card-habito-header">
-                <h3 class="card-habito-nome">${habito.nome}</h3>
-                <span class="card-habito-status ${statusClasse}">${statusTexto}</span>
-            </div>
-            <div class="card-habito-info">
-                <span class="card-habito-freq">
-                    <span>&#128337;</span> ${habito.frequenciaTexto}
-                </span>
-                <span class="card-habito-categoria">
-                    <span>&#128194;</span> ${habito.categoriaTexto}
-                </span>
-            </div>
-            <div class="card-habito-progresso">
-                <div class="progresso-barra-container">
-                    <div class="progresso-barra" style="width: ${habito.progresso}%"></div>
+            <div class="habito-loop-header">
+                <div class="habito-loop-info">
+                    <h3 class="habito-loop-nome">${habito.nome}</h3>
+                    <span class="habito-loop-freq">${habito.frequenciaTexto}</span>
                 </div>
-                <span class="progresso-texto">${habito.progresso}% do objetivo mensal</span>
+                <div class="habito-loop-sequencia">
+                    <span class="sequencia-numero">${sequencia}</span>
+                    <span class="sequencia-label">dias</span>
+                </div>
+            </div>
+            
+            <div class="habito-loop-calendario">
+                <div class="calendario-dias-header">
+                    ${headerDias}
+                </div>
+                <div class="calendario-dias" data-habito-id="${habito.id}">
+                    ${diasHTML}
+                </div>
+            </div>
+            
+            <div class="habito-loop-progresso">
+                <div class="progresso-barra-container">
+                    <div class="progresso-barra-loop" style="width: ${progresso}%; background-color: ${habito.cor}"></div>
+                </div>
+                <span class="progresso-texto-loop">${progresso}% este mês</span>
             </div>
         `;
         
         grid.appendChild(card);
     });
+    
+    configurarCliqueDias();
+}
+
+function gerarHeaderDias(numDias) {
+    const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    let html = '';
+    const hoje = new Date();
+    
+    for (let i = numDias - 1; i >= 0; i--) {
+        const data = new Date(hoje);
+        data.setDate(data.getDate() - i);
+        html += `<span class="dia-header">${diasSemana[data.getDay()]}</span>`;
+    }
+    
+    return html;
+}
+
+function gerarDiasCalendario(habito, numDias) {
+    let html = '';
+    const hoje = new Date();
+    
+    for (let i = numDias - 1; i >= 0; i--) {
+        const data = new Date(hoje);
+        data.setDate(data.getDate() - i);
+        const chave = data.toISOString().split('T')[0];
+        const concluido = habito.historico[chave] === true;
+        const diaNumero = data.getDate();
+        
+        html += `
+            <div class="calendario-dia ${concluido ? 'concluido' : ''}" 
+                 data-data="${chave}"
+                 title="${i === 0 ? 'Hoje' : (i === 1 ? 'Ontem' : formatarData(data))}">
+                <span class="dia-numero">${diaNumero}</span>
+                <span class="dia-check">${concluido ? '✓' : ''}</span>
+            </div>
+        `;
+    }
+    
+    return html;
+}
+
+function formatarData(data) {
+    const opcoes = { day: 'numeric', month: 'short' };
+    return data.toLocaleDateString('pt-BR', opcoes);
+}
+
+function configurarCliqueDias() {
+    const dias = document.querySelectorAll('.calendario-dia');
+    
+    dias.forEach(dia => {
+        dia.addEventListener('click', () => {
+            const container = dia.closest('.calendario-dias');
+            const habitoId = parseInt(container.dataset.habitoId);
+            const data = dia.dataset.data;
+            
+            toggleDiaHabito(habitoId, data);
+        });
+    });
 }
 
 /**
- * FUNÇÃO: adicionarNovoHabito
- * ---------------------------
- * Adiciona um novo hábito ao array e re-renderiza a lista.
- * Simula o comportamento de salvar em um banco de dados.
+ * FUNÇÃO: toggleDiaHabito
+ * -----------------------
+ * Marca ou desmarca um dia específico para um hábito.
+ * Atualiza todos os gráficos e estatísticas após a alteração.
  */
+function toggleDiaHabito(habitoId, data) {
+    const habito = habitos.find(h => h.id === habitoId);
+    if (!habito) return;
+    
+    habito.historico[data] = !habito.historico[data];
+    
+    renderizarHabitos();
+    atualizarEstatisticasDashboard();
+    
+    // Atualiza gráficos se estiverem na página
+    renderizarGraficoSemanal();
+    renderizarHabitosHoje();
+}
+
 function adicionarNovoHabito() {
     const nome = document.getElementById('nomeHabito').value;
     const frequencia = document.getElementById('frequenciaHabito').value;
     const categoria = document.getElementById('categoriaHabito').value;
     
-    // Mapeia frequência para texto legível
     const frequenciasTexto = {
         'diario': 'Diário',
         '3x-semana': '3x por semana',
@@ -367,7 +514,6 @@ function adicionarNovoHabito() {
         'semanal': 'Semanal'
     };
     
-    // Mapeia categoria para texto legível
     const categoriasTexto = {
         'saude': 'Saúde',
         'exercicio': 'Exercício',
@@ -377,7 +523,8 @@ function adicionarNovoHabito() {
         'lazer': 'Lazer'
     };
     
-    // Cria novo hábito
+    const cores = ['#10b981', '#f59e0b', '#6366f1', '#8b5cf6', '#3b82f6', '#ec4899', '#14b8a6'];
+    
     const novoHabito = {
         id: habitos.length + 1,
         nome: nome,
@@ -385,95 +532,79 @@ function adicionarNovoHabito() {
         frequenciaTexto: frequenciasTexto[frequencia],
         categoria: categoria,
         categoriaTexto: categoriasTexto[categoria],
-        status: 'ativo',
-        progresso: 0,
-        concluidoHoje: false
+        cor: cores[habitos.length % cores.length],
+        historico: {}
     };
     
-    // Adiciona ao array
     habitos.push(novoHabito);
     
-    // Re-renderiza a lista
+    // Re-renderiza conforme a página atual
     renderizarHabitos();
+    renderizarHabitosHoje();
+    atualizarEstatisticasDashboard();
+    renderizarGraficoSemanal();
+    renderizarGraficoDiasConcluidos();
     
-    // Fecha o modal e limpa o formulário
     fecharModal('modalHabitoBackdrop');
     document.getElementById('formHabito').reset();
     
-    // Feedback para o usuário
     alert(`Hábito "${nome}" adicionado com sucesso!`);
 }
 
-/**
- * Renderiza os hábitos de hoje no Dashboard
- * Mostra uma lista simplificada com checkbox para marcar como concluído
- */
 function renderizarHabitosHoje() {
     const container = document.getElementById('habitosHoje');
     if (!container) return;
     
     container.innerHTML = '';
+    const hoje = getHoje();
     
-    // Filtra apenas hábitos diários ou que devem ser feitos hoje
-    const habitosHoje = habitos.filter(h => h.frequencia === 'diario' || h.frequencia === '5x-semana');
-    
-    habitosHoje.forEach(habito => {
+    habitos.forEach(habito => {
+        const concluido = habito.historico[hoje] === true;
+        const sequencia = calcularSequencia(habito);
+        
         const item = document.createElement('div');
-        item.className = 'habito-hoje-item';
+        item.className = 'habito-hoje-loop';
         
         item.innerHTML = `
-            <div class="habito-hoje-check ${habito.concluidoHoje ? 'concluido' : ''}" 
-                 data-id="${habito.id}">
-                ${habito.concluidoHoje ? '&#10003;' : ''}
+            <div class="habito-hoje-check-loop ${concluido ? 'concluido' : ''}" 
+                 data-id="${habito.id}"
+                 style="--cor-habito: ${habito.cor}">
+                <span class="check-icon">${concluido ? '✓' : ''}</span>
             </div>
-            <div class="habito-hoje-info">
-                <span class="habito-hoje-nome">${habito.nome}</span>
-                <span class="habito-hoje-freq">${habito.frequenciaTexto}</span>
+            <div class="habito-hoje-info-loop">
+                <span class="habito-hoje-nome-loop">${habito.nome}</span>
+                <span class="habito-hoje-meta">${habito.frequenciaTexto} • ${sequencia} dias</span>
             </div>
         `;
         
-        // Adiciona evento de clique no checkbox
-        const checkbox = item.querySelector('.habito-hoje-check');
+        const checkbox = item.querySelector('.habito-hoje-check-loop');
         checkbox.addEventListener('click', () => {
-            toggleHabitoHoje(habito.id);
+            toggleDiaHabito(habito.id, hoje);
         });
         
         container.appendChild(item);
     });
 }
 
-/**
- * Marca/desmarca um hábito como concluído hoje
- * @param {number} id - ID do hábito
- */
-function toggleHabitoHoje(id) {
-    const habito = habitos.find(h => h.id === id);
-    if (habito) {
-        habito.concluidoHoje = !habito.concluidoHoje;
-        renderizarHabitosHoje();
-        atualizarEstatisticasDashboard();
-    }
-}
-
 // ============================================
-// 5. RENDERIZAÇÃO DE GRÁFICOS
+// 6. RENDERIZAÇÃO DE GRÁFICOS - DADOS DINÂMICOS
 // ============================================
 
 /**
  * FUNÇÃO: renderizarGraficoSemanal
  * --------------------------------
- * Renderiza o gráfico de barras verticais no Dashboard.
- * 
- * Como funciona:
- * 1. Para cada dia da semana, cria uma div com classe 'grafico-barra'
- * 2. Define a altura da barra usando CSS custom property (--altura)
- * 3. O valor é exibido acima da barra usando pseudo-elemento ::after
+ * Gráfico de barras verticais no Dashboard.
+ * DADOS DINÂMICOS: Calcula porcentagem de hábitos concluídos
+ * em cada dia da última semana baseado no histórico real.
  */
 function renderizarGraficoSemanal() {
     const container = document.getElementById('graficoSemanal');
     if (!container) return;
     
     container.innerHTML = '';
+    
+    // Calcula dados dinamicamente baseado no histórico dos hábitos
+    const dadosSemanais = calcularDadosSemanais();
     
     dadosSemanais.forEach(dado => {
         const barra = document.createElement('div');
@@ -487,8 +618,8 @@ function renderizarGraficoSemanal() {
 /**
  * FUNÇÃO: renderizarGraficoDiasConcluidos
  * ---------------------------------------
- * Renderiza o gráfico de barras horizontais na página de Relatórios.
- * Mostra quantos dias cada hábito foi concluído no último mês.
+ * Gráfico de barras horizontais na página de Relatórios.
+ * DADOS DINÂMICOS: Conta dias concluídos de cada hábito no último mês.
  */
 function renderizarGraficoDiasConcluidos() {
     const container = document.getElementById('graficoDiasConcluidos');
@@ -496,20 +627,20 @@ function renderizarGraficoDiasConcluidos() {
     
     container.innerHTML = '';
     
-    // Encontra o valor máximo para calcular porcentagem
-    const maxDias = 30; // Dias do mês
+    const maxDias = 30;
     
-    dadosDiasConcluidos.forEach(dado => {
-        const porcentagem = (dado.dias / maxDias) * 100;
+    habitos.forEach(habito => {
+        const diasConcluidos = contarDiasConcluidos(habito);
+        const porcentagem = (diasConcluidos / maxDias) * 100;
         
         const item = document.createElement('div');
         item.className = 'grafico-horizontal-item';
         
         item.innerHTML = `
-            <span class="grafico-horizontal-label">${dado.habito}</span>
+            <span class="grafico-horizontal-label">${habito.nome}</span>
             <div class="grafico-horizontal-barra-container">
-                <div class="grafico-horizontal-barra" style="width: ${porcentagem}%">
-                    <span class="grafico-horizontal-valor">${dado.dias} dias</span>
+                <div class="grafico-horizontal-barra" style="width: ${porcentagem}%; background: linear-gradient(to right, ${habito.cor}, ${habito.cor}dd)">
+                    <span class="grafico-horizontal-valor">${diasConcluidos} dias</span>
                 </div>
             </div>
         `;
@@ -521,7 +652,8 @@ function renderizarGraficoDiasConcluidos() {
 /**
  * FUNÇÃO: renderizarGraficoMensal
  * -------------------------------
- * Renderiza o gráfico de barras verticais para taxa de conclusão mensal.
+ * Gráfico de barras verticais para taxa de conclusão mensal.
+ * DADOS DINÂMICOS: Calcula taxa de conclusão por semana.
  */
 function renderizarGraficoMensal() {
     const container = document.getElementById('graficoMensal');
@@ -532,15 +664,16 @@ function renderizarGraficoMensal() {
     container.innerHTML = '';
     if (legenda) legenda.innerHTML = '';
     
+    // Calcula dados dinamicamente
+    const dadosMensais = calcularDadosMensais();
+    
     dadosMensais.forEach(dado => {
-        // Barra
         const barra = document.createElement('div');
         barra.className = 'grafico-barra';
         barra.style.setProperty('--altura', `${dado.valor}%`);
         barra.setAttribute('data-valor', `${dado.valor}%`);
         container.appendChild(barra);
         
-        // Legenda
         if (legenda) {
             const legendaItem = document.createElement('span');
             legendaItem.textContent = dado.semana;
@@ -550,39 +683,109 @@ function renderizarGraficoMensal() {
 }
 
 /**
- * Atualiza as estatísticas exibidas no Dashboard
+ * FUNÇÃO: atualizarEstatisticasDashboard
+ * --------------------------------------
+ * Atualiza todos os cards de estatísticas no Dashboard.
+ * DADOS DINÂMICOS: Todos os valores são calculados do histórico real.
  */
 function atualizarEstatisticasDashboard() {
     const habitosAtivos = document.getElementById('habitosAtivos');
     const completadosHoje = document.getElementById('completadosHoje');
+    const sequenciaAtual = document.getElementById('sequenciaAtual');
+    const taxaConclusao = document.getElementById('taxaConclusao');
+    
+    const hoje = getHoje();
     
     if (habitosAtivos) {
-        habitosAtivos.textContent = habitos.filter(h => h.status === 'ativo').length;
+        habitosAtivos.textContent = habitos.length;
     }
     
     if (completadosHoje) {
-        completadosHoje.textContent = habitos.filter(h => h.concluidoHoje).length;
+        const concluidos = habitos.filter(h => h.historico[hoje] === true).length;
+        completadosHoje.textContent = concluidos;
+    }
+    
+    if (sequenciaAtual) {
+        // Maior sequência entre todos os hábitos
+        const maiorSequencia = habitos.length > 0 
+            ? Math.max(...habitos.map(h => calcularSequencia(h)))
+            : 0;
+        sequenciaAtual.textContent = maiorSequencia;
+    }
+    
+    if (taxaConclusao) {
+        // Taxa média de conclusão no último mês
+        const taxaMedia = habitos.length > 0 
+            ? Math.round(habitos.reduce((acc, h) => acc + calcularProgresso(h), 0) / habitos.length)
+            : 0;
+        taxaConclusao.textContent = `${taxaMedia}%`;
+    }
+    
+    // Atualiza estatísticas da página de relatórios se existirem
+    atualizarEstatisticasRelatorios();
+}
+
+/**
+ * Atualiza as estatísticas na página de Relatórios
+ */
+function atualizarEstatisticasRelatorios() {
+    const totalDiasAtivos = document.getElementById('totalDiasAtivos');
+    const melhorSequencia = document.getElementById('melhorSequencia');
+    const habitosConcluidos = document.getElementById('habitosConcluidos');
+    const mediaDiaria = document.getElementById('mediaDiaria');
+    
+    if (totalDiasAtivos) {
+        // Conta quantos dias no último mês tiveram pelo menos 1 hábito concluído
+        let diasAtivos = 0;
+        const hoje = new Date();
+        
+        for (let i = 0; i < 30; i++) {
+            const data = new Date(hoje);
+            data.setDate(data.getDate() - i);
+            const chave = data.toISOString().split('T')[0];
+            
+            const algumConcluido = habitos.some(h => h.historico[chave] === true);
+            if (algumConcluido) diasAtivos++;
+        }
+        
+        totalDiasAtivos.textContent = diasAtivos;
+    }
+    
+    if (melhorSequencia) {
+        const maior = habitos.length > 0 
+            ? Math.max(...habitos.map(h => calcularSequencia(h)))
+            : 0;
+        melhorSequencia.textContent = maior;
+    }
+    
+    if (habitosConcluidos) {
+        // Total de conclusões no mês
+        let total = 0;
+        habitos.forEach(h => {
+            total += contarDiasConcluidos(h);
+        });
+        habitosConcluidos.textContent = total;
+    }
+    
+    if (mediaDiaria) {
+        // Média de hábitos concluídos por dia
+        let totalConclusoes = 0;
+        habitos.forEach(h => {
+            totalConclusoes += contarDiasConcluidos(h);
+        });
+        const media = totalConclusoes / 30;
+        mediaDiaria.textContent = media.toFixed(1);
     }
 }
 
 // ============================================
-// 6. INICIALIZAÇÃO E EVENTOS
+// 7. INICIALIZAÇÃO E EVENTOS
 // ============================================
 
-/**
- * FUNÇÃO: inicializarPagina
- * -------------------------
- * Função principal que é executada quando a página carrega.
- * Detecta qual página está sendo exibida e inicializa os componentes necessários.
- */
 function inicializarPagina() {
-    // Configura o menu hambúrguer (presente em todas as páginas do app)
     configurarMenuHamburguer();
-    
-    // Configura os modais
     configurarModais();
     
-    // Detecta a página atual e inicializa componentes específicos
     const paginaAtual = window.location.pathname.split('/').pop() || 'index.html';
     
     switch (paginaAtual) {
@@ -599,17 +802,13 @@ function inicializarPagina() {
         case 'relatorios.html':
             renderizarGraficoDiasConcluidos();
             renderizarGraficoMensal();
+            atualizarEstatisticasRelatorios();
             break;
     }
 }
 
-// Aguarda o DOM carregar completamente antes de inicializar
 document.addEventListener('DOMContentLoaded', inicializarPagina);
 
-/**
- * Fecha a sidebar ao redimensionar para desktop
- * Evita que a sidebar fique "presa" aberta após redimensionar
- */
 window.addEventListener('resize', () => {
     if (window.innerWidth >= 1200) {
         const sidebar = document.getElementById('sidebar');

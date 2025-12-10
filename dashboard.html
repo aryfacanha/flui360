@@ -143,6 +143,63 @@
                 </div>
             </section>
         </main>
+
+        <!-- FAB - Floating Action Button -->
+        <button class="fab" id="btnNovoHabito" aria-label="Adicionar novo hábito">
+            <span>+</span>
+        </button>
+    </div>
+
+    <!-- Modal para adicionar hábito -->
+    <div class="modal-backdrop" id="modalHabitoBackdrop">
+        <div class="modal modal-habito" role="dialog" aria-labelledby="tituloModalHabito" aria-modal="true">
+            <div class="modal-header">
+                <h2 id="tituloModalHabito">Novo Hábito</h2>
+                <button type="button" class="btn-fechar-modal" id="btnFecharModalHabito" aria-label="Fechar modal">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="form-habito" id="formHabito">
+                    <div class="campo-grupo">
+                        <label for="nomeHabito">Nome do hábito</label>
+                        <input 
+                            type="text" 
+                            id="nomeHabito" 
+                            name="nomeHabito" 
+                            placeholder="Ex: Beber 2L de água" 
+                            required
+                        >
+                    </div>
+                    
+                    <div class="campo-grupo">
+                        <label for="frequenciaHabito">Frequência</label>
+                        <select id="frequenciaHabito" name="frequenciaHabito" required>
+                            <option value="">Selecione...</option>
+                            <option value="diario">Diário</option>
+                            <option value="3x-semana">3x por semana</option>
+                            <option value="5x-semana">5x por semana</option>
+                            <option value="semanal">Semanal</option>
+                        </select>
+                    </div>
+
+                    <div class="campo-grupo">
+                        <label for="categoriaHabito">Categoria</label>
+                        <select id="categoriaHabito" name="categoriaHabito" required>
+                            <option value="">Selecione...</option>
+                            <option value="saude">Saúde</option>
+                            <option value="exercicio">Exercício</option>
+                            <option value="alimentacao">Alimentação</option>
+                            <option value="estudo">Estudo</option>
+                            <option value="trabalho">Trabalho</option>
+                            <option value="lazer">Lazer</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-primario">Adicionar Hábito</button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script src="assets/js/main.js"></script>
