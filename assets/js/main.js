@@ -31,6 +31,201 @@
 // ============================================
 
 const STORAGE_KEY = 'flui360_habitos';
+const PREFS_KEY = 'flui360_prefs';
+
+// ============================================
+// SISTEMA DE PREFERÊNCIAS DO USUÁRIO
+// ============================================
+
+/**
+ * Preferências são armazenadas em localStorage com a chave 'flui360_prefs'.
+ * Estrutura: { tema: 'claro' | 'escuro' }
+ * O tema padrão é 'claro' se não existir nada salvo.
+ */
+
+function carregarPreferencias() {
+    const dados = localStorage.getItem(PREFS_KEY);
+    if (dados) {
+        try {
+            return JSON.parse(dados);
+        } catch (e) {
+            console.error("Erro ao carregar preferências:", e);
+        }
+    }
+    return { tema: 'claro' };
+}
+
+function salvarPreferencias(prefs) {
+    localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+}
+
+/**
+ * Aplica o tema ao body, adicionando a classe correspondente.
+ * Remove a classe do tema anterior antes de aplicar a nova.
+ */
+function aplicarTema(tema) {
+    document.body.classList.remove('tema-claro', 'tema-escuro');
+    document.body.classList.add(`tema-${tema}`);
+    
+    // Atualiza o toggle no modal de preferências se existir
+    const toggleModoEscuro = document.getElementById('toggleModoEscuro');
+    if (toggleModoEscuro) {
+        const isEscuro = tema === 'escuro';
+        if (isEscuro) {
+            toggleModoEscuro.classList.add('ativo');
+        } else {
+            toggleModoEscuro.classList.remove('ativo');
+        }
+        // Atualiza aria-checked para acessibilidade
+        toggleModoEscuro.setAttribute('aria-checked', isEscuro.toString());
+    }
+}
+
+function alternarTema() {
+    const prefs = carregarPreferencias();
+    prefs.tema = prefs.tema === 'escuro' ? 'claro' : 'escuro';
+    salvarPreferencias(prefs);
+    aplicarTema(prefs.tema);
+}
+
+// ============================================
+// FUNÇÕES DE ESTATÍSTICAS DO HÁBITO
+// ============================================
+
+/**
+ * Conta quantos dias o hábito foi concluído.
+ * - Binário: dias em que valor === true
+ * - Mensurável: dias em que valor >= alvoDiario
+ */
+function contarDiasConcluidos(habito) {
+    let contador = 0;
+    for (const data in habito.historico) {
+        const valor = habito.historico[data];
+        if (habito.tipo === 'binario') {
+            if (valor === true) contador++;
+        } else {
+            if (valor >= habito.alvoDiario) contador++;
+        }
+    }
+    return contador;
+}
+
+/**
+ * Calcula a maior sequência (streak) de dias consecutivos concluídos.
+ * Percorre o histórico ordenando as datas e verificando consecutividade.
+ */
+function calcularStreakMaxima(habito) {
+    // Pega todas as datas onde o hábito foi concluído
+    const datasConcluidasSet = [];
+    
+    for (const data in habito.historico) {
+        const valor = habito.historico[data];
+        const concluido = habito.tipo === 'binario' 
+            ? valor === true 
+            : valor >= habito.alvoDiario;
+        
+        if (concluido) {
+            datasConcluidasSet.push(data);
+        }
+    }
+    
+    if (datasConcluidasSet.length === 0) return 0;
+    
+    // Ordena as datas em ordem crescente
+    datasConcluidasSet.sort();
+    
+    let streakAtual = 1;
+    let streakMaxima = 1;
+    
+    for (let i = 1; i < datasConcluidasSet.length; i++) {
+        const dataAnterior = new Date(datasConcluidasSet[i - 1] + 'T12:00:00');
+        const dataAtual = new Date(datasConcluidasSet[i] + 'T12:00:00');
+        
+        // Calcula a diferença em dias
+        const diffDias = Math.round((dataAtual - dataAnterior) / (1000 * 60 * 60 * 24));
+        
+        if (diffDias === 1) {
+            streakAtual++;
+            streakMaxima = Math.max(streakMaxima, streakAtual);
+        } else {
+            streakAtual = 1;
+        }
+    }
+    
+    return streakMaxima;
+}
+
+/**
+ * Calcula estatísticas específicas para hábitos mensuráveis:
+ * média, máximo e mínimo dos valores registrados (excluindo zeros).
+ */
+function calcularStatsMensuravel(habito) {
+    const valores = [];
+    
+    for (const data in habito.historico) {
+        const valor = habito.historico[data];
+        if (typeof valor === 'number' && valor > 0) {
+            valores.push(valor);
+        }
+    }
+    
+    if (valores.length === 0) {
+        return { media: 0, maximo: 0, minimo: 0 };
+    }
+    
+    const soma = valores.reduce((a, b) => a + b, 0);
+    const media = soma / valores.length;
+    const maximo = Math.max(...valores);
+    const minimo = Math.min(...valores);
+    
+    return {
+        media: media.toFixed(1),
+        maximo: maximo,
+        minimo: minimo
+    };
+}
+
+/**
+ * Abre o modal de estatísticas para um hábito específico.
+ * Preenche os campos com os dados calculados.
+ */
+function abrirModalStats(habitoId) {
+    const habito = habitos.find(h => h.id === habitoId);
+    if (!habito) return;
+    
+    const modalTitulo = document.getElementById('statsHabitoNome');
+    const statsDiasConcluidos = document.getElementById('statsDiasConcluidos');
+    const statsStreakMaxima = document.getElementById('statsStreakMaxima');
+    const statsTipoBadge = document.getElementById('statsTipoBadge');
+    const statsSecaoMensuravel = document.getElementById('statsSecaoMensuravel');
+    const statsMedia = document.getElementById('statsMedia');
+    const statsMaximo = document.getElementById('statsMaximo');
+    const statsMinimo = document.getElementById('statsMinimo');
+    
+    if (modalTitulo) modalTitulo.textContent = habito.nome;
+    if (statsDiasConcluidos) statsDiasConcluidos.textContent = contarDiasConcluidos(habito);
+    if (statsStreakMaxima) statsStreakMaxima.textContent = calcularStreakMaxima(habito);
+    
+    if (statsTipoBadge) {
+        statsTipoBadge.textContent = habito.tipo === 'binario' ? 'Sim/Não' : 'Mensurável';
+        statsTipoBadge.className = `stats-tipo-badge ${habito.tipo}`;
+    }
+    
+    // Mostra ou esconde a seção de mensuráveis
+    if (statsSecaoMensuravel) {
+        if (habito.tipo === 'mensuravel') {
+            statsSecaoMensuravel.style.display = 'block';
+            const stats = calcularStatsMensuravel(habito);
+            if (statsMedia) statsMedia.textContent = `${stats.media} ${habito.unidade || ''}`;
+            if (statsMaximo) statsMaximo.textContent = `${stats.maximo} ${habito.unidade || ''}`;
+            if (statsMinimo) statsMinimo.textContent = `${stats.minimo} ${habito.unidade || ''}`;
+        } else {
+            statsSecaoMensuravel.style.display = 'none';
+        }
+    }
+    
+    abrirModal('modalStatsBackdrop');
+}
 
 function gerarHistorico(diasAtras, probabilidade, tipo = 'binario', alvo = 1) {
     const historico = {};
@@ -1373,6 +1568,12 @@ function criarCardHabitoAvancado(habito) {
                 }
             });
         });
+        
+        // Clique no nome/info do hábito abre estatísticas
+        const cardInfo = card.querySelector('.habito-card-info');
+        if (cardInfo) {
+            cardInfo.addEventListener('click', () => abrirModalStats(habito.id));
+        }
     }, 0);
     
     return card;
@@ -1639,10 +1840,16 @@ function atualizarEstatisticasRelatorios() {
 // ============================================
 
 function inicializarPagina() {
+    // Aplica o tema salvo nas preferências
+    const prefs = carregarPreferencias();
+    aplicarTema(prefs.tema);
+    
     configurarMenuHamburguer();
     configurarModais();
     configurarBoasVindas();
     configurarTeclaEscape();
+    configurarModalPreferencias();
+    configurarModalStats();
     
     const paginaAtual = window.location.pathname.split('/').pop() || 'index.html';
     
@@ -1662,6 +1869,66 @@ function inicializarPagina() {
             renderizarGraficoMensal();
             atualizarEstatisticasRelatorios();
             break;
+    }
+}
+
+/**
+ * Configura o modal de preferências e o toggle de tema.
+ */
+function configurarModalPreferencias() {
+    const modalBackdrop = document.getElementById('modalPreferenciasBackdrop');
+    const btnFechar = document.getElementById('btnFecharPreferencias');
+    const toggleModoEscuro = document.getElementById('toggleModoEscuro');
+    const btnAbrirPreferencias = document.getElementById('btnAbrirPreferencias');
+    
+    if (btnAbrirPreferencias) {
+        btnAbrirPreferencias.addEventListener('click', () => {
+            abrirModal('modalPreferenciasBackdrop');
+        });
+    }
+    
+    if (btnFechar) {
+        btnFechar.addEventListener('click', () => fecharModal('modalPreferenciasBackdrop'));
+    }
+    
+    if (modalBackdrop) {
+        modalBackdrop.addEventListener('click', (e) => {
+            if (e.target === modalBackdrop) fecharModal('modalPreferenciasBackdrop');
+        });
+    }
+    
+    if (toggleModoEscuro) {
+        toggleModoEscuro.addEventListener('click', alternarTema);
+        // Suporte a teclado para acessibilidade (Enter e Space)
+        toggleModoEscuro.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                alternarTema();
+            }
+        });
+    }
+}
+
+/**
+ * Configura o modal de estatísticas do hábito.
+ */
+function configurarModalStats() {
+    const modalBackdrop = document.getElementById('modalStatsBackdrop');
+    const btnFechar = document.getElementById('btnFecharStats');
+    const btnFecharStats = document.getElementById('btnFecharModalStats');
+    
+    if (btnFechar) {
+        btnFechar.addEventListener('click', () => fecharModal('modalStatsBackdrop'));
+    }
+    
+    if (btnFecharStats) {
+        btnFecharStats.addEventListener('click', () => fecharModal('modalStatsBackdrop'));
+    }
+    
+    if (modalBackdrop) {
+        modalBackdrop.addEventListener('click', (e) => {
+            if (e.target === modalBackdrop) fecharModal('modalStatsBackdrop');
+        });
     }
 }
 

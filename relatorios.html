@@ -52,6 +52,10 @@
         </nav>
 
         <div class="sidebar-footer">
+            <button type="button" class="nav-link nav-link-preferencias" id="btnAbrirPreferencias">
+                <span class="nav-icone">&#9881;</span>
+                Preferências
+            </button>
             <a href="index.html" class="nav-link nav-sair">
                 <span class="nav-icone">&#8592;</span>
                 Sair
@@ -355,6 +359,82 @@
     </div>
 
     <div class="toast-container" id="toastContainer"></div>
+
+    <!-- MODAL: PREFERÊNCIAS -->
+    <div class="modal-backdrop" id="modalPreferenciasBackdrop">
+        <div class="modal modal-pequeno" role="dialog" aria-labelledby="tituloModalPreferencias" aria-modal="true">
+            <div class="modal-header">
+                <h2 id="tituloModalPreferencias">Preferências</h2>
+                <button type="button" class="btn-fechar-modal" id="btnFecharPreferencias" aria-label="Fechar modal">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <h3 class="modal-secao-titulo">Tema</h3>
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <span class="toggle-label-icon">&#127769;</span>
+                        <span>Modo escuro</span>
+                    </div>
+                    <div class="toggle-switch" id="toggleModoEscuro" role="switch" aria-checked="false" tabindex="0">
+                        <div class="toggle-switch-slider"></div>
+                    </div>
+                </div>
+                <p class="modal-descricao">O tema será aplicado automaticamente em todas as páginas.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: ESTATÍSTICAS DO HÁBITO -->
+    <div class="modal-backdrop" id="modalStatsBackdrop">
+        <div class="modal modal-medio" role="dialog" aria-labelledby="tituloModalStats" aria-modal="true">
+            <div class="modal-header">
+                <h2 id="tituloModalStats">Estatísticas: <span id="statsHabitoNome">Hábito</span></h2>
+                <button type="button" class="btn-fechar-modal" id="btnFecharStats" aria-label="Fechar modal">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="stats-grid">
+                    <div class="stats-item">
+                        <div class="stats-item-valor" id="statsDiasConcluidos">0</div>
+                        <div class="stats-item-label">Dias Concluídos</div>
+                    </div>
+                    <div class="stats-item">
+                        <div class="stats-item-valor" id="statsStreakMaxima">0</div>
+                        <div class="stats-item-label">Maior Sequência</div>
+                    </div>
+                </div>
+                
+                <div class="stats-secao-titulo">
+                    Tipo de hábito
+                    <span class="stats-tipo-badge" id="statsTipoBadge">Sim/Não</span>
+                </div>
+                
+                <div class="stats-secao" id="statsSecaoMensuravel" style="display: none;">
+                    <h4 class="stats-secao-titulo">&#128200; Estatísticas de Valores</h4>
+                    <div class="stats-grid">
+                        <div class="stats-item">
+                            <div class="stats-item-valor" id="statsMedia">0</div>
+                            <div class="stats-item-label">Média</div>
+                        </div>
+                        <div class="stats-item">
+                            <div class="stats-item-valor" id="statsMaximo">0</div>
+                            <div class="stats-item-label">Máximo</div>
+                        </div>
+                        <div class="stats-item">
+                            <div class="stats-item-valor" id="statsMinimo">0</div>
+                            <div class="stats-item-label">Mínimo</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-acoes">
+                    <button type="button" class="btn-primario" id="btnFecharModalStats">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="assets/js/main.js"></script>
 </body>

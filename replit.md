@@ -151,6 +151,7 @@ O projeto é estático e pode ser executado com qualquer servidor HTTP. No Repli
 
 ## Funções Principais (main.js)
 
+### CRUD e Renderização
 - `configurarFAB()`: FAB abre modal de seleção de tipo
 - `configurarModalTipo()`: Modal de escolha de tipo de hábito
 - `configurarModalValor()`: Modal de valor para mensuráveis
@@ -160,6 +161,19 @@ O projeto é estático e pode ser executado com qualquer servidor HTTP. No Repli
 - `abrirModalValor(id)`: Abre modal de valor para mensurável
 - `renderizarHabitos()`: Renderiza cards na tela
 - `toggleDiaHabito(id, data)`: Marca/desmarca dia (binários)
+
+### Sistema de Preferências
+- `carregarPreferencias()`: Carrega preferências do localStorage
+- `salvarPreferencias(prefs)`: Salva preferências no localStorage
+- `aplicarTema(tema)`: Aplica tema claro/escuro ao body
+- `alternarTema()`: Alterna entre tema claro e escuro
+- `configurarModalPreferencias()`: Configura modal e toggle de tema
+
+### Estatísticas por Hábito
+- `contarDiasConcluidos(habito)`: Conta dias em que o hábito foi concluído
+- `calcularStreakMaxima(habito)`: Calcula maior sequência consecutiva de dias
+- `calcularStatsMensuravel(habito)`: Calcula média, máximo e mínimo
+- `abrirModalStats(habitoId)`: Abre modal com estatísticas do hábito
 
 ## Princípios de IHC Aplicados
 
@@ -196,3 +210,26 @@ O projeto é estático e pode ser executado com qualquer servidor HTTP. No Repli
 ### Navegação
 - Página atual destacada na sidebar com cor de fundo e borda
 - Classe `.nav-link-ativo` aplicada dinamicamente
+
+## Novas Funcionalidades
+
+### Sistema de Preferências (Modo Escuro)
+- **Acesso**: Botão "Preferências" na sidebar de todas as páginas
+- **Modal de Preferências**: Toggle switch para ativar/desativar modo escuro
+- **Persistência**: Preferências salvas em `localStorage` (chave: `flui360_prefs`)
+- **Aplicação automática**: Tema carregado e aplicado ao iniciar cada página
+- **Acessibilidade**: Toggle com suporte a teclado (Enter/Space) e aria-checked
+
+### Modal de Estatísticas do Hábito
+- **Acesso**: Clicar no nome/info do card de hábito em "Meus Hábitos"
+- **Estatísticas exibidas**:
+  - Dias concluídos (total)
+  - Maior sequência (streak máxima)
+  - Tipo de hábito (badge)
+- **Para hábitos mensuráveis** (seção adicional):
+  - Média dos valores registrados
+  - Valor máximo
+  - Valor mínimo
+- **Cálculos**:
+  - Streak: percorre histórico ordenado verificando dias consecutivos
+  - Dias concluídos: binário = true, mensurável = valor >= alvo

@@ -78,6 +78,69 @@
 }
 
 /* ============================================
+   TEMA CLARO (padrão)
+   ============================================ */
+body.tema-claro,
+body:not(.tema-escuro) {
+    --cor-fundo: #f8fafc;
+    --cor-fundo-card: #ffffff;
+    --cor-texto: #1e293b;
+    --cor-texto-claro: #4a5568;
+    --cor-borda: #e2e8f0;
+    --sidebar-bg: #1e293b;
+    --sidebar-texto: #f1f5f9;
+    --cor-input-bg: #ffffff;
+    --cor-modal-bg: #ffffff;
+}
+
+/* ============================================
+   TEMA ESCURO
+   ============================================ */
+body.tema-escuro {
+    --cor-fundo: #0f172a;
+    --cor-fundo-card: #1e293b;
+    --cor-texto: #f1f5f9;
+    --cor-texto-claro: #94a3b8;
+    --cor-borda: #334155;
+    --sidebar-bg: #0f172a;
+    --sidebar-texto: #f1f5f9;
+    --cor-input-bg: #1e293b;
+    --cor-modal-bg: #1e293b;
+    --sombra-card: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --sombra-elevada: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+body.tema-escuro .modal-conteudo {
+    background-color: var(--cor-modal-bg);
+    color: var(--cor-texto);
+}
+
+body.tema-escuro input,
+body.tema-escuro select,
+body.tema-escuro textarea {
+    background-color: var(--cor-input-bg);
+    color: var(--cor-texto);
+    border-color: var(--cor-borda);
+}
+
+body.tema-escuro .habito-card {
+    background-color: var(--cor-fundo-card);
+}
+
+body.tema-escuro .stat-card {
+    background-color: var(--cor-fundo-card);
+}
+
+body.tema-escuro .boas-vindas {
+    background-color: #1e3a5f;
+    border-color: #2563eb;
+}
+
+body.tema-escuro .grafico-container {
+    background-color: var(--cor-fundo-card);
+}
+
+/* ============================================
    2. RESET E ESTILOS BASE
    ============================================ */
 *, *::before, *::after {
@@ -2368,4 +2431,160 @@ select:focus-visible {
 .tipo-habito-btn .tipo-descricao {
     font-size: 0.75rem;
     line-height: 1.4;
+}
+
+/* ============================================
+   TOGGLE SWITCH (para preferências)
+   ============================================ */
+.toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--espacamento-md);
+    background-color: var(--cor-fundo);
+    border-radius: var(--borda-raio);
+    margin-bottom: var(--espacamento-md);
+}
+
+.toggle-label {
+    display: flex;
+    align-items: center;
+    gap: var(--espacamento-sm);
+    font-weight: 500;
+    color: var(--cor-texto);
+}
+
+.toggle-label-icon {
+    font-size: 1.25rem;
+}
+
+.toggle-switch {
+    position: relative;
+    width: 52px;
+    height: 28px;
+    background-color: #cbd5e1;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: background-color var(--transicao-rapida);
+}
+
+.toggle-switch.ativo {
+    background-color: var(--cor-primaria);
+}
+
+.toggle-switch-slider {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 24px;
+    height: 24px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform var(--transicao-rapida);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch.ativo .toggle-switch-slider {
+    transform: translateX(24px);
+}
+
+/* ============================================
+   MODAL DE ESTATÍSTICAS DO HÁBITO
+   ============================================ */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--espacamento-md);
+    margin-bottom: var(--espacamento-lg);
+}
+
+.stats-item {
+    background-color: var(--cor-fundo);
+    padding: var(--espacamento-md);
+    border-radius: var(--borda-raio);
+    text-align: center;
+}
+
+.stats-item-valor {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--cor-primaria);
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.stats-item-label {
+    font-size: 0.75rem;
+    color: var(--cor-texto-claro);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stats-secao {
+    margin-top: var(--espacamento-lg);
+    padding-top: var(--espacamento-lg);
+    border-top: 1px solid var(--cor-borda);
+}
+
+.stats-secao-titulo {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--cor-texto);
+    margin-bottom: var(--espacamento-md);
+    display: flex;
+    align-items: center;
+    gap: var(--espacamento-sm);
+}
+
+.stats-tipo-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-left: auto;
+}
+
+.stats-tipo-badge.binario {
+    background-color: var(--cor-info-light);
+    color: var(--cor-info);
+}
+
+.stats-tipo-badge.mensuravel {
+    background-color: var(--cor-sucesso-light);
+    color: var(--cor-sucesso);
+}
+
+/* Botão de preferências na sidebar */
+.nav-link-preferencias {
+    margin-top: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: var(--espacamento-md);
+}
+
+/* Ícone de engrenagem no header (alternativa) */
+.btn-preferencias {
+    background: none;
+    border: none;
+    color: var(--cor-texto-claro);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: var(--borda-raio);
+    transition: all var(--transicao-rapida);
+    font-size: 1.25rem;
+}
+
+.btn-preferencias:hover {
+    background-color: var(--cor-primaria-light);
+    color: var(--cor-primaria);
+}
+
+/* Card de hábito clicável para stats */
+.habito-card-header {
+    cursor: pointer;
+}
+
+.habito-card-header:hover .habito-card-nome {
+    color: var(--cor-primaria);
 }

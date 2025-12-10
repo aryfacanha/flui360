@@ -1,0 +1,123 @@
+Preciso que você implemente duas grandes funcionalidades novas:
+
+1. Área de Preferências com Modo Escuro
+
+Objetivo: permitir que o usuário escolha entre tema claro e tema escuro, com preferência salva em localStorage e aplicada em todas as páginas.
+
+Requisitos:
+
+Criar um modal de “Preferências” acessível a partir de todas as páginas principais (pode ser um ícone de engrenagem no header ou um item “Preferências” na sidebar). Ao clicar, abrir um modal com:
+
+Título: “Preferências”
+
+Seção “Tema”
+
+Toggle “Modo escuro” (checkbox) com rótulo claro.
+
+Criar um módulo simples de preferências do usuário em JS:
+
+Objeto com pelo menos tema: 'claro' | 'escuro'.
+
+Funções para carregarPreferencias() e salvarPreferencias() usando localStorage (por exemplo, flui360_prefs).
+
+Criar uma função aplicarTema(tema) que:
+
+Adiciona em <body> uma classe tema-claro ou tema-escuro (removendo a outra).
+
+O tema padrão, se não existir nada salvo, é o claro.
+
+Ajustar o CSS para usar variáveis de cor (--cor-bg, --cor-bg-card, --cor-texto, etc.), e redefinir esses valores para body.tema-claro e body.tema-escuro. Não precisa ficar perfeito em termos de paleta, apenas consistente e legível; depois eu refino as cores na mão.
+
+Quando o usuário clicar no toggle “Modo escuro”:
+
+Atualizar o objeto de preferências,
+
+Salvar em localStorage,
+
+Chamar aplicarTema() imediata­mente para refletir o modo escuro/clar o em todas as páginas.
+
+Ao carregar a aplicação (em main.js), chamar carregarPreferencias() e aplicarTema() para restaurar o tema automaticamente.
+
+Garantir que o modal de preferências siga o padrão de acessibilidade já usado nos outros modais (role, aria-modal, foco, Esc para fechar).
+
+2. Estatísticas específicas por hábito (modal de stats)
+
+Objetivo: quando o usuário clicar no card de um hábito, abrir um modal com estatísticas desse hábito, incluindo:
+
+total de dias concluídos,
+
+maior sequência (streak máxima),
+
+e, para hábitos mensuráveis, estatísticas como média, máximo e mínimo.
+
+Requisitos:
+
+Estrutura de dados:
+
+Expandir a estrutura de cada hábito para incluir um historico (caso ainda não exista), algo como:
+
+historico: [{ data: 'YYYY-MM-DD', valor: true/false ou número }, ...]
+
+Sempre que o usuário marcar um hábito como concluído:
+
+Se for binário: gravar/atualizar historico na data atual com valor: true (ou false se desmarcar).
+
+Se for mensurável: quando o usuário preencher o valor no modal, salvar { data: 'YYYY-MM-DD', valor: quantidade } no histórico, substituindo o valor do dia se já existir.
+
+Use formato de data ISO simples (YYYY-MM-DD) e, se necessário, crie uma função utilitária getHojeISO().
+
+Cálculo das estatísticas:
+
+Implementar funções JS para:
+
+contarDiasConcluidos(habito) → retorna o número de dias em que o hábito foi considerado concluído:
+
+Binário: valor === true.
+
+Mensurável: valor >= alvo.
+
+calcularStreakMaxima(habito) → retorna a maior sequência de dias consecutivos concluídos (compara datas no histórico, considerando apenas registros concluídos).
+
+Para hábitos mensuráveis, uma função calcularStatsMensuravel(habito) que retorne média, máximo e mínimo dos valores registrados.
+
+UI do modal de estatísticas:
+
+Criar um modal modalStatsHabito com:
+
+Título: “Estatísticas: [nome do hábito]”
+
+Campo “Dias concluídos”
+
+Campo “Maior sequência (dias)”
+
+Campo “Tipo de hábito (Sim/Não ou Mensurável)”
+
+Um bloco extra que só aparece para hábitos mensuráveis, com:
+
+Média,
+
+Máximo,
+
+Mínimo,
+
+Botão “Fechar”.
+
+Quando o usuário clicar em um card de hábito (não no botão de completar, mas no card em si ou em um ícone de informações), abrir este modal e preencher os dados chamando as funções acima.
+
+Reaproveitar o padrão de modais já existente no app (backdrop, Esc, foco inicial).
+
+Consistência com “Hábitos de Hoje”:
+
+Garantir que qualquer conclusão de hábito (seja na lista geral em “Meus Hábitos”, seja na seção “Hábitos de Hoje” do Dashboard) atualize corretamente o historico desse hábito, de forma que as estatísticas reflitam os dados reais.
+
+Comentários e clareza:
+
+Comentar as novas partes do código em português, explicando de forma didática:
+
+como o histórico é armazenado,
+
+como os cálculos de streak e dias concluídos são feitos,
+
+e como o modal de estatísticas é preenchido.
+
+Faça as mudanças diretamente nos arquivos do projeto, mantendo o estilo atual. Depois, me dê um resumo das alterações que você fez e em quais arquivos, para eu conseguir apresentar isso na prova.
