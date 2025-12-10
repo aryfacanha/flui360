@@ -8,6 +8,9 @@ Flui360 é um aplicativo web estático de gerenciamento de hábitos, desenvolvid
 - Visualização de histórico por calendário
 - Marcação retroativa de dias
 - Indicador de sequência (streak)
+- **CRUD completo de hábitos**
+- **Tipos de hábito: Binário e Mensurável**
+- **Sistema de lembretes configuráveis**
 
 ## Estrutura do Projeto
 
@@ -15,13 +18,13 @@ Flui360 é um aplicativo web estático de gerenciamento de hábitos, desenvolvid
 /
 ├── index.html          # Página de login
 ├── dashboard.html      # Dashboard principal (com FAB)
-├── habitos.html        # Tela de gerenciamento de hábitos (com FAB)
+├── habitos.html        # Tela de gerenciamento de hábitos (com FAB + CRUD)
 ├── relatorios.html     # Tela de relatórios e estatísticas (com FAB)
 ├── assets/
 │   ├── css/
 │   │   └── style.css   # Estilos globais (mobile-first + estilo Loop)
 │   ├── js/
-│   │   └── main.js     # JavaScript principal com sistema de histórico
+│   │   └── main.js     # JavaScript principal com CRUD e sistema de histórico
 │   └── img/            # Pasta para imagens (se necessário)
 └── attached_assets/    # Arquivos anexados do projeto
 ```
@@ -41,12 +44,39 @@ Flui360 é um aplicativo web estático de gerenciamento de hábitos, desenvolvid
 - Sidebar de navegação
 
 ### Meus Hábitos (habitos.html) - ESTILO LOOP HABIT TRACKER
-- **Calendário de dias**: Grade mostrando os últimos 7 dias
-- **Checkmarks clicáveis**: Marcar/desmarcar qualquer dia (retroativo)
-- **Indicador de sequência (streak)**: Dias consecutivos
-- **Barra de progresso**: Porcentagem de conclusão mensal
-- **Cores personalizadas**: Cada hábito tem sua cor
-- FAB para adicionar novos hábitos
+
+#### CRUD Completo
+- **Criar**: Formulário avançado com todos os campos
+- **Editar**: Botão de edição em cada card (ícone de lápis)
+- **Excluir**: Botão de exclusão com confirmação (ícone de lixeira)
+- **Persistência**: Dados salvos em localStorage
+
+#### Tipos de Hábito
+1. **Binário (Sim/Não)**: Checkbox grande para marcar como concluído
+2. **Mensurável**: Input numérico + barra de progresso + meta diária
+   - Campos: Alvo diário, Unidade (litros, páginas, minutos, etc.)
+   - Exibe progresso: "12/20 páginas" com barra visual
+
+#### Frequência Dinâmica
+- **Todos os dias**: Frequência padrão
+- **X vezes por semana**: Campo para definir número de vezes (1-7)
+- **X vezes por mês**: Campo para definir número de vezes (1-31)
+- **X vezes em Y dias**: Dois campos para personalização
+
+#### Sistema de Lembretes
+- **Toggle On/Off**: Ativa/desativa lembretes
+- **Horário**: Input de tempo (HH:MM)
+- **Dias da semana**: Botões clicáveis para cada dia
+  - Botão "Selecionar todos" / "Limpar todos"
+  - Exibição: "Seg-Sex", "Todos os dias", ou lista de dias
+
+#### Interface dos Cards
+- Nome do hábito + badge de tipo (SIM/NÃO ou MENSURÁVEL)
+- Frequência configurada (ex: "3x por semana")
+- Lembrete com horário e dias (ex: "08:00 (Seg-Sex)")
+- Controle de conclusão adequado ao tipo
+- Calendário de 7 dias com histórico
+- Botões de editar e excluir
 
 ### Relatórios (relatorios.html)
 - Gráfico horizontal de dias concluídos por hábito (dados reais)
@@ -71,14 +101,48 @@ O projeto é estático e pode ser executado com qualquer servidor HTTP. No Repli
 - HTML5 (semântico, com validação)
 - CSS3 (variáveis CSS, Flexbox, Grid, animações)
 - JavaScript ES6+ (vanilla, sem frameworks)
+- localStorage para persistência de dados
 
-## Recursos Estilo Loop Habit Tracker
+## Estrutura de Dados (main.js)
 
-1. **Histórico de dias**: Cada hábito armazena um objeto com datas e status de conclusão
-2. **Marcação retroativa**: Clique em qualquer dia para marcar/desmarcar
-3. **Cálculo de sequência**: Conta dias consecutivos automaticamente
-4. **Cores dinâmicas**: Cada hábito tem cor própria para identificação visual
-5. **FAB persistente**: Botão flutuante em todas as páginas
+```javascript
+{
+  id: number,                    // ID único
+  nome: string,                  // Nome do hábito
+  tipo: 'binario' | 'mensuravel',// Tipo do hábito
+  cor: string,                   // Cor em hexadecimal
+  
+  // Campos para hábitos mensuráveis
+  unidade: string,               // Ex: "litros", "páginas"
+  alvoDiario: number,            // Meta diária
+  
+  // Frequência
+  tipoFrequencia: string,        // 'diario', 'x-semana', 'x-mes', 'x-em-y'
+  vezesX: number,                // Valor de X (vezes)
+  diasY: number,                 // Valor de Y (dias) para 'x-em-y'
+  
+  // Lembretes
+  lembreteAtivo: boolean,        // Se lembrete está ativo
+  horaLembrete: string,          // Horário do lembrete (HH:MM)
+  diasLembrete: string[],        // Array de dias: ['seg', 'ter', ...]
+  
+  // Histórico de conclusões
+  historico: {                   // Objeto com datas como chaves
+    'YYYY-MM-DD': boolean | number  // true/false para binário, número para mensurável
+  }
+}
+```
+
+## Funções Principais (main.js)
+
+- `criarHabito()` / `salvarHabito()`: Cria ou atualiza hábito
+- `editarHabito(id)`: Abre modal com dados do hábito
+- `excluirHabito(id)`: Remove hábito da lista
+- `confirmarExclusao(id)`: Modal de confirmação
+- `renderizarHabitos()`: Renderiza cards na tela
+- `toggleDiaHabito(id, data)`: Marca/desmarca dia
+- `atualizarValorMensuravel(id, valor)`: Atualiza progresso de mensurável
+- `configurarCamposDinamicos()`: Configura campos condicionais do formulário
 
 ## Princípios de IHC Aplicados
 
@@ -88,3 +152,5 @@ O projeto é estático e pode ser executado com qualquer servidor HTTP. No Repli
 4. **Responsividade**: Adaptação para diferentes tamanhos de tela
 5. **Hierarquia visual**: Tipografia clara, espaçamentos generosos
 6. **Interação direta**: Marcar hábitos com um clique, sem menus intermediários
+7. **Prevenção de erros**: Confirmação antes de excluir, validação de formulários
+8. **Flexibilidade**: Tipos de hábito, frequências e lembretes configuráveis
