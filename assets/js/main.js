@@ -379,6 +379,12 @@ function abrirModal(modalId) {
     if (modal) {
         modal.classList.add('ativo');
         document.body.style.overflow = 'hidden';
+        
+        // Foco no primeiro elemento relevante (acessibilidade)
+        setTimeout(() => {
+            const primeiroInput = modal.querySelector('input:not([type="hidden"]), button.tipo-habito-btn, button.btn-primario');
+            if (primeiroInput) primeiroInput.focus();
+        }, 100);
     }
 }
 
@@ -388,6 +394,64 @@ function fecharModal(modalId) {
         modal.classList.remove('ativo');
         document.body.style.overflow = '';
     }
+}
+
+function fecharModalAtivo() {
+    const modaisAtivos = document.querySelectorAll('.modal-backdrop.ativo');
+    if (modaisAtivos.length > 0) {
+        const ultimoModal = modaisAtivos[modaisAtivos.length - 1];
+        fecharModal(ultimoModal.id);
+        return true;
+    }
+    return false;
+}
+
+// ============================================
+// 4.1. SISTEMA DE TOAST (FEEDBACK)
+// ============================================
+
+function mostrarToast(mensagem, tipo = 'sucesso', duracao = 3000) {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${tipo}`;
+    toast.textContent = mensagem;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'polite');
+    
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.classList.add('saindo');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }, duracao);
+}
+
+// ============================================
+// 4.2. CAIXA DE BOAS-VINDAS
+// ============================================
+
+function configurarBoasVindas() {
+    const box = document.getElementById('boasVindasBox');
+    const btnFechar = document.getElementById('btnFecharBoasVindas');
+    
+    if (!box || !btnFechar) return;
+    
+    const fechado = localStorage.getItem('flui360_boas_vindas_fechado');
+    if (fechado) {
+        box.style.display = 'none';
+        return;
+    }
+    
+    btnFechar.addEventListener('click', () => {
+        box.style.display = 'none';
+        localStorage.setItem('flui360_boas_vindas_fechado', 'true');
+    });
 }
 
 // ============================================
@@ -773,7 +837,61 @@ function preencherFormularioHabito(habito) {
     if (corRadio) corRadio.checked = true;
 }
 
+function validarFormularioHabito() {
+    let valido = true;
+    limparErrosFormulario();
+    
+    const nome = document.getElementById('nomeHabito').value.trim();
+    const tipo = document.getElementById('tipoHabitoHidden').value;
+    
+    if (!nome) {
+        mostrarErro('nomeHabito', 'Por favor, insira um nome para o hábito.');
+        valido = false;
+    }
+    
+    if (tipo === 'mensuravel') {
+        const alvo = document.getElementById('alvoDiario').value;
+        if (!alvo || parseInt(alvo) < 1) {
+            mostrarErro('alvoDiario', 'Por favor, defina uma meta diária válida.');
+            valido = false;
+        }
+    }
+    
+    return valido;
+}
+
+function mostrarErro(campoId, mensagem) {
+    const campo = document.getElementById(campoId);
+    if (!campo) return;
+    
+    const campoGrupo = campo.closest('.campo-grupo');
+    if (campoGrupo) {
+        campoGrupo.classList.add('erro');
+        
+        const erroExistente = campoGrupo.querySelector('.mensagem-erro');
+        if (!erroExistente) {
+            const msgErro = document.createElement('span');
+            msgErro.className = 'mensagem-erro';
+            msgErro.textContent = mensagem;
+            campoGrupo.appendChild(msgErro);
+        }
+    }
+}
+
+function limparErrosFormulario() {
+    document.querySelectorAll('.campo-grupo.erro').forEach(grupo => {
+        grupo.classList.remove('erro');
+        const msgErro = grupo.querySelector('.mensagem-erro');
+        if (msgErro) msgErro.remove();
+    });
+}
+
 function salvarHabito() {
+    if (!validarFormularioHabito()) {
+        mostrarToast('Por favor, preencha os campos obrigatórios.', 'erro');
+        return;
+    }
+    
     const idInput = document.getElementById('habitoId').value;
     const isEdicao = idInput !== '';
     
@@ -854,6 +972,8 @@ function salvarHabito() {
     salvarHabitos();
     fecharModal('modalHabitoBackdrop');
     
+    mostrarToast(isEdicao ? 'Hábito atualizado com sucesso!' : 'Hábito criado com sucesso!', 'sucesso');
+    
     renderizarHabitos();
     renderizarHabitosHoje();
     atualizarEstatisticasDashboard();
@@ -886,6 +1006,8 @@ function confirmarExclusao(id) {
 function excluirHabito(id) {
     habitos = habitos.filter(h => h.id !== id);
     salvarHabitos();
+    
+    mostrarToast('Hábito excluído com sucesso!', 'sucesso');
     
     renderizarHabitos();
     renderizarHabitosHoje();
@@ -954,6 +1076,8 @@ function configurarModalValor() {
                 habitoParaValor = null;
                 
                 fecharModal('modalValorBackdrop');
+                
+                mostrarToast('Progresso registrado!', 'sucesso');
                 
                 renderizarHabitos();
                 renderizarHabitosHoje();
@@ -1281,11 +1405,12 @@ function renderizarHabitosHoje() {
         
         if (habito.tipo === 'binario') {
             item.innerHTML = `
-                <div class="habito-hoje-check-loop ${concluido ? 'concluido' : ''}" 
+                <button type="button" class="habito-hoje-check-loop ${concluido ? 'concluido' : ''}" 
                      data-id="${habito.id}"
-                     style="--cor-habito: ${habito.cor}">
+                     style="--cor-habito: ${habito.cor}"
+                     aria-label="${concluido ? 'Desmarcar' : 'Marcar'} ${habito.nome}">
                     <span class="check-icon">${concluido ? '✓' : ''}</span>
-                </div>
+                </button>
                 <div class="habito-hoje-info-loop">
                     <span class="habito-hoje-nome-loop">${habito.nome}</span>
                     <span class="habito-hoje-meta">${getTextoFrequencia(habito)} • ${sequencia} dias</span>
@@ -1297,14 +1422,14 @@ function renderizarHabitosHoje() {
                 toggleDiaHabito(habito.id, hoje);
             });
         } else {
-            // Mensurável - abre modal de valor ao clicar
             const valorHoje = getValorHoje(habito);
             item.innerHTML = `
-                <div class="habito-hoje-check-loop ${concluido ? 'concluido' : ''}" 
+                <button type="button" class="habito-hoje-check-loop ${concluido ? 'concluido' : ''}" 
                      data-id="${habito.id}"
-                     style="--cor-habito: ${habito.cor}">
+                     style="--cor-habito: ${habito.cor}"
+                     aria-label="Registrar progresso de ${habito.nome}">
                     <span class="check-icon">${concluido ? '✓' : ''}</span>
-                </div>
+                </button>
                 <div class="habito-hoje-info-loop">
                     <span class="habito-hoje-nome-loop">${habito.nome}</span>
                     <span class="habito-hoje-meta">${valorHoje}/${habito.alvoDiario} ${habito.unidade} • ${sequencia} dias</span>
@@ -1476,6 +1601,8 @@ function atualizarEstatisticasRelatorios() {
 function inicializarPagina() {
     configurarMenuHamburguer();
     configurarModais();
+    configurarBoasVindas();
+    configurarTeclaEscape();
     
     const paginaAtual = window.location.pathname.split('/').pop() || 'index.html';
     
@@ -1496,6 +1623,14 @@ function inicializarPagina() {
             atualizarEstatisticasRelatorios();
             break;
     }
+}
+
+function configurarTeclaEscape() {
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            fecharModalAtivo();
+        }
+    });
 }
 
 document.addEventListener('DOMContentLoaded', inicializarPagina);

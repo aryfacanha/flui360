@@ -35,7 +35,7 @@
         <nav class="sidebar-nav">
             <ul>
                 <li>
-                    <a href="dashboard.html" class="nav-link ativo">
+                    <a href="dashboard.html" class="nav-link nav-link-ativo" aria-current="page">
                         <span class="nav-icone">&#9632;</span>
                         Dashboard
                     </a>
@@ -78,6 +78,16 @@
 
         <main class="main-content">
             <h1 class="titulo-pagina">Dashboard</h1>
+            
+            <div class="boas-vindas-box" id="boasVindasBox">
+                <p class="boas-vindas-texto">
+                    <strong>Bem-vindo ao Flui360!</strong> Você está vendo alguns hábitos de exemplo 
+                    para conhecer o app. Use o botão <span class="destaque-fab">+</span> no canto 
+                    inferior direito para criar seus próprios hábitos, ou edite os existentes 
+                    em <a href="habitos.html">Meus Hábitos</a>.
+                </p>
+                <button type="button" class="btn-fechar-boas-vindas" id="btnFecharBoasVindas" aria-label="Fechar mensagem">&times;</button>
+            </div>
             
             <section class="resumo-cards">
                 <article class="card-resumo">
@@ -160,12 +170,12 @@
                     <button type="button" class="tipo-habito-btn" data-tipo="binario">
                         <span class="tipo-icone">&#10003;</span>
                         <span class="tipo-nome">Sim ou Não</span>
-                        <span class="tipo-descricao">Marcar/desmarcar como concluído</span>
+                        <span class="tipo-descricao">Ideal para hábitos que você simplesmente faz ou não faz. Ex: Meditar, Tomar vitamina, Acordar cedo.</span>
                     </button>
                     <button type="button" class="tipo-habito-btn" data-tipo="mensuravel">
                         <span class="tipo-icone">&#9776;</span>
                         <span class="tipo-nome">Mensurável</span>
-                        <span class="tipo-descricao">Registrar valores numéricos</span>
+                        <span class="tipo-descricao">Para hábitos com quantidade. Ex: Beber 2L de água, Ler 30 páginas, Caminhar 5km.</span>
                     </button>
                 </div>
             </div>
@@ -391,6 +401,8 @@
             </div>
         </div>
     </div>
+
+    <div class="toast-container" id="toastContainer"></div>
 
     <script src="assets/js/main.js"></script>
 </body>

@@ -428,10 +428,13 @@ img {
     color: var(--sidebar-texto);
 }
 
-.nav-link.ativo {
+.nav-link.ativo,
+.nav-link.nav-link-ativo {
     opacity: 1;
     background-color: var(--cor-primaria);
     color: white;
+    border-left: 4px solid var(--cor-primaria-light);
+    padding-left: calc(var(--espacamento-lg) - 4px);
 }
 
 .nav-icone {
@@ -2167,4 +2170,202 @@ img {
 .controle-mensuravel-progresso {
     font-size: var(--fonte-tamanho-sm);
     color: var(--cor-texto-claro);
+}
+
+/* ============================================
+   MELHORIAS DE IHC - ACESSIBILIDADE E FEEDBACK
+   ============================================ */
+
+/* --- Caixa de Boas-Vindas (Dashboard) --- */
+.boas-vindas-box {
+    background: linear-gradient(135deg, var(--cor-primaria-light), #f0f9ff);
+    border: 1px solid var(--cor-primaria);
+    border-left: 4px solid var(--cor-primaria);
+    border-radius: var(--borda-raio);
+    padding: var(--espacamento-md) var(--espacamento-lg);
+    margin-bottom: var(--espacamento-lg);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--espacamento-md);
+    position: relative;
+}
+
+.boas-vindas-texto {
+    flex: 1;
+    font-size: var(--fonte-tamanho-sm);
+    color: var(--cor-texto);
+    line-height: 1.6;
+}
+
+.boas-vindas-texto a {
+    font-weight: 600;
+}
+
+.destaque-fab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background-color: var(--cor-primaria);
+    color: white;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.btn-fechar-boas-vindas {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--cor-texto-claro);
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    transition: color var(--transicao-rapida);
+}
+
+.btn-fechar-boas-vindas:hover {
+    color: var(--cor-texto);
+}
+
+/* --- Sistema de Toast (Feedback) --- */
+.toast-container {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacamento-sm);
+    pointer-events: none;
+}
+
+.toast {
+    background-color: var(--cor-texto);
+    color: white;
+    padding: var(--espacamento-md) var(--espacamento-lg);
+    border-radius: var(--borda-raio);
+    box-shadow: var(--sombra-elevada);
+    font-size: var(--fonte-tamanho-sm);
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: toastIn 0.3s ease forwards;
+    pointer-events: auto;
+    max-width: 320px;
+    text-align: center;
+}
+
+.toast.toast-sucesso {
+    background-color: var(--cor-sucesso);
+}
+
+.toast.toast-erro {
+    background-color: var(--cor-erro);
+}
+
+.toast.toast-info {
+    background-color: var(--cor-info);
+}
+
+.toast.saindo {
+    animation: toastOut 0.3s ease forwards;
+}
+
+@keyframes toastIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes toastOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+/* --- Validação de Formulário --- */
+.campo-grupo.erro input,
+.campo-grupo.erro select {
+    border-color: var(--cor-erro);
+    background-color: var(--cor-erro-light);
+}
+
+.campo-grupo.erro input:focus,
+.campo-grupo.erro select:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+.mensagem-erro {
+    color: var(--cor-erro);
+    font-size: 0.75rem;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.mensagem-erro::before {
+    content: "!";
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    background-color: var(--cor-erro);
+    color: white;
+    border-radius: 50%;
+    font-size: 0.625rem;
+    font-weight: bold;
+}
+
+/* --- Melhorias de Contraste --- */
+.grafico-descricao,
+.subtitulo-pagina,
+.card-resumo-label,
+.estatistica-label {
+    color: #475569;
+}
+
+.texto-aviso {
+    color: #b45309;
+}
+
+/* --- Botões Acessíveis para Hábitos --- */
+.habito-hoje-check-loop {
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+/* Melhoria de foco para acessibilidade */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 2px solid var(--cor-primaria);
+    outline-offset: 2px;
+}
+
+.tipo-habito-btn:focus-visible {
+    outline: 3px solid var(--cor-primaria);
+    outline-offset: 2px;
+}
+
+/* --- Estilo para descrição expandida no modal de tipo --- */
+.tipo-habito-btn .tipo-descricao {
+    font-size: 0.75rem;
+    line-height: 1.4;
 }
