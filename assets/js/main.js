@@ -153,6 +153,7 @@ let habitos = carregarHabitos();
 // Variáveis globais para modais
 let habitoParaExcluir = null;
 let habitoParaValor = null;
+let dataParaValor = null;
 let tipoHabitoSelecionado = 'binario';
 let frequenciaXTemp = 3;
 let frequenciaYTemp = 5;
@@ -1071,9 +1072,11 @@ function configurarModalValor() {
         btnConfirmarValor.addEventListener('click', () => {
             if (habitoParaValor) {
                 const valor = parseFloat(inputValorDia.value) || 0;
-                habitoParaValor.historico[getHoje()] = valor;
+                const dataAlvo = dataParaValor || getHoje();
+                habitoParaValor.historico[dataAlvo] = valor;
                 salvarHabitos();
                 habitoParaValor = null;
+                dataParaValor = null;
                 
                 fecharModal('modalValorBackdrop');
                 
@@ -1114,6 +1117,41 @@ function abrirModalValor(habitoId) {
     
     if (inputValorDia) {
         inputValorDia.value = getValorHoje(habito);
+    }
+    
+    atualizarPreviewValor();
+    abrirModal('modalValorBackdrop');
+}
+
+function abrirModalValorParaData(habitoId, data) {
+    const habito = habitos.find(h => h.id === habitoId);
+    if (!habito || habito.tipo !== 'mensuravel') return;
+    
+    habitoParaValor = habito;
+    dataParaValor = data;
+    
+    const perguntaValor = document.getElementById('perguntaValor');
+    const valorUnidade = document.getElementById('valorUnidade');
+    const inputValorDia = document.getElementById('inputValorDia');
+    
+    const dataObj = new Date(data + 'T12:00:00');
+    const hoje = new Date();
+    hoje.setHours(12, 0, 0, 0);
+    const isHoje = dataObj.toDateString() === hoje.toDateString();
+    
+    if (perguntaValor) {
+        perguntaValor.textContent = isHoje 
+            ? 'Quanto você completou hoje?' 
+            : `Quanto você completou em ${dataObj.getDate()}/${dataObj.getMonth() + 1}?`;
+    }
+    
+    if (valorUnidade) {
+        valorUnidade.textContent = habito.unidade || 'unidades';
+    }
+    
+    if (inputValorDia) {
+        const valorExistente = habito.historico[data];
+        inputValorDia.value = valorExistente !== undefined ? valorExistente : 0;
     }
     
     atualizarPreviewValor();
@@ -1330,6 +1368,8 @@ function criarCardHabitoAvancado(habito) {
             dia.addEventListener('click', () => {
                 if (habito.tipo === 'binario') {
                     toggleDiaHabito(habito.id, dia.dataset.data);
+                } else {
+                    abrirModalValorParaData(habito.id, dia.dataset.data);
                 }
             });
         });
