@@ -97,15 +97,15 @@ body:not(.tema-escuro) {
    TEMA ESCURO
    ============================================ */
 body.tema-escuro {
-    --cor-fundo: #0f172a;
-    --cor-fundo-card: #1e293b;
-    --cor-texto: #f1f5f9;
+    --cor-fundo: #0b1220;
+    --cor-fundo-card: #111827;
+    --cor-texto: #e5e7eb;
     --cor-texto-claro: #cbd5e1;
-    --cor-borda: #334155;
-    --sidebar-bg: #0f172a;
-    --sidebar-texto: #f1f5f9;
-    --cor-input-bg: #1e293b;
-    --cor-modal-bg: #1e293b;
+    --cor-borda: #1f2937;
+    --sidebar-bg: #0b1220;
+    --sidebar-texto: #e5e7eb;
+    --cor-input-bg: #0f172a;
+    --cor-modal-bg: #111827;
     --sombra-card: 0 1px 3px rgba(0, 0, 0, 0.3);
     --sombra-elevada: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
@@ -725,24 +725,27 @@ img {
 }
 
 .titulo-pagina {
-    font-size: var(--fonte-tamanho-xl);
+    font-size: 2.25rem;
     color: var(--cor-texto);
-    margin-bottom: var(--espacamento-sm);
+    margin-bottom: var(--espacamento-xs);
+    font-weight: 700;
 }
 
 .subtitulo-pagina {
     color: var(--cor-texto-claro);
-    margin-bottom: var(--espacamento-lg);
+    margin-bottom: var(--espacamento-md);
+    font-size: 1rem;
 }
 
 .header-secao {
-    margin-bottom: var(--espacamento-lg);
+    margin-bottom: var(--espacamento-xl);
 }
 
 .secao-titulo {
-    font-size: var(--fonte-tamanho-lg);
+    font-size: 1.25rem;
     color: var(--cor-texto);
     margin-bottom: var(--espacamento-md);
+    font-weight: 700;
 }
 
 /* ============================================
@@ -937,6 +940,16 @@ img {
 /* ============================================
    7. MEUS HÁBITOS - COMPONENTES ESPECÍFICOS
    ============================================ */
+
+.habitos-dica-tipos {
+    background: linear-gradient(135deg, var(--cor-fundo), var(--cor-fundo-card));
+    border: 1px dashed var(--cor-borda);
+    border-radius: var(--borda-raio);
+    padding: var(--espacamento-md);
+    margin-bottom: var(--espacamento-lg);
+    color: var(--cor-texto-claro);
+    font-size: var(--fonte-tamanho-sm);
+}
 
 /*
  * GRID DE HÁBITOS
@@ -1881,6 +1894,8 @@ img {
     display: flex;
     flex-direction: column;
     gap: var(--espacamento-md);
+    width: 100%;
+    min-width: 0;
 }
 
 .card-habito-avancado:hover {
@@ -1931,6 +1946,19 @@ img {
     display: flex;
     align-items: center;
     gap: 4px;
+}
+
+.btn-icone.btn-stats-habito {
+    width: auto;
+    height: auto;
+    padding: 6px 10px;
+    gap: 6px;
+    font-weight: 600;
+    border-radius: 999px;
+}
+
+.btn-icone.btn-stats-habito span {
+    font-size: 0.75rem;
 }
 
 .habito-card-acoes {
@@ -2114,6 +2142,19 @@ img {
     
     .form-acoes button {
         width: 100%;
+    }
+    
+    .main-content {
+        padding: var(--espacamento-md);
+    }
+    
+    .habitos-grid {
+        grid-template-columns: 1fr;
+        gap: var(--espacamento-md);
+    }
+    
+    .card-habito-avancado {
+        padding: var(--espacamento-md);
     }
 }
 
@@ -2746,11 +2787,10 @@ select:focus-visible {
     color: var(--cor-primaria);
 }
 
-/* Card de hábito clicável para stats */
-.habito-card-header {
+.habito-card-info {
     cursor: pointer;
 }
 
-.habito-card-header:hover .habito-card-nome {
+.habito-card-info:hover .habito-card-nome {
     color: var(--cor-primaria);
 }

@@ -44,13 +44,13 @@ const PREFS_KEY = 'flui360_prefs';
  */
 
 function carregarPreferencias() {
-    const dados = localStorage.getItem(PREFS_KEY);
-    if (dados) {
-        try {
+    try {
+        const dados = localStorage.getItem(PREFS_KEY);
+        if (dados) {
             return JSON.parse(dados);
-        } catch (e) {
-            console.error("Erro ao carregar preferências:", e);
         }
+    } catch (e) {
+        console.error("Erro ao carregar preferências:", e);
     }
     return { tema: 'claro' };
 }
@@ -152,8 +152,9 @@ function criarTrapDeFoco(elemento) {
  */
 function contarDiasConcluidos(habito) {
     let contador = 0;
-    for (const data in habito.historico) {
-        const valor = habito.historico[data];
+    const historico = getHistorico(habito);
+    for (const data in historico) {
+        const valor = historico[data];
         if (habito.tipo === 'binario') {
             if (valor === true) contador++;
         } else {
@@ -170,9 +171,10 @@ function contarDiasConcluidos(habito) {
 function calcularStreakMaxima(habito) {
     // Pega todas as datas onde o hábito foi concluído
     const datasConcluidasSet = [];
+    const historico = getHistorico(habito);
     
-    for (const data in habito.historico) {
-        const valor = habito.historico[data];
+    for (const data in historico) {
+        const valor = historico[data];
         const concluido = habito.tipo === 'binario' 
             ? valor === true 
             : valor >= habito.alvoDiario;
@@ -214,9 +216,10 @@ function calcularStreakMaxima(habito) {
  */
 function calcularStatsMensuravel(habito) {
     const valores = [];
+    const historico = getHistorico(habito);
     
-    for (const data in habito.historico) {
-        const valor = habito.historico[data];
+    for (const data in historico) {
+        const valor = historico[data];
         if (typeof valor === 'number' && valor > 0) {
             valores.push(valor);
         }
@@ -246,6 +249,7 @@ function abrirModalStats(habitoId) {
     const habito = habitos.find(h => h.id === habitoId);
     if (!habito) return;
     
+    // Estatísticas apoiam reflexão e tomada de decisão sobre o hábito (IHC).
     const modalTitulo = document.getElementById('statsHabitoNome');
     const statsDiasConcluidos = document.getElementById('statsDiasConcluidos');
     const statsStreakMaxima = document.getElementById('statsStreakMaxima');
@@ -254,6 +258,7 @@ function abrirModalStats(habitoId) {
     const statsMedia = document.getElementById('statsMedia');
     const statsMaximo = document.getElementById('statsMaximo');
     const statsMinimo = document.getElementById('statsMinimo');
+    const btnFecharStats = document.getElementById('btnFecharStats');
     
     if (modalTitulo) modalTitulo.textContent = habito.nome;
     if (statsDiasConcluidos) statsDiasConcluidos.textContent = contarDiasConcluidos(habito);
@@ -278,6 +283,16 @@ function abrirModalStats(habitoId) {
     }
     
     abrirModal('modalStatsBackdrop');
+    
+    // Envia o foco para o título (ou botão fechar) para leitura imediata em leitores de tela.
+    setTimeout(() => {
+        const tituloModal = document.getElementById('tituloModalStats');
+        if (tituloModal) {
+            tituloModal.focus();
+        } else if (btnFecharStats) {
+            btnFecharStats.focus();
+        }
+    }, 150);
 }
 
 function gerarHistorico(diasAtras, probabilidade, tipo = 'binario', alvo = 1) {
@@ -380,23 +395,52 @@ function getHabitosPadrao() {
     ];
 }
 
-function carregarHabitos() {
-    const dados = localStorage.getItem(STORAGE_KEY);
-    if (dados) {
-        try {
-            return JSON.parse(dados);
-        } catch (e) {
-            console.error("Erro ao carregar hábitos:", e);
-        }
+function normalizarHabitos(lista) {
+    if (!Array.isArray(lista)) {
+        console.warn('[Flui360] Lista de hábitos inválida, usando padrão.');
+        return getHabitosPadrao();
     }
-    return getHabitosPadrao();
+    
+    return lista
+        .filter(Boolean)
+        .map((habito, index) => ({
+            ...habito,
+            id: typeof habito.id === 'number' ? habito.id : Date.now() + index,
+            tipo: habito.tipo === 'mensuravel' ? 'mensuravel' : 'binario',
+            historico: habito.historico && typeof habito.historico === 'object' ? habito.historico : {},
+            alvoDiario: habito.alvoDiario || 1,
+            unidade: habito.unidade || '',
+            cor: habito.cor || '#6366f1'
+        }));
+}
+
+function carregarHabitos() {
+    try {
+        const dados = localStorage.getItem(STORAGE_KEY);
+        if (dados) {
+            const parsed = JSON.parse(dados);
+            const normalizados = normalizarHabitos(parsed);
+            console.log('[Flui360] Hábitos carregados:', normalizados.length);
+            return normalizados;
+        }
+    } catch (e) {
+        console.error("Erro ao carregar hábitos:", e);
+    }
+    const defaults = getHabitosPadrao();
+    console.log('[Flui360] Usando hábitos padrão:', defaults.length);
+    return defaults;
 }
 
 function salvarHabitos() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(habitos));
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(habitos));
+        console.log('[Flui360] Hábitos salvos:', habitos.length);
+    } catch (e) {
+        console.error('Erro ao salvar hábitos no localStorage', e);
+    }
 }
 
-let habitos = carregarHabitos();
+let habitos = normalizarHabitos(carregarHabitos());
 
 // Variáveis globais para modais
 let habitoParaExcluir = null;
@@ -414,8 +458,12 @@ function getHoje() {
     return new Date().toISOString().split('T')[0];
 }
 
+function getHistorico(habito) {
+    return habito && typeof habito.historico === 'object' ? habito.historico : {};
+}
+
 function estaConcluidoHoje(habito) {
-    const valor = habito.historico[getHoje()];
+    const valor = getHistorico(habito)[getHoje()];
     if (habito.tipo === 'binario') {
         return valor === true;
     }
@@ -423,18 +471,19 @@ function estaConcluidoHoje(habito) {
 }
 
 function getValorHoje(habito) {
-    return habito.historico[getHoje()] || 0;
+    return getHistorico(habito)[getHoje()] || 0;
 }
 
 function calcularSequencia(habito) {
     let sequencia = 0;
     const hoje = new Date();
+    const historico = getHistorico(habito);
     
     for (let i = 0; i < 365; i++) {
         const data = new Date(hoje);
         data.setDate(data.getDate() - i);
         const chave = data.toISOString().split('T')[0];
-        const valor = habito.historico[chave];
+        const valor = historico[chave];
         
         let concluido = habito.tipo === 'binario' ? valor === true : valor >= habito.alvoDiario;
         
@@ -451,12 +500,13 @@ function calcularSequencia(habito) {
 function calcularProgresso(habito) {
     let concluidos = 0;
     const hoje = new Date();
+    const historico = getHistorico(habito);
     
     for (let i = 0; i < 30; i++) {
         const data = new Date(hoje);
         data.setDate(data.getDate() - i);
         const chave = data.toISOString().split('T')[0];
-        const valor = habito.historico[chave];
+        const valor = historico[chave];
         
         if (habito.tipo === 'binario') {
             if (valor === true) concluidos++;
@@ -481,7 +531,7 @@ function calcularDadosSemanais() {
         
         let concluidos = 0;
         habitos.forEach(habito => {
-            const valor = habito.historico[chave];
+            const valor = getHistorico(habito)[chave];
             if (habito.tipo === 'binario') {
                 if (valor === true) concluidos++;
             } else {
@@ -511,7 +561,7 @@ function calcularDadosMensais() {
             
             habitos.forEach(habito => {
                 totalPossiveis++;
-                const valor = habito.historico[chave];
+                const valor = getHistorico(habito)[chave];
                 if (habito.tipo === 'binario') {
                     if (valor === true) totalConcluidos++;
                 } else {
@@ -530,12 +580,13 @@ function calcularDadosMensais() {
 function contarDiasConcluidos(habito) {
     let dias = 0;
     const hoje = new Date();
+    const historico = getHistorico(habito);
     
     for (let i = 0; i < 30; i++) {
         const data = new Date(hoje);
         data.setDate(data.getDate() - i);
         const chave = data.toISOString().split('T')[0];
-        const valor = habito.historico[chave];
+        const valor = historico[chave];
         
         if (habito.tipo === 'binario') {
             if (valor === true) dias++;
@@ -683,6 +734,7 @@ function fecharModalAtivo() {
 // 4.1. SISTEMA DE TOAST (FEEDBACK)
 // ============================================
 
+// Feedback imediato mantém a visibilidade do estado do sistema (heurística de Nielsen).
 function mostrarToast(mensagem, tipo = 'sucesso', duracao = 3000) {
     const container = document.getElementById('toastContainer');
     if (!container) return;
@@ -1294,8 +1346,11 @@ function toggleDiaHabito(habitoId, data) {
     const habito = habitos.find(h => h.id === habitoId);
     if (!habito) return;
     
+    // Mesma ação de marcar/desmarcar é reaproveitada em todas as telas para consistência e padrões.
     if (habito.tipo === 'binario') {
-        const novoValor = !habito.historico[data];
+        const historico = getHistorico(habito);
+        const novoValor = !historico[data];
+        habito.historico = historico;
         habito.historico[data] = novoValor;
         salvarHabitos();
         renderizarHabitos();
@@ -1350,6 +1405,7 @@ function configurarModalValor() {
             if (habitoParaValor) {
                 const valor = parseFloat(inputValorDia.value) || 0;
                 const dataAlvo = dataParaValor || getHoje();
+                habitoParaValor.historico = getHistorico(habitoParaValor);
                 habitoParaValor.historico[dataAlvo] = valor;
                 salvarHabitos();
                 habitoParaValor = null;
@@ -1427,7 +1483,7 @@ function abrirModalValorParaData(habitoId, data) {
     }
     
     if (inputValorDia) {
-        const valorExistente = habito.historico[data];
+        const valorExistente = getHistorico(habito)[data];
         inputValorDia.value = valorExistente !== undefined ? valorExistente : 0;
     }
     
@@ -1542,6 +1598,11 @@ function renderizarHabitos() {
     
     if (!grid) return;
     
+    if (!Array.isArray(habitos)) {
+        console.warn('[Flui360] Estado de hábitos inválido ao renderizar. Resetando.');
+        habitos = normalizarHabitos([]);
+    }
+    
     grid.innerHTML = '';
     
     if (habitos.length === 0) {
@@ -1561,6 +1622,7 @@ function criarCardHabitoAvancado(habito) {
     const card = document.createElement('article');
     card.className = 'card-habito-avancado';
     card.style.setProperty('--cor-habito', habito.cor);
+    const historico = getHistorico(habito);
     
     const tipoBadge = habito.tipo === 'binario' ? 'Sim/Não' : 'Mensurável';
     const frequenciaTexto = getTextoFrequencia(habito);
@@ -1576,10 +1638,10 @@ function criarCardHabitoAvancado(habito) {
     const hoje = getHoje();
     
     if (habito.tipo === 'binario') {
-        const concluido = habito.historico[hoje] === true;
+        const concluido = historico[hoje] === true;
         controleHTML = `
             <div class="habito-card-controle">
-                <div class="controle-binario" onclick="toggleDiaHabito(${habito.id}, '${hoje}')">
+                <div class="controle-binario" role="button" tabindex="0" aria-label="${concluido ? 'Desmarcar' : 'Marcar'} o hábito ${habito.nome} como concluído hoje" onclick="toggleDiaHabito(${habito.id}, '${hoje}')">
                     <div class="checkbox-grande ${concluido ? 'concluido' : ''}" style="--cor-habito: ${habito.cor}">
                         <span class="check-icon">${concluido ? '✓' : ''}</span>
                     </div>
@@ -1589,15 +1651,16 @@ function criarCardHabitoAvancado(habito) {
         `;
     } else {
         // Hábito mensurável - botão com mesmo estilo que abre modal
-        const valorHoje = habito.historico[hoje] || 0;
+        const valorHoje = historico[hoje] || 0;
         const alvo = habito.alvoDiario;
         const atingido = valorHoje >= alvo;
         const percentual = Math.min((valorHoje / alvo) * 100, 100);
         
         controleHTML = `
             <div class="habito-card-controle">
-                <div class="controle-mensuravel-botao" onclick="abrirModalValor(${habito.id})">
-                    <button class="btn-completar-mensuravel ${atingido ? 'concluido' : ''}" style="--cor-habito: ${habito.cor}; --progresso: ${percentual}%">
+                <div class="controle-mensuravel-botao" role="button" tabindex="0" aria-label="Registrar valor de hoje para o hábito ${habito.nome}" onclick="abrirModalValor(${habito.id})">
+                    <button class="btn-completar-mensuravel ${atingido ? 'concluido' : ''}" style="--cor-habito: ${habito.cor}; --progresso: ${percentual}%"
+                        aria-hidden="true">
                         <span class="check-icon">${atingido ? '✓' : ''}</span>
                     </button>
                     <div class="controle-mensuravel-info">
@@ -1617,8 +1680,11 @@ function criarCardHabitoAvancado(habito) {
         <div class="habito-card-header">
             <div class="habito-card-info">
                 <h3 class="habito-card-nome">
-                    ${habito.nome}
+                    <span class="habito-card-nome-texto">${habito.nome}</span>
                     <span class="habito-tipo-badge">${tipoBadge}</span>
+                    <button type="button" class="btn-icone btn-stats-habito" data-habito-id="${habito.id}" aria-label="Ver estatísticas do hábito ${habito.nome}" title="Ver estatísticas">
+                        &#9432; <span>Detalhes</span>
+                    </button>
                 </h3>
                 <div class="habito-card-meta">
                     <span>&#128197; ${frequenciaTexto}</span>
@@ -1626,8 +1692,8 @@ function criarCardHabitoAvancado(habito) {
                 </div>
             </div>
             <div class="habito-card-acoes">
-                <button class="btn-icone btn-editar" onclick="editarHabito(${habito.id})" aria-label="Editar hábito" title="Editar">&#9998;</button>
-                <button class="btn-icone btn-excluir" onclick="confirmarExclusao(${habito.id})" aria-label="Excluir hábito" title="Excluir">&#128465;</button>
+                <button class="btn-icone btn-editar" onclick="editarHabito(${habito.id})" aria-label="Editar o hábito ${habito.nome}" title="Editar">&#9998;</button>
+                <button class="btn-icone btn-excluir" onclick="confirmarExclusao(${habito.id})" aria-label="Excluir o hábito ${habito.nome}" title="Excluir">&#128465;</button>
             </div>
         </div>
         
@@ -1652,10 +1718,38 @@ function criarCardHabitoAvancado(habito) {
             });
         });
         
+        const controleBinario = card.querySelector('.controle-binario');
+        if (controleBinario) {
+            controleBinario.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleDiaHabito(habito.id, hoje);
+                }
+            });
+        }
+        
+        const controleMensuravel = card.querySelector('.controle-mensuravel-botao');
+        if (controleMensuravel) {
+            controleMensuravel.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    abrirModalValor(habito.id);
+                }
+            });
+        }
+        
         // Clique no nome/info do hábito abre estatísticas
         const cardInfo = card.querySelector('.habito-card-info');
         if (cardInfo) {
             cardInfo.addEventListener('click', () => abrirModalStats(habito.id));
+        }
+        
+        const btnStats = card.querySelector('.btn-stats-habito');
+        if (btnStats) {
+            btnStats.addEventListener('click', (e) => {
+                e.stopPropagation();
+                abrirModalStats(habito.id);
+            });
         }
     }, 0);
     
@@ -1680,12 +1774,13 @@ function gerarDiasCalendario(habito, numDias) {
     let html = '';
     const hoje = new Date();
     const diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+    const historico = getHistorico(habito);
     
     for (let i = numDias - 1; i >= 0; i--) {
         const data = new Date(hoje);
         data.setDate(data.getDate() - i);
         const chave = data.toISOString().split('T')[0];
-        const valor = habito.historico[chave];
+        const valor = historico[chave];
         
         let concluido = habito.tipo === 'binario' ? valor === true : valor >= habito.alvoDiario;
         const diaNumero = data.getDate();
@@ -1723,6 +1818,11 @@ function renderizarHabitosHoje() {
     const container = document.getElementById('habitosHoje');
     if (!container) return;
     
+    if (!Array.isArray(habitos)) {
+        console.warn('[Flui360] Estado de hábitos inválido ao renderizar hoje. Resetando.');
+        habitos = normalizarHabitos([]);
+    }
+    
     container.innerHTML = '';
     const hoje = getHoje();
     
@@ -1738,7 +1838,7 @@ function renderizarHabitosHoje() {
                 <button type="button" class="habito-hoje-check-loop ${concluido ? 'concluido' : ''}" 
                      data-id="${habito.id}"
                      style="--cor-habito: ${habito.cor}"
-                     aria-label="${concluido ? 'Desmarcar' : 'Marcar'} ${habito.nome}">
+                     aria-label="${concluido ? 'Desmarcar' : 'Marcar'} o hábito ${habito.nome} como concluído hoje">
                     <span class="check-icon">${concluido ? '✓' : ''}</span>
                 </button>
                 <div class="habito-hoje-info-loop">
@@ -1757,7 +1857,7 @@ function renderizarHabitosHoje() {
                 <button type="button" class="habito-hoje-check-loop ${concluido ? 'concluido' : ''}" 
                      data-id="${habito.id}"
                      style="--cor-habito: ${habito.cor}"
-                     aria-label="Registrar progresso de ${habito.nome}">
+                     aria-label="Registrar valor de hoje para o hábito ${habito.nome}">
                     <span class="check-icon">${concluido ? '✓' : ''}</span>
                 </button>
                 <div class="habito-hoje-info-loop">
@@ -2024,6 +2124,7 @@ function configurarModalStats() {
 function configurarTeclaEscape() {
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
+            // Fecha qualquer modal ativo via teclado para manter acessibilidade.
             fecharModalAtivo();
         }
     });

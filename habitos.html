@@ -96,6 +96,13 @@
                 <h1 class="titulo-pagina">Meus Hábitos</h1>
                 <p class="subtitulo-pagina">Gerencie seus hábitos diários</p>
             </div>
+            
+            <div class="habitos-dica-tipos" aria-live="polite">
+                <p>
+                    Hábitos <strong>Sim/Não</strong> são marcados apenas como feitos ou não feitos no dia.
+                    Hábitos <strong>mensuráveis</strong> registram um valor (páginas, litros, minutos etc.) toda vez que você conclui o dia, para acompanhar o volume realizado.
+                </p>
+            </div>
 
             <section class="habitos-grid" id="habitosGrid">
             </section>
@@ -418,7 +425,7 @@
         </div>
     </div>
 
-    <div class="toast-container" id="toastContainer"></div>
+    <div class="toast-container" id="toastContainer" role="status" aria-live="polite" aria-atomic="true"></div>
 
     <!-- MODAL: PREFERÊNCIAS -->
     <div class="modal-backdrop" id="modalPreferenciasBackdrop">
@@ -449,7 +456,7 @@
     <div class="modal-backdrop" id="modalStatsBackdrop">
         <div class="modal modal-medio" role="dialog" aria-labelledby="tituloModalStats" aria-modal="true">
             <div class="modal-header">
-                <h2 id="tituloModalStats">Estatísticas: <span id="statsHabitoNome">Hábito</span></h2>
+                <h2 id="tituloModalStats" tabindex="-1">Estatísticas: <span id="statsHabitoNome">Hábito</span></h2>
                 <button type="button" class="btn-fechar-modal" id="btnFecharStats" aria-label="Fechar modal">
                     &times;
                 </button>

@@ -198,6 +198,10 @@ O projeto é estático e pode ser executado com qualquer servidor HTTP. No Repli
 
 ### Validação de Formulários
 - Mensagens de erro próximas aos campos inválidos
+
+## Atualizações rápidas (IHC)
+- Arquivos alterados: habitos.html, dashboard.html, relatorios.html, assets/css/style.css, assets/js/main.js.
+- Melhorias aplicadas: texto breve explicando tipos de hábito, botão/ícone claro para abrir estatísticas, aria-labels e contêiner de toast com aria-live/role, contraste reforçado no modo escuro e cards em coluna única no mobile, comentários de código destacando feedback, consistência e reflexão do usuário.
 - Validação antes de submeter
 - Feedback visual com borda vermelha nos campos com erro
 
