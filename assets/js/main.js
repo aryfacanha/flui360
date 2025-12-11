@@ -92,6 +92,39 @@ function alternarTema() {
     anunciarParaLeitorDeTela(`Tema alterado para modo ${preferencias.tema}`);
 }
 
+function solicitarNotificacao(callback) {
+    if (!('Notification' in window)) {
+        alert('Este navegador não suporta notificações.');
+        return;
+    }
+
+    if (Notification.permission === 'granted') {
+        callback();
+        return;
+    }
+
+    if (Notification.permission === 'denied') {
+        alert('Notificações bloqueadas pelo navegador. Ajuste as permissões para habilitar.');
+        return;
+    }
+
+    Notification.requestPermission().then((perm) => {
+        if (perm === 'granted') {
+            callback();
+        } else {
+            alert('Permissão de notificações não concedida.');
+        }
+    });
+}
+
+function testarNotificacao() {
+    solicitarNotificacao(() => {
+        new Notification('Flui360', {
+            body: 'Notificação de teste enviada com sucesso!',
+        });
+    });
+}
+
 // ============================================
 // FUNÇÕES DE ACESSIBILIDADE
 // ============================================
@@ -2474,6 +2507,7 @@ function configurarModalPreferencias() {
     const toggleModoEscuro = document.getElementById('toggleModoEscuro');
     const toggleOrientacaoDias = document.getElementById('toggleOrientacaoDias');
     const selectPaginaInicial = document.getElementById('selectPaginaInicial');
+    const btnTestarNotificacao = document.getElementById('btnTestarNotificacao');
     const btnAbrirPreferencias = document.getElementById('btnAbrirPreferencias');
     
     if (btnAbrirPreferencias) {
@@ -2531,6 +2565,12 @@ function configurarModalPreferencias() {
         selectPaginaInicial.addEventListener('change', () => {
             preferencias.paginaInicial = selectPaginaInicial.value;
             salvarPreferencias(preferencias);
+        });
+    }
+
+    if (btnTestarNotificacao) {
+        btnTestarNotificacao.addEventListener('click', () => {
+            testarNotificacao();
         });
     }
 }
