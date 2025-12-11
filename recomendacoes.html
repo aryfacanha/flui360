@@ -92,6 +92,12 @@
         </button>
     </div>
 
+    <!-- 
+        MODAL 1: SELEÇÃO DE TIPO DE HÁBITO
+        ==================================
+        Aparece primeiro quando o usuário clica no FAB para criar novo hábito.
+        Após selecionar o tipo, abre o formulário principal.
+    -->
     <div class="modal-backdrop" id="modalTipoBackdrop">
         <div class="modal modal-pequeno" role="dialog" aria-labelledby="tituloModalTipo" aria-modal="true">
             <div class="modal-header">
@@ -118,6 +124,12 @@
         </div>
     </div>
 
+    <!-- 
+        MODAL 2: FORMULÁRIO PRINCIPAL DE HÁBITO
+        =======================================
+        Aparece após selecionar o tipo no modal anterior.
+        O tipo é fixo e não pode ser alterado durante edição.
+    -->
     <div class="modal-backdrop" id="modalHabitoBackdrop">
         <div class="modal modal-habito modal-habito-avancado" role="dialog" aria-labelledby="tituloModalHabito" aria-modal="true">
             <div class="modal-header">
@@ -131,12 +143,13 @@
                     <input type="hidden" id="habitoId" value="">
                     <input type="hidden" id="tipoHabitoHidden" value="binario">
 
-                    <div class="form-secao form-secao-nome-cor">
-                        <div class="nome-cor-grid">
-                            <div class="campo-grupo nome-habito-grupo">
-                                <label for="nomeHabito">Nome do hábito</label>
-                                <input 
-                                    type="text" 
+                    <!-- NOME DO HÁBITO + COR COMPACTA -->
+                        <div class="form-secao form-secao-nome-cor">
+                            <div class="nome-cor-grid">
+                                <div class="campo-grupo nome-habito-grupo">
+                                    <label for="nomeHabito">Nome do hábito</label>
+                                    <input 
+                                        type="text" 
                                     id="nomeHabito" 
                                     name="nomeHabito" 
                                     placeholder="Ex: Beber água, Meditar, Ler..." 
@@ -153,20 +166,34 @@
                         </div>
                     </div>
 
+                    <!-- CAMPOS PARA HÁBITO MENSURÁVEL -->
                     <div class="form-secao campos-mensuravel" id="camposMensuravel" style="display: none;">
                         <h3 class="form-secao-titulo">Meta Diária</h3>
                         <div class="campos-linha">
                             <div class="campo-grupo campo-pequeno">
                                 <label for="alvoDiario">Alvo</label>
-                                <input type="number" id="alvoDiario" name="alvoDiario" min="1" value="1">
+                                <input 
+                                    type="number" 
+                                    id="alvoDiario" 
+                                    name="alvoDiario" 
+                                    min="1" 
+                                    value="1"
+                                    placeholder="Ex: 2"
+                                >
                             </div>
                             <div class="campo-grupo campo-medio">
                                 <label for="unidadeHabito">Unidade</label>
-                                <input type="text" id="unidadeHabito" name="unidadeHabito" placeholder="Ex: litros, páginas">
+                                <input 
+                                    type="text" 
+                                    id="unidadeHabito" 
+                                    name="unidadeHabito" 
+                                    placeholder="Ex: litros, páginas, minutos"
+                                >
                             </div>
                         </div>
                     </div>
 
+                    <!-- FREQUÊNCIA (RESUMO + MINI MODAL) -->
                     <div class="form-secao form-secao-frequencia">
                         <div class="freq-resumo">
                             <div class="freq-resumo-textos">
@@ -178,30 +205,31 @@
                         <input type="hidden" id="tipoFrequencia" value="diario">
                     </div>
 
+                    <!-- LEMBRETES -->
                     <div class="form-secao">
                         <h3 class="form-secao-titulo">Lembretes</h3>
+                        
                         <div class="lembrete-config lembrete-config-simples" id="lembreteConfig" style="display: none;">
-                            <div class="lembrete-config-header">
-                                <span class="lembrete-label">Horário</span>
-                                <button type="button" class="btn-icone btn-limpar-hora" id="btnLimparHoraLembrete" aria-label="Limpar horário do lembrete">&times;</button>
+                            <input type="checkbox" id="lembreteAtivo" name="lembreteAtivo" style="display: none;">
+                            <div class="campo-grupo campo-hora-lembrete">
+                                <div class="hora-lembrete-wrapper">
+                                    <input type="time" id="horaLembrete" name="horaLembrete" value="" placeholder="Desabilitado">
+                                    <button type="button" class="btn-icone btn-limpar-hora" id="btnLimparHoraLembrete" aria-label="Limpar horário do lembrete">&times;</button>
+                                </div>
                             </div>
-                            <input type="time" id="horaLembrete" class="input-hora" aria-label="Horário do lembrete">
-                        </div>
-                        <div class="lembrete-toggle-container">
-                            <label class="toggle-lembrete">
-                                <input type="checkbox" id="lembreteAtivo">
-                                <span class="toggle-lembrete-slider"></span>
-                                <span class="toggle-lembrete-texto">Ativar lembrete diário</span>
-                            </label>
-                            <div class="dias-semana-resumo" style="display: none;">
-                                <span id="diasResumoTexto">Todos os dias</span>
-                                <button type="button" class="btn-texto" id="btnAbrirDiasModal">Escolher dias</button>
+                            
+                            <div class="dias-semana-resumo">
+                                <div class="dias-resumo-textos">
+                                    <span class="dias-resumo-label">Dias da semana</span>
+                                    <span class="dias-resumo-valor" id="diasResumoTexto">Todos os dias</span>
+                                </div>
+                                <button type="button" class="btn-texto btn-abrir-dias" id="btnAbrirDiasModal">Selecionar</button>
                             </div>
                         </div>
                     </div>
 
                     <div class="form-acoes">
-                        <button type="button" class="btn-secundario" id="btnCancelarHabito">Cancelar</button>
+                        <button type="button" class="btn-secundario btn-cancelar" id="btnCancelarHabito">Cancelar</button>
                         <button type="submit" class="btn-primario" id="btnSalvarHabito">Salvar Hábito</button>
                     </div>
                 </form>
@@ -209,6 +237,196 @@
         </div>
     </div>
 
+    <!-- MINI MODAL: DIAS DO LEMBRETE -->
+    <div class="modal-backdrop" id="modalDiasBackdrop">
+        <div class="modal modal-mini" role="dialog" aria-labelledby="tituloModalDias" aria-modal="true">
+            <div class="modal-header">
+                <h2 id="tituloModalDias">Selecionar dias</h2>
+                <button type="button" class="btn-fechar-modal" id="btnFecharModalDias" aria-label="Fechar modal">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="dias-semana-container dias-modal">
+                    <div class="dias-semana-header">
+                        <span>Dias da semana</span>
+                        <button type="button" class="btn-texto" id="btnToggleDias">Selecionar todos</button>
+                    </div>
+                    <div class="dias-semana-grid" id="diasSemanaGrid">
+                        <button type="button" class="dia-semana-btn" data-dia="dom">Dom</button>
+                        <button type="button" class="dia-semana-btn" data-dia="seg">Seg</button>
+                        <button type="button" class="dia-semana-btn" data-dia="ter">Ter</button>
+                        <button type="button" class="dia-semana-btn" data-dia="qua">Qua</button>
+                        <button type="button" class="dia-semana-btn" data-dia="qui">Qui</button>
+                        <button type="button" class="dia-semana-btn" data-dia="sex">Sex</button>
+                        <button type="button" class="dia-semana-btn" data-dia="sab">Sáb</button>
+                    </div>
+                </div>
+                <div class="form-acoes form-acoes-compacta">
+                    <button type="button" class="btn-secundario btn-cancelar" id="btnCancelarDias">Cancelar</button>
+                    <button type="button" class="btn-primario" id="btnSalvarDias">Aplicar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MINI MODAL: CORES -->
+    <div class="modal-backdrop" id="modalCoresBackdrop">
+        <div class="modal modal-mini" role="dialog" aria-labelledby="tituloModalCores" aria-modal="true">
+            <div class="modal-header">
+                <h2 id="tituloModalCores">Escolha uma cor</h2>
+                <button type="button" class="btn-fechar-modal" id="btnFecharModalCores" aria-label="Fechar modal">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="cores-grid cores-grid-modal" id="coresGrid">
+                    <label class="cor-opcao">
+                        <input type="radio" name="corHabito" value="#10b981" checked>
+                        <span class="cor-preview" style="background-color: #10b981"></span>
+                    </label>
+                    <label class="cor-opcao">
+                        <input type="radio" name="corHabito" value="#f59e0b">
+                        <span class="cor-preview" style="background-color: #f59e0b"></span>
+                    </label>
+                    <label class="cor-opcao">
+                        <input type="radio" name="corHabito" value="#6366f1">
+                        <span class="cor-preview" style="background-color: #6366f1"></span>
+                    </label>
+                    <label class="cor-opcao">
+                        <input type="radio" name="corHabito" value="#8b5cf6">
+                        <span class="cor-preview" style="background-color: #8b5cf6"></span>
+                    </label>
+                    <label class="cor-opcao">
+                        <input type="radio" name="corHabito" value="#3b82f6">
+                        <span class="cor-preview" style="background-color: #3b82f6"></span>
+                    </label>
+                    <label class="cor-opcao">
+                        <input type="radio" name="corHabito" value="#ec4899">
+                        <span class="cor-preview" style="background-color: #ec4899"></span>
+                    </label>
+                    <label class="cor-opcao">
+                        <input type="radio" name="corHabito" value="#14b8a6">
+                        <span class="cor-preview" style="background-color: #14b8a6"></span>
+                    </label>
+                    <label class="cor-opcao">
+                        <input type="radio" name="corHabito" value="#ef4444">
+                        <span class="cor-preview" style="background-color: #ef4444"></span>
+                    </label>
+                </div>
+                <div class="form-acoes form-acoes-compacta">
+                    <button type="button" class="btn-secundario" id="btnCancelarCores">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 
+        MODAL 3: VALOR PARA HÁBITO MENSURÁVEL
+        =====================================
+        Aparece quando o usuário clica para "completar" um hábito mensurável.
+        Pergunta o valor do dia (ex: "Quantas páginas você leu hoje?")
+    -->
+    <div class="modal-backdrop" id="modalValorBackdrop">
+        <div class="modal modal-pequeno" role="dialog" aria-labelledby="tituloModalValor" aria-modal="true">
+            <div class="modal-header">
+                <h2 id="tituloModalValor">Registrar Valor</h2>
+                <button type="button" class="btn-fechar-modal" id="btnFecharModalValor" aria-label="Fechar modal">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-pergunta" id="perguntaValor">Quanto você completou hoje?</p>
+                <div class="campo-valor-modal">
+                    <input type="number" id="inputValorDia" min="0" step="0.5" value="0" class="input-valor-grande">
+                    <span class="valor-unidade" id="valorUnidade">unidades</span>
+                </div>
+                <div class="valor-progresso-preview">
+                    <span id="valorProgressoTexto">0/0</span>
+                    <div class="progresso-barra-mensuravel">
+                        <div class="progresso-barra-preenchido" id="valorProgressoBarra" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="form-acoes">
+                    <button type="button" class="btn-secundario btn-cancelar" id="btnCancelarValor">Cancelar</button>
+                    <button type="button" class="btn-primario" id="btnConfirmarValor">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MINI MODAL: FREQUÊNCIA -->
+    <div class="modal-backdrop" id="modalFrequenciaBackdrop">
+        <div class="modal modal-mini" role="dialog" aria-labelledby="tituloModalFrequencia" aria-modal="true">
+            <div class="modal-header">
+                <h2 id="tituloModalFrequencia">Escolher frequência</h2>
+                <button type="button" class="btn-fechar-modal" id="btnFecharModalFrequencia" aria-label="Fechar modal">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="freq-opcoes">
+                    <label class="freq-opcao">
+                        <input type="radio" name="opcaoFrequencia" value="diario" checked>
+                        <span>Todos os dias</span>
+                    </label>
+                    <label class="freq-opcao freq-opcao-inline">
+                        <input type="radio" name="opcaoFrequencia" value="x-semana">
+                        <span>
+                            <input type="number" id="vezesXSemana" min="1" max="7" value="3" class="freq-input-pequeno"> vez(es) por semana
+                        </span>
+                    </label>
+                    <label class="freq-opcao freq-opcao-inline">
+                        <input type="radio" name="opcaoFrequencia" value="x-mes">
+                        <span>
+                            <input type="number" id="vezesXMes" min="1" max="31" value="10" class="freq-input-pequeno"> vez(es) por mês
+                        </span>
+                    </label>
+                    <label class="freq-opcao freq-opcao-inline">
+                        <input type="radio" name="opcaoFrequencia" value="x-em-y">
+                        <span>
+                            <input type="number" id="inputVezesX" min="1" value="3" class="freq-input-pequeno"> vez(es) em
+                            <input type="number" id="inputDiasY" min="1" value="5" class="freq-input-pequeno"> dia(s)
+                        </span>
+                    </label>
+                    <!--
+                    <label class="freq-opcao">
+                        <input type="radio" name="opcaoFrequencia" value="personalizado">
+                        <span>Personalizado</span>
+                    </label>
+                    -->
+                </div>
+                <div class="form-acoes form-acoes-compacta">
+                    <button type="button" class="btn-secundario btn-cancelar" id="btnCancelarFrequencia">Cancelar</button>
+                    <button type="button" class="btn-primario" id="btnSalvarFrequencia">Aplicar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 5: CONFIRMAÇÃO DE EXCLUSÃO -->
+    <div class="modal-backdrop" id="modalExcluirBackdrop">
+        <div class="modal modal-pequeno" role="dialog" aria-labelledby="tituloModalExcluir" aria-modal="true">
+            <div class="modal-header">
+                <h2 id="tituloModalExcluir">Excluir Hábito</h2>
+                <button type="button" class="btn-fechar-modal" id="btnFecharModalExcluir" aria-label="Fechar modal">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir o hábito "<strong id="nomeHabitoExcluir"></strong>"?</p>
+                <p class="texto-aviso">Esta ação não pode ser desfeita.</p>
+                <div class="form-acoes">
+                    <button type="button" class="btn-secundario btn-cancelar" id="btnCancelarExcluir">Cancelar</button>
+                    <button type="button" class="btn-perigo" id="btnConfirmarExcluir">Excluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer" role="status" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- MODAL: PREFERÊNCIAS -->
     <div class="modal-backdrop" id="modalPreferenciasBackdrop">
         <div class="modal modal-pequeno" role="dialog" aria-labelledby="tituloModalPreferencias" aria-modal="true">
             <div class="modal-header">
@@ -267,12 +485,90 @@
                             </select>
                         </div>
                     </div>
+
+                    <div class="pref-item">
+                        <div class="pref-item-header">
+                            <div class="pref-item-texto">
+                                <div class="pref-item-titulo">
+                                    Notificações
+                                    <span class="pref-item-info" tabindex="0" data-info="Ative para receber lembretes do navegador.">i</span>
+                                </div>
+                                <p class="pref-item-descricao">Use um horário no hábito e permita notificações no navegador.</p>
+                            </div>
+                            <div class="pref-item-acoes">
+                                <div class="toggle-switch" id="toggleNotificacoes" role="switch" aria-checked="false" tabindex="0">
+                                    <div class="toggle-switch-slider"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal-backdrop" id="modalPreferenciasBackdrop"></div>
+    <!-- MODAL: ESTATÍSTICAS DO HÁBITO -->
+    <div class="modal-backdrop" id="modalStatsBackdrop">
+        <div class="modal modal-medio" role="dialog" aria-labelledby="tituloModalStats" aria-modal="true">
+            <div class="modal-header">
+                <h2 id="tituloModalStats" tabindex="-1">Estatísticas: <span id="statsHabitoNome">Hábito</span></h2>
+                <button type="button" class="btn-fechar-modal" id="btnFecharStats" aria-label="Fechar modal">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="stats-lista">
+                    <div class="stats-linha stats-linha-dupla">
+                        <div class="stats-duo">
+                            <span class="stats-item-label">Dias Concluídos</span>
+                            <span class="stats-item-valor" id="statsDiasConcluidos">0</span>
+                        </div>
+                        <div class="stats-duo">
+                            <span class="stats-item-label">Maior Sequência</span>
+                            <span class="stats-item-valor" id="statsStreakMaxima">0</span>
+                        </div>
+                    </div>
+                    <div class="stats-linha">
+                        <span class="stats-item-label">Tipo</span>
+                        <span class="stats-item-valor">
+                            <span class="stats-tipo-badge" id="statsTipoBadge">Sim/Não</span>
+                        </span>
+                    </div>
+                    <div class="stats-linha">
+                        <span class="stats-item-label">Frequência</span>
+                        <span class="stats-item-valor" id="statsFrequenciaTexto">–</span>
+                    </div>
+                    <div class="stats-linha">
+                        <span class="stats-item-label">Lembrete</span>
+                        <span class="stats-item-valor" id="statsLembreteTexto">–</span>
+                    </div>
+                </div>
+                
+                <div class="stats-secao" id="statsSecaoMensuravel" style="display: none;">
+                    <h4 class="stats-secao-titulo">Estatísticas de Valores</h4>
+                    <div class="stats-grid">
+                        <div class="stats-item">
+                            <div class="stats-item-valor" id="statsMedia">0</div>
+                            <div class="stats-item-label">Média</div>
+                        </div>
+                        <div class="stats-item">
+                            <div class="stats-item-valor" id="statsMaximo">0</div>
+                            <div class="stats-item-label">Máximo</div>
+                        </div>
+                        <div class="stats-item">
+                            <div class="stats-item-valor" id="statsMinimo">0</div>
+                            <div class="stats-item-label">Mínimo</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-acoes">
+                    <button type="button" class="btn-primario" id="btnFecharModalStats">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="assets/js/main.js"></script>
 </body>
 </html>

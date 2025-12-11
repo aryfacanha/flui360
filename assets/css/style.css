@@ -926,6 +926,16 @@ img {
     display: block;
 }
 
+@media (max-width: 768px) {
+    /* Centraliza tooltips em telas pequenas para evitar sair da viewport */
+    .info-icone-tooltip {
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        max-width: 90vw;
+    }
+}
+
 /* --- Gráfico de Barras Vertical --- */
 .secao-grafico {
     background-color: var(--cor-fundo-card);
