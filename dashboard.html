@@ -437,17 +437,37 @@
                 </button>
             </div>
             <div class="modal-body">
-                <h3 class="modal-secao-titulo">Tema</h3>
-                <div class="toggle-container">
-                    <div class="toggle-label">
-                        <span class="toggle-label-icon">&#127769;</span>
-                        <span>Modo escuro</span>
+                <div class="pref-list">
+                    <div class="pref-item">
+                        <div class="pref-item-header">
+                            <div class="pref-item-texto">
+                                <div class="pref-item-titulo">
+                                    Modo escuro
+                                    <span class="pref-item-info" tabindex="0" data-info="O tema será aplicado automaticamente em todas as páginas.">i</span>
+                                </div>
+                                <p class="pref-item-descricao">O tema será aplicado automaticamente em todas as páginas.</p>
+                            </div>
+                            <div class="toggle-switch" id="toggleModoEscuro" role="switch" aria-checked="false" tabindex="0">
+                                <div class="toggle-switch-slider"></div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="toggle-switch" id="toggleModoEscuro" role="switch" aria-checked="false" tabindex="0">
-                        <div class="toggle-switch-slider"></div>
+
+                    <div class="pref-item">
+                        <div class="pref-item-header">
+                            <div class="pref-item-texto">
+                                <div class="pref-item-titulo">
+                                    Orientação dos dias
+                                    <span class="pref-item-info" tabindex="0" data-info="Quando ativado, o mini calendário começa pelo dia atual à esquerda e mostra os dias anteriores à direita.">i</span>
+                                </div>
+                                <p class="pref-item-descricao">Quando ativado, o mini calendário começa pelo dia atual à esquerda e mostra os dias anteriores à direita.</p>
+                            </div>
+                            <div class="toggle-switch" id="toggleOrientacaoDias" role="switch" aria-checked="false" tabindex="0">
+                                <div class="toggle-switch-slider"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <p class="modal-descricao">O tema será aplicado automaticamente em todas as páginas.</p>
             </div>
         </div>
     </div>

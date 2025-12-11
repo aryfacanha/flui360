@@ -32,6 +32,7 @@
 
 const STORAGE_KEY = 'flui360_habitos';
 const PREFS_KEY = 'flui360_prefs';
+const DEFAULT_PREFS = { tema: 'claro', orientacaoDias: 'normal' };
 
 // ============================================
 // SISTEMA DE PREFERÊNCIAS DO USUÁRIO
@@ -47,17 +48,20 @@ function carregarPreferencias() {
     try {
         const dados = localStorage.getItem(PREFS_KEY);
         if (dados) {
-            return JSON.parse(dados);
+            const parsed = JSON.parse(dados);
+            return { ...DEFAULT_PREFS, ...parsed };
         }
     } catch (e) {
         console.error("Erro ao carregar preferências:", e);
     }
-    return { tema: 'claro' };
+    return { ...DEFAULT_PREFS };
 }
 
 function salvarPreferencias(prefs) {
     localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
 }
+
+let preferencias = carregarPreferencias();
 
 /**
  * Aplica o tema ao body, adicionando a classe correspondente.
@@ -82,11 +86,10 @@ function aplicarTema(tema) {
 }
 
 function alternarTema() {
-    const prefs = carregarPreferencias();
-    prefs.tema = prefs.tema === 'escuro' ? 'claro' : 'escuro';
-    salvarPreferencias(prefs);
-    aplicarTema(prefs.tema);
-    anunciarParaLeitorDeTela(`Tema alterado para modo ${prefs.tema}`);
+    preferencias.tema = preferencias.tema === 'escuro' ? 'claro' : 'escuro';
+    salvarPreferencias(preferencias);
+    aplicarTema(preferencias.tema);
+    anunciarParaLeitorDeTela(`Tema alterado para modo ${preferencias.tema}`);
 }
 
 // ============================================
@@ -1995,12 +1998,16 @@ function gerarDiasCalendario(habito, numDias) {
     const historico = getHistorico(habito);
 
     // Sempre exibimos 7 dias (ou numDias), terminando em hoje; nenhum futuro.
-    const datas = [];
+    let datas = [];
     for (let i = numDias - 1; i >= 0; i--) {
         const data = new Date(hoje);
         data.setDate(data.getDate() - i);
         data.setHours(12, 0, 0, 0); // normaliza para comparar apenas data
         datas.push(data);
+    }
+
+    if (preferencias.orientacaoDias === 'hoje-esquerda') {
+        datas = datas.reverse();
     }
 
     const podeAplicarMeta = habito.tipoFrequencia !== 'diario' && habito.tipoFrequencia !== 'personalizado';
@@ -2316,8 +2323,7 @@ function atualizarEstatisticasRelatorios() {
 
 function inicializarPagina() {
     // Aplica o tema salvo nas preferências
-    const prefs = carregarPreferencias();
-    aplicarTema(prefs.tema);
+    aplicarTema(preferencias.tema);
     
     configurarMenuHamburguer();
     configurarModais();
@@ -2360,6 +2366,7 @@ function configurarModalPreferencias() {
     const modalBackdrop = document.getElementById('modalPreferenciasBackdrop');
     const btnFechar = document.getElementById('btnFecharPreferencias');
     const toggleModoEscuro = document.getElementById('toggleModoEscuro');
+    const toggleOrientacaoDias = document.getElementById('toggleOrientacaoDias');
     const btnAbrirPreferencias = document.getElementById('btnAbrirPreferencias');
     
     if (btnAbrirPreferencias) {
@@ -2385,6 +2392,29 @@ function configurarModalPreferencias() {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 alternarTema();
+            }
+        });
+    }
+
+    if (toggleOrientacaoDias) {
+        const ativa = preferencias.orientacaoDias === 'hoje-esquerda';
+        toggleOrientacaoDias.classList.toggle('ativo', ativa);
+        toggleOrientacaoDias.setAttribute('aria-checked', ativa.toString());
+
+        const alternarOrientacao = () => {
+            const novaAtiva = !toggleOrientacaoDias.classList.contains('ativo');
+            toggleOrientacaoDias.classList.toggle('ativo', novaAtiva);
+            toggleOrientacaoDias.setAttribute('aria-checked', novaAtiva.toString());
+            preferencias.orientacaoDias = novaAtiva ? 'hoje-esquerda' : 'normal';
+            salvarPreferencias(preferencias);
+            renderizarHabitos();
+        };
+
+        toggleOrientacaoDias.addEventListener('click', alternarOrientacao);
+        toggleOrientacaoDias.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                alternarOrientacao();
             }
         });
     }
