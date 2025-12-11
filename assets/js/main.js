@@ -254,6 +254,8 @@ function abrirModalStats(habitoId) {
     const statsDiasConcluidos = document.getElementById('statsDiasConcluidos');
     const statsStreakMaxima = document.getElementById('statsStreakMaxima');
     const statsTipoBadge = document.getElementById('statsTipoBadge');
+    const statsFrequenciaTexto = document.getElementById('statsFrequenciaTexto');
+    const statsLembreteTexto = document.getElementById('statsLembreteTexto');
     const statsSecaoMensuravel = document.getElementById('statsSecaoMensuravel');
     const statsMedia = document.getElementById('statsMedia');
     const statsMaximo = document.getElementById('statsMaximo');
@@ -267,6 +269,17 @@ function abrirModalStats(habitoId) {
     if (statsTipoBadge) {
         statsTipoBadge.textContent = habito.tipo === 'binario' ? 'Sim/Não' : 'Mensurável';
         statsTipoBadge.className = `stats-tipo-badge ${habito.tipo}`;
+    }
+    if (statsFrequenciaTexto) {
+        statsFrequenciaTexto.textContent = getTextoFrequencia(habito);
+    }
+    if (statsLembreteTexto) {
+        if (habito.lembreteAtivo) {
+            const diasTexto = getTextoDiasLembrete(habito.diasLembrete);
+            statsLembreteTexto.textContent = `${habito.horaLembrete}${diasTexto ? ' (' + diasTexto + ')' : ''}`;
+        } else {
+            statsLembreteTexto.textContent = 'Desabilitado';
+        }
     }
     
     // Mostra ou esconde a seção de mensuráveis
@@ -449,6 +462,8 @@ let dataParaValor = null;
 let tipoHabitoSelecionado = 'binario';
 let frequenciaXTemp = 3;
 let frequenciaYTemp = 5;
+let cacheDiasSelecionados = [];
+let cacheFrequencia = null;
 
 // ============================================
 // 2. FUNÇÕES UTILITÁRIAS
@@ -779,6 +794,24 @@ function configurarBoasVindas() {
     });
 }
 
+// Dica removível em Meus Hábitos (persistente)
+function configurarDicaHabitos() {
+    const dica = document.getElementById('habitosDicaTipos');
+    const btnFecharDica = document.getElementById('btnFecharDicaHabitos');
+    if (!dica || !btnFecharDica) return;
+    
+    const fechada = localStorage.getItem('flui360_dica_habitos_fechada');
+    if (fechada) {
+        dica.style.display = 'none';
+        return;
+    }
+    
+    btnFecharDica.addEventListener('click', () => {
+        dica.style.display = 'none';
+        localStorage.setItem('flui360_dica_habitos_fechada', 'true');
+    });
+}
+
 // ============================================
 // 5. FAB GLOBAL E FLUXO DE CRIAÇÃO
 // ============================================
@@ -849,24 +882,9 @@ function configurarModalTipo() {
  */
 function configurarTipoNoFormulario(tipo) {
     const tipoHabitoHidden = document.getElementById('tipoHabitoHidden');
-    const tipoIndicador = document.getElementById('tipoIndicador');
     const camposMensuravel = document.getElementById('camposMensuravel');
     
     if (tipoHabitoHidden) tipoHabitoHidden.value = tipo;
-    
-    if (tipoIndicador) {
-        if (tipo === 'binario') {
-            tipoIndicador.innerHTML = `
-                <span class="tipo-indicador-icone">&#10003;</span>
-                <span class="tipo-indicador-texto">Hábito Sim/Não</span>
-            `;
-        } else {
-            tipoIndicador.innerHTML = `
-                <span class="tipo-indicador-icone">&#9776;</span>
-                <span class="tipo-indicador-texto">Hábito Mensurável</span>
-            `;
-        }
-    }
     
     if (camposMensuravel) {
         camposMensuravel.style.display = tipo === 'mensuravel' ? 'block' : 'none';
@@ -914,6 +932,21 @@ function configurarModais() {
             if (e.target === modalHabitoBackdrop) fecharModal('modalHabitoBackdrop');
         });
     }
+
+    // Mini modais auxiliares
+    const modalDiasBackdrop = document.getElementById('modalDiasBackdrop');
+    if (modalDiasBackdrop) {
+        modalDiasBackdrop.addEventListener('click', (e) => {
+            if (e.target === modalDiasBackdrop) fecharModalDias(true);
+        });
+    }
+
+    const modalCoresBackdrop = document.getElementById('modalCoresBackdrop');
+    if (modalCoresBackdrop) {
+        modalCoresBackdrop.addEventListener('click', (e) => {
+            if (e.target === modalCoresBackdrop) fecharModal('modalCoresBackdrop');
+        });
+    }
     
     // Modal de exclusão
     const btnFecharModalExcluir = document.getElementById('btnFecharModalExcluir');
@@ -951,65 +984,39 @@ function configurarModais() {
     configurarFAB();
     configurarModalTipo();
     configurarModalValor();
-    configurarModalFrequenciaXY();
 }
 
 /**
  * FUNÇÃO: configurarCamposDinamicos
  * ---------------------------------
  * Configura campos condicionais no formulário:
- * - Frequência X/Y (abre modal para x-em-y)
+ * - Frequência via mini modal
  * - Lembretes (toggle + dias da semana)
  */
 function configurarCamposDinamicos() {
-    // Frequência dinâmica
-    const selectFrequencia = document.getElementById('tipoFrequencia');
-    const camposXSemana = document.getElementById('camposXSemana');
-    const camposXMes = document.getElementById('camposXMes');
-    const frequenciaPersonalizadaInfo = document.getElementById('frequenciaPersonalizadaInfo');
+    // Frequência via mini modal
+    const btnAbrirFrequencia = document.getElementById('btnAbrirFrequencia');
+    const btnSalvarFrequencia = document.getElementById('btnSalvarFrequencia');
+    const btnCancelarFrequencia = document.getElementById('btnCancelarFrequencia');
+    const btnFecharModalFrequencia = document.getElementById('btnFecharModalFrequencia');
+    const modalFrequenciaBackdrop = document.getElementById('modalFrequenciaBackdrop');
     
-    if (selectFrequencia) {
-        selectFrequencia.addEventListener('change', () => {
-            if (camposXSemana) camposXSemana.style.display = 'none';
-            if (camposXMes) camposXMes.style.display = 'none';
-            if (frequenciaPersonalizadaInfo) frequenciaPersonalizadaInfo.style.display = 'none';
-            
-            switch (selectFrequencia.value) {
-                case 'x-semana':
-                    if (camposXSemana) camposXSemana.style.display = 'flex';
-                    break;
-                case 'x-mes':
-                    if (camposXMes) camposXMes.style.display = 'flex';
-                    break;
-                case 'x-em-y':
-                    // Abre o modal de frequência personalizada
-                    abrirModal('modalFrequenciaXYBackdrop');
-                    break;
-            }
+    if (btnAbrirFrequencia) btnAbrirFrequencia.addEventListener('click', abrirModalFrequencia);
+    if (btnSalvarFrequencia) btnSalvarFrequencia.addEventListener('click', salvarModalFrequencia);
+    if (btnCancelarFrequencia) btnCancelarFrequencia.addEventListener('click', () => fecharModalFrequencia(true));
+    if (btnFecharModalFrequencia) btnFecharModalFrequencia.addEventListener('click', () => fecharModalFrequencia(true));
+    if (modalFrequenciaBackdrop) {
+        modalFrequenciaBackdrop.addEventListener('click', (e) => {
+            if (e.target === modalFrequenciaBackdrop) fecharModalFrequencia(true);
         });
     }
+    atualizarResumoFrequencia();
     
-    // Botão para editar frequência X em Y
-    const btnEditarFrequenciaXY = document.getElementById('btnEditarFrequenciaXY');
-    if (btnEditarFrequenciaXY) {
-        btnEditarFrequenciaXY.addEventListener('click', () => {
-            abrirModal('modalFrequenciaXYBackdrop');
-        });
-    }
-    
-    // Toggle de lembrete
-    const toggleLembrete = document.getElementById('lembreteAtivo');
-    const lembreteConfig = document.getElementById('lembreteConfig');
-    const lembreteLabel = document.getElementById('lembreteLabel');
-    
-    if (toggleLembrete) {
-        toggleLembrete.addEventListener('change', () => {
-            if (lembreteConfig) {
-                lembreteConfig.style.display = toggleLembrete.checked ? 'block' : 'none';
-            }
-            if (lembreteLabel) {
-                lembreteLabel.textContent = toggleLembrete.checked ? 'Habilitado' : 'Desabilitado';
-            }
+    // Lembrete via campo de horário
+    const horaLembrete = document.getElementById('horaLembrete');
+    if (horaLembrete) {
+        horaLembrete.addEventListener('input', () => {
+            atualizarEstadoLembrete();
         });
     }
     
@@ -1019,6 +1026,7 @@ function configurarCamposDinamicos() {
         btn.addEventListener('click', () => {
             btn.classList.toggle('ativo');
             atualizarBotaoToggleDias();
+            atualizarResumoDias();
         });
     });
     
@@ -1035,8 +1043,61 @@ function configurarCamposDinamicos() {
                 todosDias.forEach(btn => btn.classList.add('ativo'));
             }
             atualizarBotaoToggleDias();
+            atualizarResumoDias();
         });
     }
+
+    // Mini modal de dias
+    const btnAbrirDiasModal = document.getElementById('btnAbrirDiasModal');
+    const btnSalvarDias = document.getElementById('btnSalvarDias');
+    const btnCancelarDias = document.getElementById('btnCancelarDias');
+    const btnFecharModalDias = document.getElementById('btnFecharModalDias');
+    
+    if (btnAbrirDiasModal) {
+        btnAbrirDiasModal.addEventListener('click', () => {
+            cacheDiasSelecionados = getDiasSelecionados();
+            abrirModal('modalDiasBackdrop');
+        });
+    }
+    if (btnSalvarDias) {
+        btnSalvarDias.addEventListener('click', () => {
+            atualizarResumoDias();
+            fecharModalDias();
+        });
+    }
+    if (btnCancelarDias) {
+        btnCancelarDias.addEventListener('click', () => {
+            fecharModalDias(true);
+        });
+    }
+    if (btnFecharModalDias) {
+        btnFecharModalDias.addEventListener('click', () => fecharModalDias(true));
+    }
+
+    // Mini modal de cores
+    const btnAbrirCores = document.getElementById('btnAbrirCores');
+    const btnFecharModalCores = document.getElementById('btnFecharModalCores');
+    const btnCancelarCores = document.getElementById('btnCancelarCores');
+    
+    if (btnAbrirCores) {
+        btnAbrirCores.addEventListener('click', () => abrirModal('modalCoresBackdrop'));
+    }
+    if (btnFecharModalCores) {
+        btnFecharModalCores.addEventListener('click', () => fecharModal('modalCoresBackdrop'));
+    }
+    if (btnCancelarCores) {
+        btnCancelarCores.addEventListener('click', () => fecharModal('modalCoresBackdrop'));
+    }
+    
+    document.querySelectorAll('input[name=\"corHabito\"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            atualizarCorAtalho();
+            fecharModal('modalCoresBackdrop');
+        });
+    });
+    
+    atualizarResumoDias();
+    atualizarCorAtalho();
 }
 
 function atualizarBotaoToggleDias() {
@@ -1047,6 +1108,171 @@ function atualizarBotaoToggleDias() {
     const todosDias = document.querySelectorAll('.dia-semana-btn');
     
     btnToggleDias.textContent = diasAtivos.length === todosDias.length ? 'Limpar todos' : 'Selecionar todos';
+}
+
+function getDiasSelecionados() {
+    return Array.from(document.querySelectorAll('.dia-semana-btn.ativo')).map(btn => btn.dataset.dia);
+}
+
+function setDiasSelecionados(dias) {
+    document.querySelectorAll('.dia-semana-btn').forEach(btn => {
+        btn.classList.toggle('ativo', dias.includes(btn.dataset.dia));
+    });
+    atualizarBotaoToggleDias();
+    atualizarResumoDias();
+}
+
+function atualizarResumoDias() {
+    const resumo = document.getElementById('diasResumoTexto');
+    if (!resumo) return;
+    const dias = getDiasSelecionados();
+    resumo.textContent = dias.length > 0 ? getTextoDiasLembrete(dias) : 'Sem dias selecionados';
+}
+
+function atualizarCorAtalho() {
+    const corSelecionada = document.querySelector('input[name=\"corHabito\"]:checked');
+    const corPreview = document.getElementById('corAtualPreview');
+    if (corSelecionada && corPreview) {
+        corPreview.style.backgroundColor = corSelecionada.value;
+    }
+}
+
+function atualizarEstadoLembrete() {
+    const horaInput = document.getElementById('horaLembrete');
+    const lembreteAtivo = document.getElementById('lembreteAtivo');
+    const lembreteConfig = document.getElementById('lembreteConfig');
+    const diasResumo = document.querySelector('.dias-semana-resumo');
+    
+    const ativo = !!(horaInput && horaInput.value);
+    if (lembreteAtivo) lembreteAtivo.checked = ativo;
+    if (lembreteConfig) lembreteConfig.style.display = 'block'; // mantém container visível
+    if (diasResumo) diasResumo.style.display = ativo ? 'flex' : 'none';
+}
+
+function getFrequenciaAtual() {
+    const tipoFrequencia = document.getElementById('tipoFrequencia');
+    return {
+        tipo: tipoFrequencia ? tipoFrequencia.value : 'diario',
+        semana: parseInt(document.getElementById('vezesXSemana')?.value) || 3,
+        mes: parseInt(document.getElementById('vezesXMes')?.value) || 10,
+        x: frequenciaXTemp,
+        y: frequenciaYTemp
+    };
+}
+
+function atualizarResumoFrequencia() {
+    const resumo = document.getElementById('freqResumoTexto');
+    const tipoFrequencia = document.getElementById('tipoFrequencia');
+    if (!resumo || !tipoFrequencia) return;
+    
+    const tipo = tipoFrequencia.value || 'diario';
+    let texto = 'Todos os dias';
+    
+    switch (tipo) {
+        case 'x-semana': {
+            const val = parseInt(document.getElementById('vezesXSemana')?.value) || 3;
+            texto = `${val}x por semana`;
+            break;
+        }
+        case 'x-mes': {
+            const val = parseInt(document.getElementById('vezesXMes')?.value) || 10;
+            texto = `${val}x por mês`;
+            break;
+        }
+        case 'x-em-y': {
+            texto = `${frequenciaXTemp}x em ${frequenciaYTemp} dias`;
+            break;
+        }
+        default:
+            texto = 'Todos os dias';
+    }
+    
+    resumo.textContent = texto;
+}
+
+function abrirModalFrequencia() {
+    cacheFrequencia = getFrequenciaAtual();
+    
+    const radio = document.querySelector(`input[name=\"opcaoFrequencia\"][value=\"${cacheFrequencia.tipo}\"]`);
+    if (radio) radio.checked = true;
+    else {
+        const diario = document.querySelector('input[name=\"opcaoFrequencia\"][value=\"diario\"]');
+        if (diario) diario.checked = true;
+    }
+    
+    const inputSemana = document.getElementById('vezesXSemana');
+    if (inputSemana) inputSemana.value = cacheFrequencia.semana || 3;
+    
+    const inputMes = document.getElementById('vezesXMes');
+    if (inputMes) inputMes.value = cacheFrequencia.mes || 10;
+    
+    const inputX = document.getElementById('inputVezesX');
+    const inputY = document.getElementById('inputDiasY');
+    if (inputX) inputX.value = cacheFrequencia.x || 3;
+    if (inputY) inputY.value = cacheFrequencia.y || 5;
+    
+    abrirModal('modalFrequenciaBackdrop');
+}
+
+function fecharModalFrequencia(reverter = false) {
+    if (reverter && cacheFrequencia) {
+        const tipoFrequencia = document.getElementById('tipoFrequencia');
+        if (tipoFrequencia) tipoFrequencia.value = cacheFrequencia.tipo;
+        
+        const inputSemana = document.getElementById('vezesXSemana');
+        if (inputSemana) inputSemana.value = cacheFrequencia.semana;
+        
+        const inputMes = document.getElementById('vezesXMes');
+        if (inputMes) inputMes.value = cacheFrequencia.mes;
+        
+        frequenciaXTemp = cacheFrequencia.x;
+        frequenciaYTemp = cacheFrequencia.y;
+        
+        const inputX = document.getElementById('inputVezesX');
+        const inputY = document.getElementById('inputDiasY');
+        if (inputX) inputX.value = cacheFrequencia.x;
+        if (inputY) inputY.value = cacheFrequencia.y;
+        
+        atualizarResumoFrequencia();
+    }
+    fecharModal('modalFrequenciaBackdrop');
+}
+
+function salvarModalFrequencia() {
+    const selecionado = document.querySelector('input[name=\"opcaoFrequencia\"]:checked');
+    let tipoSelecionado = selecionado ? selecionado.value : 'diario';
+    let tipoParaSalvar = tipoSelecionado;
+    
+    const tipoFrequencia = document.getElementById('tipoFrequencia');
+    
+    if (tipoSelecionado === 'x-semana') {
+        const val = parseInt(document.getElementById('vezesXSemana')?.value) || 3;
+        if (document.getElementById('vezesXSemana')) document.getElementById('vezesXSemana').value = val;
+    }
+    
+    if (tipoSelecionado === 'x-mes') {
+        const val = parseInt(document.getElementById('vezesXMes')?.value) || 10;
+        if (document.getElementById('vezesXMes')) document.getElementById('vezesXMes').value = val;
+    }
+    
+    if (tipoSelecionado === 'x-em-y' || tipoSelecionado === 'personalizado') {
+        const x = parseInt(document.getElementById('inputVezesX')?.value) || 3;
+        const y = parseInt(document.getElementById('inputDiasY')?.value) || 5;
+        frequenciaXTemp = x;
+        frequenciaYTemp = y;
+        tipoParaSalvar = 'x-em-y';
+    }
+    
+    if (tipoFrequencia) tipoFrequencia.value = tipoParaSalvar;
+    atualizarResumoFrequencia();
+    fecharModal('modalFrequenciaBackdrop');
+}
+
+function fecharModalDias(reverterSelecao = false) {
+    if (reverterSelecao) {
+        setDiasSelecionados(cacheDiasSelecionados);
+    }
+    fecharModal('modalDiasBackdrop');
 }
 
 function limparFormularioHabito() {
@@ -1064,33 +1290,31 @@ function limparFormularioHabito() {
     const tipoFrequencia = document.getElementById('tipoFrequencia');
     if (tipoFrequencia) tipoFrequencia.value = 'diario';
     
-    const camposXSemana = document.getElementById('camposXSemana');
-    const camposXMes = document.getElementById('camposXMes');
-    const frequenciaPersonalizadaInfo = document.getElementById('frequenciaPersonalizadaInfo');
-    
-    if (camposXSemana) camposXSemana.style.display = 'none';
-    if (camposXMes) camposXMes.style.display = 'none';
-    if (frequenciaPersonalizadaInfo) frequenciaPersonalizadaInfo.style.display = 'none';
+    const vezesXSemana = document.getElementById('vezesXSemana');
+    const vezesXMes = document.getElementById('vezesXMes');
+    if (vezesXSemana) vezesXSemana.value = 3;
+    if (vezesXMes) vezesXMes.value = 10;
     
     // Reset lembretes
     const lembreteAtivo = document.getElementById('lembreteAtivo');
     const lembreteConfig = document.getElementById('lembreteConfig');
-    const lembreteLabel = document.getElementById('lembreteLabel');
-    
     if (lembreteAtivo) lembreteAtivo.checked = false;
-    if (lembreteConfig) lembreteConfig.style.display = 'none';
-    if (lembreteLabel) lembreteLabel.textContent = 'Desabilitado';
+    if (lembreteConfig) lembreteConfig.style.display = 'block';
+    const horaLembrete = document.getElementById('horaLembrete');
+    if (horaLembrete) horaLembrete.value = '';
     
-    document.querySelectorAll('.dia-semana-btn').forEach(btn => btn.classList.remove('ativo'));
-    atualizarBotaoToggleDias();
+    setDiasSelecionados([]);
+    atualizarEstadoLembrete();
     
     // Reset cor
     const corRadio = document.querySelector('input[name="corHabito"][value="#10b981"]');
     if (corRadio) corRadio.checked = true;
+    atualizarCorAtalho();
     
     // Reset frequência temporária
     frequenciaXTemp = 3;
     frequenciaYTemp = 5;
+    atualizarResumoFrequencia();
 }
 
 function preencherFormularioHabito(habito) {
@@ -1109,57 +1333,41 @@ function preencherFormularioHabito(habito) {
     
     // Frequência
     const tipoFrequencia = document.getElementById('tipoFrequencia');
-    const camposXSemana = document.getElementById('camposXSemana');
-    const camposXMes = document.getElementById('camposXMes');
-    const frequenciaPersonalizadaInfo = document.getElementById('frequenciaPersonalizadaInfo');
-    const frequenciaPersonalizadaTexto = document.getElementById('frequenciaPersonalizadaTexto');
     
     if (tipoFrequencia) tipoFrequencia.value = habito.tipoFrequencia;
-    if (camposXSemana) camposXSemana.style.display = 'none';
-    if (camposXMes) camposXMes.style.display = 'none';
-    if (frequenciaPersonalizadaInfo) frequenciaPersonalizadaInfo.style.display = 'none';
-    
+
     switch (habito.tipoFrequencia) {
         case 'x-semana':
-            if (camposXSemana) camposXSemana.style.display = 'flex';
             document.getElementById('vezesXSemana').value = habito.vezesX || 3;
             break;
         case 'x-mes':
-            if (camposXMes) camposXMes.style.display = 'flex';
             document.getElementById('vezesXMes').value = habito.vezesX || 10;
             break;
         case 'x-em-y':
             frequenciaXTemp = habito.vezesX || 3;
             frequenciaYTemp = habito.diasY || 5;
-            if (frequenciaPersonalizadaInfo) frequenciaPersonalizadaInfo.style.display = 'flex';
-            if (frequenciaPersonalizadaTexto) {
-                frequenciaPersonalizadaTexto.textContent = `${frequenciaXTemp} vezes em ${frequenciaYTemp} dias`;
-            }
             break;
+        default:
+            frequenciaXTemp = 3;
+            frequenciaYTemp = 5;
     }
+    atualizarResumoFrequencia();
     
     // Lembretes
     const lembreteAtivo = document.getElementById('lembreteAtivo');
     const lembreteConfig = document.getElementById('lembreteConfig');
-    const lembreteLabel = document.getElementById('lembreteLabel');
-    
     if (lembreteAtivo) lembreteAtivo.checked = habito.lembreteAtivo;
-    if (lembreteConfig) lembreteConfig.style.display = habito.lembreteAtivo ? 'block' : 'none';
-    if (lembreteLabel) lembreteLabel.textContent = habito.lembreteAtivo ? 'Habilitado' : 'Desabilitado';
+    if (lembreteConfig) lembreteConfig.style.display = 'block';
     
-    document.getElementById('horaLembrete').value = habito.horaLembrete || '08:00';
+    document.getElementById('horaLembrete').value = habito.lembreteAtivo ? (habito.horaLembrete || '08:00') : '';
     
-    document.querySelectorAll('.dia-semana-btn').forEach(btn => {
-        btn.classList.remove('ativo');
-        if (habito.diasLembrete && habito.diasLembrete.includes(btn.dataset.dia)) {
-            btn.classList.add('ativo');
-        }
-    });
-    atualizarBotaoToggleDias();
+    setDiasSelecionados(habito.diasLembrete || []);
+    atualizarEstadoLembrete();
     
     // Cor
     const corRadio = document.querySelector(`input[name="corHabito"][value="${habito.cor}"]`);
     if (corRadio) corRadio.checked = true;
+    atualizarCorAtalho();
 }
 
 function validarFormularioHabito() {
@@ -1253,10 +1461,7 @@ function salvarHabito() {
     // Lembretes
     const lembreteAtivo = document.getElementById('lembreteAtivo').checked;
     const horaLembrete = document.getElementById('horaLembrete').value || '08:00';
-    const diasLembrete = [];
-    document.querySelectorAll('.dia-semana-btn.ativo').forEach(btn => {
-        diasLembrete.push(btn.dataset.dia);
-    });
+    const diasLembrete = getDiasSelecionados();
     
     if (isEdicao) {
         const id = parseInt(idInput);
@@ -1513,83 +1718,7 @@ function atualizarPreviewValor() {
 }
 
 // ============================================
-// 8. MODAL DE FREQUÊNCIA X EM Y DIAS
-// ============================================
-
-/**
- * FUNÇÃO: configurarModalFrequenciaXY
- * -----------------------------------
- * Modal para configurar frequência personalizada (X vezes em Y dias).
- * Abre quando o usuário seleciona "Personalizado..." no select de frequência.
- */
-function configurarModalFrequenciaXY() {
-    const modalFrequenciaXYBackdrop = document.getElementById('modalFrequenciaXYBackdrop');
-    const btnFecharModalFrequenciaXY = document.getElementById('btnFecharModalFrequenciaXY');
-    const btnCancelarFrequenciaXY = document.getElementById('btnCancelarFrequenciaXY');
-    const btnConfirmarFrequenciaXY = document.getElementById('btnConfirmarFrequenciaXY');
-    const inputVezesX = document.getElementById('inputVezesX');
-    const inputDiasY = document.getElementById('inputDiasY');
-    const frequenciaExemplo = document.getElementById('frequenciaExemplo');
-    
-    // Atualiza exemplo conforme digita
-    function atualizarExemplo() {
-        const x = parseInt(inputVezesX?.value) || 3;
-        const y = parseInt(inputDiasY?.value) || 5;
-        if (frequenciaExemplo) {
-            frequenciaExemplo.textContent = `Exemplo: Completar ${x} vezes a cada ${y} dias`;
-        }
-    }
-    
-    if (inputVezesX) inputVezesX.addEventListener('input', atualizarExemplo);
-    if (inputDiasY) inputDiasY.addEventListener('input', atualizarExemplo);
-    
-    if (btnFecharModalFrequenciaXY) {
-        btnFecharModalFrequenciaXY.addEventListener('click', () => {
-            // Volta para "diario" se cancelar
-            const tipoFrequencia = document.getElementById('tipoFrequencia');
-            if (tipoFrequencia) tipoFrequencia.value = 'diario';
-            fecharModal('modalFrequenciaXYBackdrop');
-        });
-    }
-    if (btnCancelarFrequenciaXY) {
-        btnCancelarFrequenciaXY.addEventListener('click', () => {
-            const tipoFrequencia = document.getElementById('tipoFrequencia');
-            if (tipoFrequencia) tipoFrequencia.value = 'diario';
-            fecharModal('modalFrequenciaXYBackdrop');
-        });
-    }
-    if (modalFrequenciaXYBackdrop) {
-        modalFrequenciaXYBackdrop.addEventListener('click', (e) => {
-            if (e.target === modalFrequenciaXYBackdrop) {
-                const tipoFrequencia = document.getElementById('tipoFrequencia');
-                if (tipoFrequencia) tipoFrequencia.value = 'diario';
-                fecharModal('modalFrequenciaXYBackdrop');
-            }
-        });
-    }
-    
-    // Confirma a frequência
-    if (btnConfirmarFrequenciaXY) {
-        btnConfirmarFrequenciaXY.addEventListener('click', () => {
-            frequenciaXTemp = parseInt(inputVezesX?.value) || 3;
-            frequenciaYTemp = parseInt(inputDiasY?.value) || 5;
-            
-            // Atualiza o indicador no formulário
-            const frequenciaPersonalizadaInfo = document.getElementById('frequenciaPersonalizadaInfo');
-            const frequenciaPersonalizadaTexto = document.getElementById('frequenciaPersonalizadaTexto');
-            
-            if (frequenciaPersonalizadaInfo) frequenciaPersonalizadaInfo.style.display = 'flex';
-            if (frequenciaPersonalizadaTexto) {
-                frequenciaPersonalizadaTexto.textContent = `${frequenciaXTemp} vezes em ${frequenciaYTemp} dias`;
-            }
-            
-            fecharModal('modalFrequenciaXYBackdrop');
-        });
-    }
-}
-
-// ============================================
-// 9. RENDERIZAÇÃO DE HÁBITOS
+// 8. RENDERIZAÇÃO DE HÁBITOS
 // ============================================
 
 function renderizarHabitos() {
@@ -1626,12 +1755,6 @@ function criarCardHabitoAvancado(habito) {
     
     const tipoBadge = habito.tipo === 'binario' ? 'Sim/Não' : 'Mensurável';
     const frequenciaTexto = getTextoFrequencia(habito);
-    
-    let lembreteHTML = '';
-    if (habito.lembreteAtivo) {
-        const diasTexto = getTextoDiasLembrete(habito.diasLembrete);
-        lembreteHTML = `<span title="Lembrete">&#128276; ${habito.horaLembrete}${diasTexto ? ' (' + diasTexto + ')' : ''}</span>`;
-    }
     
     // Controle de conclusão
     let controleHTML = '';
@@ -1678,22 +1801,17 @@ function criarCardHabitoAvancado(habito) {
     
     card.innerHTML = `
         <div class="habito-card-header">
+            <div class="habito-card-acoes">
+                <button class="btn-icone btn-editar" onclick="editarHabito(${habito.id})" aria-label="Editar o hábito ${habito.nome}" title="Editar">&#9998;</button>
+                <button class="btn-icone btn-excluir" onclick="confirmarExclusao(${habito.id})" aria-label="Excluir o hábito ${habito.nome}" title="Excluir">&#128465;</button>
+            </div>
             <div class="habito-card-info">
                 <h3 class="habito-card-nome">
                     <span class="habito-card-nome-texto">${habito.nome}</span>
-                    <span class="habito-tipo-badge">${tipoBadge}</span>
                     <button type="button" class="btn-icone btn-stats-habito" data-habito-id="${habito.id}" aria-label="Ver estatísticas do hábito ${habito.nome}" title="Ver estatísticas">
                         &#9432; <span>Detalhes</span>
                     </button>
                 </h3>
-                <div class="habito-card-meta">
-                    <span>&#128197; ${frequenciaTexto}</span>
-                    ${lembreteHTML}
-                </div>
-            </div>
-            <div class="habito-card-acoes">
-                <button class="btn-icone btn-editar" onclick="editarHabito(${habito.id})" aria-label="Editar o hábito ${habito.nome}" title="Editar">&#9998;</button>
-                <button class="btn-icone btn-excluir" onclick="confirmarExclusao(${habito.id})" aria-label="Excluir o hábito ${habito.nome}" title="Excluir">&#128465;</button>
             </div>
         </div>
         
@@ -2051,6 +2169,7 @@ function inicializarPagina() {
             
         case 'habitos.html':
             renderizarHabitos();
+            configurarDicaHabitos();
             break;
             
         case 'relatorios.html':
