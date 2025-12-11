@@ -3284,8 +3284,8 @@ select:focus-visible {
     align-items: center;
     justify-content: center;
     font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--cor-texto);
+    font-weight: 400;
+    color: var(--cor-texto-claro);
     background-color: var(--cor-fundo);
     position: relative;
     cursor: help;
@@ -3299,7 +3299,7 @@ select:focus-visible {
     left: 50%;
     transform: translateX(-50%);
     background: var(--cor-fundo-card);
-    color: var(--cor-texto);
+    color: var(--cor-texto-claro);
     border: 1px solid var(--cor-borda);
     border-radius: var(--borda-raio);
     padding: 6px 8px;
