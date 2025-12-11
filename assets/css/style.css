@@ -863,6 +863,67 @@ img {
 .card-resumo-label {
     font-size: var(--fonte-tamanho-sm);
     color: var(--cor-texto-claro);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--espacamento-xs);
+}
+
+.info-icone {
+    margin-left: var(--espacamento-xs);
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid var(--cor-borda);
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto);
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+    position: relative;
+    cursor: pointer;
+    transition: background-color var(--transicao-rapida), color var(--transicao-rapida);
+}
+
+.info-icone:hover,
+.info-icone:focus-visible,
+.info-icone.ativo {
+    background-color: var(--cor-primaria-light);
+    color: var(--cor-primaria);
+    outline: none;
+}
+
+.info-icone-tooltip {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    left: auto;
+    transform: none;
+    background-color: var(--cor-fundo-card);
+    color: var(--cor-texto);
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--borda-raio);
+    padding: var(--espacamento-sm);
+    box-shadow: var(--sombra-card);
+    width: max-content;
+    max-width: min(240px, 80vw);
+    font-size: var(--fonte-tamanho-sm);
+    font-weight: 400;
+    color: var(--cor-texto-claro);
+    text-align: left;
+    z-index: 5;
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+
+.info-icone:hover .info-icone-tooltip,
+.info-icone:focus-visible .info-icone-tooltip,
+.info-icone.ativo .info-icone-tooltip {
+    display: block;
 }
 
 /* --- Gráfico de Barras Vertical --- */
@@ -1173,6 +1234,13 @@ img {
     margin-bottom: var(--espacamento-lg);
 }
 
+.secao-relatorio-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--espacamento-md);
+}
+
 /* Gráfico de barras horizontais */
 .grafico-horizontal-container {
     display: flex;
@@ -1188,10 +1256,14 @@ img {
 }
 
 .grafico-horizontal-label {
-    min-width: 120px;
+    flex: 0 0 120px;
+    max-width: 120px;
     font-size: var(--fonte-tamanho-sm);
     color: var(--cor-texto);
     text-align: right;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .grafico-horizontal-barra-container {
@@ -1217,6 +1289,15 @@ img {
     font-size: var(--fonte-tamanho-sm);
     color: white;
     font-weight: 500;
+}
+
+.grafico-vazio {
+    padding: var(--espacamento-md);
+    background-color: var(--cor-fundo);
+    border-radius: var(--borda-raio);
+    color: var(--cor-texto-claro);
+    text-align: center;
+    font-size: var(--fonte-tamanho-sm);
 }
 
 /* Grid de estatísticas */
@@ -1331,7 +1412,37 @@ img {
     
     /* Label do gráfico horizontal maior */
     .grafico-horizontal-label {
-        min-width: 150px;
+        flex-basis: 150px;
+        max-width: 150px;
+    }
+}
+
+/* Ajustes mobile para o gráfico horizontal */
+@media (max-width: 640px) {
+    .grafico-horizontal-item {
+        flex-direction: row;
+        align-items: center;
+        gap: var(--espacamento-sm);
+    }
+
+    .grafico-horizontal-label {
+        flex: 0 0 100px;
+        max-width: 100px;
+        text-align: right;
+    }
+
+    .grafico-horizontal-barra-container {
+        flex: 1;
+        height: 28px;
+    }
+
+    .grafico-horizontal-barra {
+        justify-content: flex-end;
+        padding-right: var(--espacamento-sm);
+    }
+
+    .grafico-horizontal-valor {
+        font-weight: 600;
     }
 }
 
@@ -1947,8 +2058,28 @@ img {
     gap: var(--espacamento-sm);
 }
 
+.hora-lembrete-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--espacamento-xs);
+}
+
 .campo-hora-lembrete input[type="time"] {
     width: 100%;
+    flex: 1;
+}
+
+.btn-icone.btn-limpar-hora {
+    background-color: var(--cor-erro-light);
+    border: 1px solid var(--cor-erro);
+    color: var(--cor-erro);
+    width: 32px;
+    height: 32px;
+}
+
+.btn-icone.btn-limpar-hora:hover {
+    background-color: var(--cor-erro);
+    color: #fff;
 }
 
 /* Dias da semana */
@@ -2823,7 +2954,7 @@ img {
     transform: translateY(20px);
     animation: toastIn 0.3s ease forwards;
     pointer-events: auto;
-    max-width: 320px;
+    width: min(420px, calc(100vw - 32px));
     text-align: center;
 }
 

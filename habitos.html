@@ -239,7 +239,10 @@
                         <div class="lembrete-config lembrete-config-simples" id="lembreteConfig" style="display: none;">
                             <input type="checkbox" id="lembreteAtivo" name="lembreteAtivo" style="display: none;">
                             <div class="campo-grupo campo-hora-lembrete">
-                                <input type="time" id="horaLembrete" name="horaLembrete" value="" placeholder="Desabilitado">
+                                <div class="hora-lembrete-wrapper">
+                                    <input type="time" id="horaLembrete" name="horaLembrete" value="" placeholder="Desabilitado">
+                                    <button type="button" class="btn-icone btn-limpar-hora" id="btnLimparHoraLembrete" aria-label="Limpar horário do lembrete">&times;</button>
+                                </div>
                             </div>
                             
                             <div class="dias-semana-resumo">
@@ -413,10 +416,12 @@
                             <input type="number" id="inputDiasY" min="1" value="5" class="freq-input-pequeno"> dia(s)
                         </span>
                     </label>
+                    <!--
                     <label class="freq-opcao">
                         <input type="radio" name="opcaoFrequencia" value="personalizado">
                         <span>Personalizado</span>
                     </label>
+                    -->
                 </div>
                 <div class="form-acoes form-acoes-compacta">
                     <button type="button" class="btn-secundario btn-cancelar" id="btnCancelarFrequencia">Cancelar</button>

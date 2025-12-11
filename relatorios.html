@@ -89,29 +89,31 @@
             </div>
 
             <section class="secao-relatorio">
-                <h2 class="secao-titulo">Dias Concluídos por Hábito</h2>
+                <div class="secao-relatorio-header">
+                    <h2 class="secao-titulo">Dias Concluídos por Hábito</h2>
+                    <button type="button" class="info-icone" aria-label="Explicação do gráfico dias concluídos" aria-expanded="false">
+                        &#9432;
+                        <span class="info-icone-tooltip">Cada barra mostra quantos dias, no último mês, você completou cada hábito. Quanto maior a barra, mais consistente você foi com esse hábito.</span>
+                    </button>
+                </div>
                 <div class="grafico-horizontal-container" id="graficoDiasConcluidos">
                 </div>
-                <p class="grafico-descricao">
-                    <strong>O que este gráfico representa:</strong> Cada barra mostra quantos dias 
-                    no último mês você completou cada hábito. Quanto maior a barra, mais consistente 
-                    você foi com esse hábito.
-                </p>
             </section>
 
             <section class="secao-relatorio">
-                <h2 class="secao-titulo">Taxa de Conclusão Mensal</h2>
+                <div class="secao-relatorio-header">
+                    <h2 class="secao-titulo">Taxa de Conclusão Mensal</h2>
+                    <button type="button" class="info-icone" aria-label="Explicação do gráfico de taxa de conclusão" aria-expanded="false">
+                        &#9432;
+                        <span class="info-icone-tooltip">Mostra a porcentagem de hábitos concluídos em cada semana do mês. Uma tendência crescente indica melhora na consistência.</span>
+                    </button>
+                </div>
                 <div class="grafico-container">
                     <div class="grafico-barras grafico-mensal" id="graficoMensal">
                     </div>
                     <div class="grafico-legenda grafico-legenda-mensal" id="legendaMensal">
                     </div>
                 </div>
-                <p class="grafico-descricao">
-                    <strong>O que este gráfico representa:</strong> Mostra a porcentagem de hábitos 
-                    concluídos em cada semana do mês. Uma tendência crescente indica que você está 
-                    melhorando sua consistência.
-                </p>
             </section>
 
             <section class="secao-relatorio">
@@ -134,10 +136,6 @@
                         <span class="estatistica-label">Média Diária</span>
                     </div>
                 </div>
-                <p class="grafico-descricao">
-                    <strong>Dica de IHC:</strong> Estas estatísticas fornecem feedback imediato 
-                    sobre seu desempenho, um princípio importante de usabilidade.
-                </p>
             </section>
         </main>
 

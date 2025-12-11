@@ -141,6 +141,42 @@ function criarTrapDeFoco(elemento) {
     return () => elemento.removeEventListener('keydown', handler);
 }
 
+// Tooltip simples usado em ícones de informação (desktop e toque)
+function configurarTooltipsInformacao() {
+    const infoIcones = document.querySelectorAll('.info-icone');
+    if (infoIcones.length === 0) return;
+
+    const fecharTodos = () => {
+        infoIcones.forEach(icon => {
+            icon.classList.remove('ativo');
+            icon.setAttribute('aria-expanded', 'false');
+        });
+    };
+
+    infoIcones.forEach(icon => {
+        icon.setAttribute('aria-expanded', 'false');
+
+        icon.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const ativa = !icon.classList.contains('ativo');
+            fecharTodos();
+            if (ativa) {
+                icon.classList.add('ativo');
+                icon.setAttribute('aria-expanded', 'true');
+            }
+        });
+
+        icon.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                icon.classList.remove('ativo');
+                icon.setAttribute('aria-expanded', 'false');
+            }
+        });
+    });
+
+    document.addEventListener('click', fecharTodos);
+}
+
 // ============================================
 // FUNÇÕES DE ESTATÍSTICAS DO HÁBITO
 // ============================================
@@ -149,19 +185,37 @@ function criarTrapDeFoco(elemento) {
  * Conta quantos dias o hábito foi concluído.
  * - Binário: dias em que valor === true
  * - Mensurável: dias em que valor >= alvoDiario
+ * - limiteDias: null para histórico completo ou número de dias recentes
  */
-function contarDiasConcluidos(habito) {
-    let contador = 0;
+function contarDiasConcluidos(habito, limiteDias = 30) {
     const historico = getHistorico(habito);
-    for (const data in historico) {
-        const valor = historico[data];
-        if (habito.tipo === 'binario') {
-            if (valor === true) contador++;
-        } else {
-            if (valor >= habito.alvoDiario) contador++;
-        }
+    const contarConclusao = (valor) => {
+        return habito.tipo === 'binario'
+            ? valor === true
+            : valor >= habito.alvoDiario;
+    };
+
+    // Histórico completo
+    if (limiteDias === null) {
+        return Object.keys(historico).reduce((total, data) => {
+            return contarConclusao(historico[data]) ? total + 1 : total;
+        }, 0);
     }
-    return contador;
+
+    // Últimos N dias (usado em relatórios mensais)
+    let dias = 0;
+    const hoje = new Date();
+
+    for (let i = 0; i < limiteDias; i++) {
+        const data = new Date(hoje);
+        data.setDate(data.getDate() - i);
+        const chave = data.toISOString().split('T')[0];
+        const valor = historico[chave];
+
+        if (contarConclusao(valor)) dias++;
+    }
+
+    return dias;
 }
 
 /**
@@ -263,7 +317,7 @@ function abrirModalStats(habitoId) {
     const btnFecharStats = document.getElementById('btnFecharStats');
     
     if (modalTitulo) modalTitulo.textContent = habito.nome;
-    if (statsDiasConcluidos) statsDiasConcluidos.textContent = contarDiasConcluidos(habito);
+    if (statsDiasConcluidos) statsDiasConcluidos.textContent = contarDiasConcluidos(habito, null);
     if (statsStreakMaxima) statsStreakMaxima.textContent = calcularStreakMaxima(habito);
     
     if (statsTipoBadge) {
@@ -329,88 +383,12 @@ function gerarHistorico(diasAtras, probabilidade, tipo = 'binario', alvo = 1) {
 }
 
 function getHabitosPadrao() {
-    return [
-        {
-            id: 1,
-            nome: "Beber água",
-            tipo: "mensuravel",
-            cor: "#10b981",
-            unidade: "litros",
-            alvoDiario: 2,
-            tipoFrequencia: "diario",
-            vezesX: 1,
-            diasY: 1,
-            lembreteAtivo: true,
-            horaLembrete: "08:00",
-            diasLembrete: ["seg", "ter", "qua", "qui", "sex"],
-            historico: gerarHistorico(30, 85, "mensuravel", 2)
-        },
-        {
-            id: 2,
-            nome: "Fazer exercícios",
-            tipo: "binario",
-            cor: "#f59e0b",
-            unidade: "",
-            alvoDiario: 1,
-            tipoFrequencia: "x-semana",
-            vezesX: 3,
-            diasY: 1,
-            lembreteAtivo: true,
-            horaLembrete: "07:00",
-            diasLembrete: ["seg", "qua", "sex"],
-            historico: gerarHistorico(30, 40)
-        },
-        {
-            id: 3,
-            nome: "Ler",
-            tipo: "mensuravel",
-            cor: "#6366f1",
-            unidade: "páginas",
-            alvoDiario: 20,
-            tipoFrequencia: "diario",
-            vezesX: 1,
-            diasY: 1,
-            lembreteAtivo: false,
-            horaLembrete: "21:00",
-            diasLembrete: [],
-            historico: gerarHistorico(30, 90, "mensuravel", 20)
-        },
-        {
-            id: 4,
-            nome: "Meditar",
-            tipo: "binario",
-            cor: "#8b5cf6",
-            unidade: "",
-            alvoDiario: 1,
-            tipoFrequencia: "diario",
-            vezesX: 1,
-            diasY: 1,
-            lembreteAtivo: true,
-            horaLembrete: "06:30",
-            diasLembrete: ["dom", "seg", "ter", "qua", "qui", "sex", "sab"],
-            historico: gerarHistorico(30, 50)
-        },
-        {
-            id: 5,
-            nome: "Estudar programação",
-            tipo: "mensuravel",
-            cor: "#3b82f6",
-            unidade: "minutos",
-            alvoDiario: 60,
-            tipoFrequencia: "x-semana",
-            vezesX: 5,
-            diasY: 1,
-            lembreteAtivo: false,
-            horaLembrete: "19:00",
-            diasLembrete: [],
-            historico: gerarHistorico(30, 70, "mensuravel", 60)
-        }
-    ];
+    return [];
 }
 
 function normalizarHabitos(lista) {
     if (!Array.isArray(lista)) {
-        console.warn('[Flui360] Lista de hábitos inválida, usando padrão.');
+        console.warn('[Flui360] Lista de hábitos inválida, retornando vazia.');
         return getHabitosPadrao();
     }
     
@@ -439,9 +417,7 @@ function carregarHabitos() {
     } catch (e) {
         console.error("Erro ao carregar hábitos:", e);
     }
-    const defaults = getHabitosPadrao();
-    console.log('[Flui360] Usando hábitos padrão:', defaults.length);
-    return defaults;
+    return getHabitosPadrao();
 }
 
 function salvarHabitos() {
@@ -509,6 +485,30 @@ function calcularSequencia(habito) {
         }
     }
     
+    return sequencia;
+}
+
+// Sequência contínua considerando hoje apenas se concluído; senão, começa de ontem.
+function calcularSequenciaAtual(habito) {
+    let sequencia = 0;
+    const hoje = new Date();
+    const historico = getHistorico(habito);
+
+    for (let i = 0; i < 365; i++) {
+        const data = new Date(hoje);
+        data.setDate(data.getDate() - i);
+        const chave = data.toISOString().split('T')[0];
+        const valor = historico[chave];
+        const concluido = habito.tipo === 'binario' ? valor === true : valor >= habito.alvoDiario;
+
+        if (i === 0 && !concluido) continue; // se hoje não concluiu, não encerra a sequência
+        if (concluido) {
+            sequencia++;
+        } else {
+            break;
+        }
+    }
+
     return sequencia;
 }
 
@@ -590,27 +590,6 @@ function calcularDadosMensais() {
     }
     
     return dados;
-}
-
-function contarDiasConcluidos(habito) {
-    let dias = 0;
-    const hoje = new Date();
-    const historico = getHistorico(habito);
-    
-    for (let i = 0; i < 30; i++) {
-        const data = new Date(hoje);
-        data.setDate(data.getDate() - i);
-        const chave = data.toISOString().split('T')[0];
-        const valor = historico[chave];
-        
-        if (habito.tipo === 'binario') {
-            if (valor === true) dias++;
-        } else {
-            if (valor >= habito.alvoDiario) dias++;
-        }
-    }
-    
-    return dias;
 }
 
 function getTextoFrequencia(habito) {
@@ -1017,6 +996,15 @@ function configurarCamposDinamicos() {
     if (horaLembrete) {
         horaLembrete.addEventListener('input', () => {
             atualizarEstadoLembrete();
+        });
+    }
+    const btnLimparHoraLembrete = document.getElementById('btnLimparHoraLembrete');
+    if (btnLimparHoraLembrete) {
+        btnLimparHoraLembrete.addEventListener('click', () => {
+            if (horaLembrete) {
+                horaLembrete.value = '';
+                atualizarEstadoLembrete();
+            }
         });
     }
     
@@ -1563,6 +1551,10 @@ function toggleDiaHabito(habitoId, data) {
         atualizarEstatisticasDashboard();
         renderizarGraficoSemanal();
         
+        if (novoValor) {
+            mostrarToast('Progresso registrado com sucesso!', 'sucesso');
+        }
+        
         // Anuncia para leitores de tela
         const acao = novoValor ? 'marcado como concluído' : 'desmarcado';
         anunciarParaLeitorDeTela(`${habito.nome} ${acao}`);
@@ -1618,7 +1610,7 @@ function configurarModalValor() {
                 
                 fecharModal('modalValorBackdrop');
                 
-                mostrarToast('Progresso registrado!', 'sucesso');
+                mostrarToast('Progresso registrado com sucesso!', 'sucesso');
                 
                 renderizarHabitos();
                 renderizarHabitosHoje();
@@ -1946,7 +1938,7 @@ function renderizarHabitosHoje() {
     
     habitos.forEach(habito => {
         const concluido = estaConcluidoHoje(habito);
-        const sequencia = calcularSequencia(habito);
+        const sequencia = calcularSequenciaAtual(habito);
         
         const item = document.createElement('div');
         item.className = 'habito-hoje-loop';
@@ -1961,7 +1953,7 @@ function renderizarHabitosHoje() {
                 </button>
                 <div class="habito-hoje-info-loop">
                     <span class="habito-hoje-nome-loop">${habito.nome}</span>
-                    <span class="habito-hoje-meta">${getTextoFrequencia(habito)} • ${sequencia} dias</span>
+                    <span class="habito-hoje-meta">${getTextoFrequencia(habito)} • ${sequencia} dias de sequência</span>
                 </div>
             `;
             
@@ -1980,7 +1972,7 @@ function renderizarHabitosHoje() {
                 </button>
                 <div class="habito-hoje-info-loop">
                     <span class="habito-hoje-nome-loop">${habito.nome}</span>
-                    <span class="habito-hoje-meta">${valorHoje}/${habito.alvoDiario} ${habito.unidade} • ${sequencia} dias</span>
+                    <span class="habito-hoje-meta">${valorHoje}/${habito.alvoDiario} ${habito.unidade} • ${sequencia} dias de sequência</span>
                 </div>
             `;
             
@@ -2019,11 +2011,24 @@ function renderizarGraficoDiasConcluidos() {
     if (!container) return;
     
     container.innerHTML = '';
+    
+    if (habitos.length === 0) {
+        container.innerHTML = '<p class="grafico-vazio">Cadastre um hábito para visualizar este gráfico.</p>';
+        return;
+    }
+    
+    const possuiHistorico = habitos.some(h => Object.keys(getHistorico(h)).length > 0);
+    if (!possuiHistorico) {
+        container.innerHTML = '<p class="grafico-vazio">Nenhum registro ainda. Complete um hábito para ver os dados.</p>';
+        return;
+    }
+    
     const maxDias = 30;
     
     habitos.forEach(habito => {
-        const diasConcluidos = contarDiasConcluidos(habito);
+        const diasConcluidos = contarDiasConcluidos(habito, maxDias);
         const porcentagem = (diasConcluidos / maxDias) * 100;
+        const valorLabel = `${diasConcluidos}`;
         
         const item = document.createElement('div');
         item.className = 'grafico-horizontal-item';
@@ -2032,7 +2037,7 @@ function renderizarGraficoDiasConcluidos() {
             <span class="grafico-horizontal-label">${habito.nome}</span>
             <div class="grafico-horizontal-barra-container">
                 <div class="grafico-horizontal-barra" style="width: ${porcentagem}%; background: linear-gradient(to right, ${habito.cor}, ${habito.cor}dd)">
-                    <span class="grafico-horizontal-valor">${diasConcluidos} dias</span>
+                    <span class="grafico-horizontal-valor">${valorLabel}</span>
                 </div>
             </div>
         `;
@@ -2049,6 +2054,17 @@ function renderizarGraficoMensal() {
     
     container.innerHTML = '';
     if (legenda) legenda.innerHTML = '';
+    
+    if (habitos.length === 0) {
+        container.innerHTML = '<p class="grafico-vazio">Cadastre um hábito para visualizar este gráfico.</p>';
+        return;
+    }
+    
+    const possuiHistorico = habitos.some(h => Object.keys(getHistorico(h)).length > 0);
+    if (!possuiHistorico) {
+        container.innerHTML = '<p class="grafico-vazio">Nenhum registro ainda. Complete um hábito para ver os dados.</p>';
+        return;
+    }
     
     const dadosMensais = calcularDadosMensais();
     
@@ -2088,10 +2104,10 @@ function atualizarEstatisticasDashboard() {
     }
     
     if (taxaConclusao) {
-        const taxaMedia = habitos.length > 0 
-            ? Math.round(habitos.reduce((acc, h) => acc + calcularProgresso(h), 0) / habitos.length)
-            : 0;
-        taxaConclusao.textContent = `${taxaMedia}%`;
+        const totalHabitos = habitos.length;
+        const concluidosHoje = habitos.filter(h => estaConcluidoHoje(h)).length;
+        const taxaHoje = totalHabitos > 0 ? Math.round((concluidosHoje / totalHabitos) * 100) : 0;
+        taxaConclusao.textContent = `${taxaHoje}%`;
     }
     
     atualizarEstatisticasRelatorios();
@@ -2130,13 +2146,13 @@ function atualizarEstatisticasRelatorios() {
     
     if (habitosConcluidos) {
         let total = 0;
-        habitos.forEach(h => total += contarDiasConcluidos(h));
+        habitos.forEach(h => total += contarDiasConcluidos(h, 30));
         habitosConcluidos.textContent = total;
     }
     
     if (mediaDiaria) {
         let totalConclusoes = 0;
-        habitos.forEach(h => totalConclusoes += contarDiasConcluidos(h));
+        habitos.forEach(h => totalConclusoes += contarDiasConcluidos(h, 30));
         const media = totalConclusoes / 30;
         mediaDiaria.textContent = media.toFixed(1);
     }
@@ -2157,6 +2173,7 @@ function inicializarPagina() {
     configurarTeclaEscape();
     configurarModalPreferencias();
     configurarModalStats();
+    configurarTooltipsInformacao();
     
     const paginaAtual = window.location.pathname.split('/').pop() || 'index.html';
     
@@ -2176,6 +2193,10 @@ function inicializarPagina() {
             renderizarGraficoDiasConcluidos();
             renderizarGraficoMensal();
             atualizarEstatisticasRelatorios();
+            
+            window.addEventListener('resize', () => {
+                renderizarGraficoDiasConcluidos();
+            });
             break;
     }
 }
