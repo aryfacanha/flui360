@@ -32,7 +32,7 @@
 
 const STORAGE_KEY = 'flui360_habitos';
 const PREFS_KEY = 'flui360_prefs';
-const DEFAULT_PREFS = { tema: 'claro', orientacaoDias: 'normal' };
+const DEFAULT_PREFS = { tema: 'claro', orientacaoDias: 'normal', paginaInicial: 'dashboard.html' };
 
 // ============================================
 // SISTEMA DE PREFERÊNCIAS DO USUÁRIO
@@ -2457,6 +2457,11 @@ function inicializarPagina() {
         case 'recomendacoes.html':
             renderizarRecomendacoes();
             break;
+
+        case 'index.html':
+        default:
+            configurarRedirecionamentoLogin();
+            break;
     }
 }
 
@@ -2468,6 +2473,7 @@ function configurarModalPreferencias() {
     const btnFechar = document.getElementById('btnFecharPreferencias');
     const toggleModoEscuro = document.getElementById('toggleModoEscuro');
     const toggleOrientacaoDias = document.getElementById('toggleOrientacaoDias');
+    const selectPaginaInicial = document.getElementById('selectPaginaInicial');
     const btnAbrirPreferencias = document.getElementById('btnAbrirPreferencias');
     
     if (btnAbrirPreferencias) {
@@ -2519,6 +2525,14 @@ function configurarModalPreferencias() {
             }
         });
     }
+
+    if (selectPaginaInicial) {
+        selectPaginaInicial.value = preferencias.paginaInicial || 'dashboard.html';
+        selectPaginaInicial.addEventListener('change', () => {
+            preferencias.paginaInicial = selectPaginaInicial.value;
+            salvarPreferencias(preferencias);
+        });
+    }
 }
 
 /**
@@ -2551,6 +2565,15 @@ function configurarTeclaEscape() {
             fecharModalAtivo();
         }
     });
+}
+
+// Redireciona o login para a página escolhida em Preferências
+function configurarRedirecionamentoLogin() {
+    const formLogin = document.getElementById('formLogin');
+    if (!formLogin) return;
+
+    const destino = preferencias.paginaInicial || 'dashboard.html';
+    formLogin.setAttribute('action', destino);
 }
 
 document.addEventListener('DOMContentLoaded', inicializarPagina);
