@@ -32,7 +32,7 @@
 
 const STORAGE_KEY = 'flui360_habitos';
 const PREFS_KEY = 'flui360_prefs';
-const DEFAULT_PREFS = { tema: 'claro', orientacaoDias: 'normal', paginaInicial: 'dashboard.html' };
+const DEFAULT_PREFS = { tema: 'claro', orientacaoDias: 'normal', paginaInicial: 'dashboard.html', notificacoesAtivas: false };
 
 // ============================================
 // SISTEMA DE PREFERÊNCIAS DO USUÁRIO
@@ -62,6 +62,18 @@ function salvarPreferencias(prefs) {
 }
 
 let preferencias = carregarPreferencias();
+let notificacoesInterval = null;
+const notificacoesEnviadasHoje = new Set();
+let lembreteToastAviso = false;
+let ultimaHoraAvisada = '';
+
+// Mostra aviso para habilitar notificações ao definir um horário de lembrete
+function avisarNotificacaoLembrete() {
+    if (lembreteToastAviso || preferencias.notificacoesAtivas !== false) return;
+    lembreteToastAviso = true;
+    mostrarToast('Ative as notificações em Preferências para receber os alertas.', 'info');
+    setTimeout(() => { lembreteToastAviso = false; }, 5000);
+}
 
 /**
  * Aplica o tema ao body, adicionando a classe correspondente.
@@ -121,6 +133,50 @@ function testarNotificacao() {
     solicitarNotificacao(() => {
         new Notification('Flui360', {
             body: 'Notificação de teste enviada com sucesso!',
+        });
+    });
+}
+
+function iniciarMonitorNotificacoes() {
+    if (notificacoesInterval || !preferencias.notificacoesAtivas) return;
+    solicitarNotificacao(() => {
+        if (notificacoesInterval) return;
+        verificarNotificacoesHabitos();
+        notificacoesInterval = setInterval(verificarNotificacoesHabitos, 60000);
+    });
+}
+
+function pararMonitorNotificacoes() {
+    if (notificacoesInterval) {
+        clearInterval(notificacoesInterval);
+        notificacoesInterval = null;
+    }
+    notificacoesEnviadasHoje.clear();
+}
+
+function verificarNotificacoesHabitos() {
+    if (Notification.permission !== 'granted') return;
+    const hoje = new Date();
+    const hojeKey = hoje.toISOString().split('T')[0];
+    const diaSemana = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'][hoje.getDay()];
+    const minutosAgora = hoje.getHours() * 60 + hoje.getMinutes();
+
+    habitos.forEach(habito => {
+        if (!habito.horaLembrete) return;
+        const historicoDias = Array.isArray(habito.diasLembrete) ? habito.diasLembrete : [];
+        if (historicoDias.length > 0 && !historicoDias.includes(diaSemana)) return;
+
+        const [hStr, mStr] = habito.horaLembrete.split(':');
+        const alvoMinutos = (parseInt(hStr, 10) || 0) * 60 + (parseInt(mStr, 10) || 0);
+        if (alvoMinutos > minutosAgora) return;
+        if (minutosAgora - alvoMinutos > 5) return; // janela curta para evitar múltiplos disparos
+
+        const chaveNotif = `${habito.id}_${hojeKey}`;
+        if (notificacoesEnviadasHoje.has(chaveNotif)) return;
+
+        notificacoesEnviadasHoje.add(chaveNotif);
+        new Notification('Lembrete de hábito', {
+            body: `Hora de fazer: ${habito.nome}`,
         });
     });
 }
@@ -1326,6 +1382,12 @@ function atualizarEstadoLembrete() {
     if (lembreteAtivo) lembreteAtivo.checked = ativo;
     if (lembreteConfig) lembreteConfig.style.display = 'block'; // mantém container visível
     if (diasResumo) diasResumo.style.display = ativo ? 'flex' : 'none';
+
+    // Ao completar o horário (HH:MM), mostra o toast junto com os dias
+    if (ativo && horaInput.value.length === 5 && horaInput.value !== ultimaHoraAvisada) {
+        ultimaHoraAvisada = horaInput.value;
+        avisarNotificacaoLembrete();
+    }
 }
 
 function getFrequenciaAtual() {
@@ -1680,6 +1742,15 @@ function salvarHabito() {
     fecharModal('modalHabitoBackdrop');
     
     mostrarToast(isEdicao ? 'Hábito atualizado com sucesso!' : 'Hábito criado com sucesso!', 'sucesso');
+    if (lembreteAtivo && horaLembrete) {
+        const notificacoesAtivas = preferencias.notificacoesAtivas === true;
+        const permissaoOk = typeof Notification !== 'undefined' ? Notification.permission === 'granted' : false;
+        const precisaHabilitar = !notificacoesAtivas || !permissaoOk;
+        const aviso = precisaHabilitar
+            ? `Lembrete às ${horaLembrete}. Ative as notificações em Preferências e permita no navegador para receber o alerta.`
+            : `Lembrete configurado para ${horaLembrete}.`;
+        mostrarToast(aviso, 'info');
+    }
     
     renderizarHabitos();
     renderizarHabitosHoje();
@@ -2496,6 +2567,10 @@ function inicializarPagina() {
             configurarRedirecionamentoLogin();
             break;
     }
+
+    if (preferencias.notificacoesAtivas) {
+        iniciarMonitorNotificacoes();
+    }
 }
 
 /**
@@ -2507,7 +2582,7 @@ function configurarModalPreferencias() {
     const toggleModoEscuro = document.getElementById('toggleModoEscuro');
     const toggleOrientacaoDias = document.getElementById('toggleOrientacaoDias');
     const selectPaginaInicial = document.getElementById('selectPaginaInicial');
-    const btnTestarNotificacao = document.getElementById('btnTestarNotificacao');
+    const toggleNotificacoes = document.getElementById('toggleNotificacoes');
     const btnAbrirPreferencias = document.getElementById('btnAbrirPreferencias');
     
     if (btnAbrirPreferencias) {
@@ -2568,9 +2643,30 @@ function configurarModalPreferencias() {
         });
     }
 
-    if (btnTestarNotificacao) {
-        btnTestarNotificacao.addEventListener('click', () => {
-            testarNotificacao();
+    if (toggleNotificacoes) {
+        const ativa = preferencias.notificacoesAtivas === true;
+        toggleNotificacoes.classList.toggle('ativo', ativa);
+        toggleNotificacoes.setAttribute('aria-checked', ativa.toString());
+
+        const alternarNotificacoes = () => {
+            const novo = !toggleNotificacoes.classList.contains('ativo');
+            toggleNotificacoes.classList.toggle('ativo', novo);
+            toggleNotificacoes.setAttribute('aria-checked', novo.toString());
+            preferencias.notificacoesAtivas = novo;
+            salvarPreferencias(preferencias);
+            if (novo) {
+                iniciarMonitorNotificacoes();
+            } else {
+                pararMonitorNotificacoes();
+            }
+        };
+
+        toggleNotificacoes.addEventListener('click', alternarNotificacoes);
+        toggleNotificacoes.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                alternarNotificacoes();
+            }
         });
     }
 }

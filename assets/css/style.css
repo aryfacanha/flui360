@@ -3314,6 +3314,13 @@ select:focus-visible {
     overflow: visible;
 }
 
+.pref-item-acoes {
+    display: flex;
+    align-items: center;
+    gap: var(--espacamento-sm);
+    flex-shrink: 0;
+}
+
 @media (max-width: 768px) {
     .pref-item-descricao {
         display: none;
