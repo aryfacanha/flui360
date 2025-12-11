@@ -1870,8 +1870,8 @@ function criarCardHabitoAvancado(habito) {
     card.innerHTML = `
         <div class="habito-card-header">
             <div class="habito-card-acoes">
-                <button class="btn-icone btn-editar" onclick="editarHabito(${habito.id})" aria-label="Editar o hábito ${habito.nome}" title="Editar">&#9998;</button>
-                <button class="btn-icone btn-excluir" onclick="confirmarExclusao(${habito.id})" aria-label="Excluir o hábito ${habito.nome}" title="Excluir">&#128465;</button>
+                <button class="btn-icone btn-editar" onclick="editarHabito(${habito.id})" aria-label="Editar o hábito ${habito.nome}" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                <button class="btn-icone btn-excluir" onclick="confirmarExclusao(${habito.id})" aria-label="Excluir o hábito ${habito.nome}" title="Excluir"><i class="fa-solid fa-trash"></i></button>
             </div>
             <div class="habito-card-info">
                 <h3 class="habito-card-nome">
@@ -1937,14 +1937,54 @@ function criarCardHabitoAvancado(habito) {
                 abrirModalStats(habito.id);
             });
         }
+
+        configurarSwipeParaExcluir(card, habito.id);
     }, 0);
     
     return card;
 }
 
+function configurarSwipeParaExcluir(elemento, habitoId) {
+    if (window.innerWidth > 768) return; // apenas mobile
+    
+    let inicioX = 0;
+    let inicioY = 0;
+    const limiteDeslize = 60;
+    const toleranciaVertical = 40;
+    
+    elemento.addEventListener('touchstart', (e) => {
+        if (e.touches.length !== 1) return;
+        inicioX = e.touches[0].clientX;
+        inicioY = e.touches[0].clientY;
+    });
+    
+    elemento.addEventListener('touchend', (e) => {
+        if (!inicioX && !inicioY) return;
+        const fimX = e.changedTouches[0].clientX;
+        const fimY = e.changedTouches[0].clientY;
+        const deltaX = fimX - inicioX;
+        const deltaY = Math.abs(fimY - inicioY);
+        
+        // Deslize da direita para a esquerda, com pouca variação vertical
+        if (deltaX < -limiteDeslize && deltaY < toleranciaVertical) {
+            confirmarExclusao(habitoId);
+        }
+        
+        inicioX = 0;
+        inicioY = 0;
+    });
+}
+
 function gerarHeaderDias(datas) {
     const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-    return datas.map(data => `<span class="dia-header">${diasSemana[data.getDay()]}</span>`).join('');
+    const hoje = new Date();
+    hoje.setHours(12, 0, 0, 0);
+    return datas.map(data => {
+        const dataNormalizada = new Date(data);
+        dataNormalizada.setHours(12, 0, 0, 0);
+        const isHoje = dataNormalizada.getTime() === hoje.getTime();
+        return `<span class="dia-header ${isHoje ? 'dia-header-hoje' : ''}">${diasSemana[data.getDay()]}</span>`;
+    }).join('');
 }
 
 function gerarDiasCalendario(habito, numDias) {

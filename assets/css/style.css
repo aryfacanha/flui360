@@ -1571,6 +1571,11 @@ img {
     text-transform: uppercase;
 }
 
+.dia-header-hoje {
+    font-weight: 700;
+    color: var(--cor-texto);
+}
+
 .calendario-dias {
     display: flex;
     gap: var(--espacamento-xs);
@@ -1586,18 +1591,28 @@ img {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: var(--cor-fundo);
+    background-color: #ffffff;
     border-radius: var(--borda-raio);
     cursor: pointer;
     transition: all var(--transicao-rapida);
-    border: 2px solid transparent;
+    border: 2px solid #6b7280;
     position: relative;
     padding: 0;
     font-family: inherit;
 }
 
+.calendario-dia:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.calendario-dia:focus-visible {
+    outline: none;
+    box-shadow: none;
+}
+
 .calendario-dia.hoje {
-    box-shadow: inset 0 0 0 2px var(--cor-primaria);
+    box-shadow: none;
 }
 
 .calendario-dia:hover {
@@ -2422,12 +2437,30 @@ img {
     font-size: 0.875rem;
 }
 
+.btn-icone.btn-editar {
+    color: #10b981;
+}
+
+.btn-icone.btn-excluir {
+    color: #ef4444;
+}
+
 .btn-icone:hover {
     background-color: var(--cor-borda);
     color: var(--cor-texto);
 }
 
+.btn-icone.btn-editar:hover,
+.btn-icone.btn-editar:focus-visible {
+    background-color: rgba(16, 185, 129, 0.1);
+}
+
 .btn-icone.btn-excluir:hover {
+    background-color: #fee2e2;
+    color: #ef4444;
+}
+
+.btn-icone.btn-excluir:focus-visible {
     background-color: #fee2e2;
     color: #ef4444;
 }
