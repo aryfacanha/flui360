@@ -298,6 +298,60 @@ function calcularStatsMensuravel(habito) {
     };
 }
 
+function gerarRecomendacoesLocais() {
+    if (!Array.isArray(habitos) || habitos.length === 0) {
+        return [
+            { titulo: 'Beber 8 copos de água', freq: 'Todos os dias', descricao: 'Hidratação melhora energia e foco.' },
+            { titulo: 'Caminhada de 20 minutos', freq: '3x por semana', descricao: 'Movimente o corpo e alivie o estresse.' },
+            { titulo: 'Respiração profunda', freq: '5x por semana', descricao: '3 minutos de respiração consciente.' }
+        ];
+    }
+
+    const sugestoes = [];
+
+    habitos.forEach(h => {
+        const conclSem = calcularConclusoesUltimosDias(h, 7);
+        const lembreteAtivo = !!h.horaLembrete || h.lembreteAtivo;
+        const streak = calcularSequenciaAtual(h);
+
+        if (!lembreteAtivo) {
+            sugestoes.push({
+                titulo: `Ative lembrete para "${h.nome}"`,
+                freq: getTextoFrequencia(h),
+                descricao: 'Lembretes ajudam a consolidar o hábito.'
+            });
+        }
+
+        if (conclSem <= 2) {
+            sugestoes.push({
+                titulo: `Simplifique "${h.nome}"`,
+                freq: getTextoFrequencia(h),
+                descricao: 'Torná-lo mais curto ou ajustar frequência pode aumentar consistência.'
+            });
+        }
+
+        if (streak >= 5) {
+            sugestoes.push({
+                titulo: `Evolua "${h.nome}"`,
+                freq: getTextoFrequencia(h),
+                descricao: 'Você está consistente. Considere subir a meta ou adicionar um desafio semanal.'
+            });
+        }
+    });
+
+    // Se nada foi gerado, use fallback
+    if (sugestoes.length === 0) {
+        sugestoes.push({
+            titulo: 'Experimente um novo hábito leve',
+            freq: 'Diário',
+            descricao: '5 minutos de leitura ou alongamento para começar.'
+        });
+    }
+
+    // Limita para não poluir a UI
+    return sugestoes.slice(0, 6);
+}
+
 /**
  * Abre o modal de estatísticas para um hábito específico.
  * Preenche os campos com os dados calculados.
@@ -534,6 +588,21 @@ function calcularProgresso(habito) {
     }
     
     return Math.round((concluidos / 30) * 100);
+}
+
+function calcularConclusoesUltimosDias(habito, dias = 7) {
+    let concluidos = 0;
+    const hoje = new Date();
+    const historico = getHistorico(habito);
+    for (let i = 0; i < dias; i++) {
+        const data = new Date(hoje);
+        data.setDate(data.getDate() - i);
+        const chave = data.toISOString().split('T')[0];
+        const valor = historico[chave];
+        const feito = habito.tipo === 'binario' ? valor === true : valor >= habito.alvoDiario;
+        if (feito) concluidos++;
+    }
+    return concluidos;
 }
 
 function calcularDadosSemanais() {
@@ -2152,6 +2221,27 @@ function renderizarHabitosHoje() {
     });
 }
 
+function renderizarRecomendacoes() {
+    const grid = document.getElementById('recomendacoesGrid');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+    const sugestoes = gerarRecomendacoesLocais();
+
+    sugestoes.forEach(sug => {
+        const card = document.createElement('article');
+        card.className = 'card-habito';
+        card.innerHTML = `
+            <div class="card-habito-header">
+                <span class="habito-badge">${sug.freq}</span>
+            </div>
+            <h3 class="habito-nome">${sug.titulo}</h3>
+            <p class="habito-descricao">${sug.descricao}</p>
+        `;
+        grid.appendChild(card);
+    });
+}
+
 // ============================================
 // 10. GRÁFICOS E ESTATÍSTICAS
 // ============================================
@@ -2362,6 +2452,10 @@ function inicializarPagina() {
             window.addEventListener('resize', () => {
                 renderizarGraficoDiasConcluidos();
             });
+            break;
+
+        case 'recomendacoes.html':
+            renderizarRecomendacoes();
             break;
     }
 }

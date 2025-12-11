@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Flui360 - Recomendações personalizadas de hábitos">
+    <title>Flui360 - Recomendações</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="pagina-app">
+    <a href="#conteudo-principal" class="skip-link">Pular para o conteúdo principal</a>
+    <div id="ariaLiveRegion" class="aria-live-region" aria-live="polite" aria-atomic="true"></div>
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Menu principal">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="logo-icone" aria-hidden="true">&#9679;</span>
+                <span class="logo-texto">Flui360</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav" aria-label="Navegação principal">
+            <ul>
+                <li>
+                    <a href="dashboard.html" class="nav-link">
+                        <span class="nav-icone">&#9632;</span>
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="habitos.html" class="nav-link">
+                        <span class="nav-icone">&#10003;</span>
+                        Meus Hábitos
+                    </a>
+                </li>
+                <li>
+                    <a href="relatorios.html" class="nav-link">
+                        <span class="nav-icone">&#9776;</span>
+                        Relatórios
+                    </a>
+                </li>
+                <li>
+                    <a href="recomendacoes.html" class="nav-link nav-link-ativo" aria-current="page">
+                        <span class="nav-icone">&#9733;</span>
+                        Recomendações
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button type="button" class="nav-link nav-link-preferencias" id="btnAbrirPreferencias">
+                <span class="nav-icone">&#9881;</span>
+                Preferências
+            </button>
+            <a href="index.html" class="nav-link nav-sair">
+                <span class="nav-icone">&#8592;</span>
+                Sair
+            </a>
+        </div>
+    </aside>
+
+    <div class="conteudo-principal" id="conteudo-principal" role="main">
+        <header class="header-app">
+            <button class="btn-hamburguer" id="btnHamburguer" aria-label="Abrir menu" aria-expanded="false">
+                <span class="hamburguer-linha"></span>
+                <span class="hamburguer-linha"></span>
+                <span class="hamburguer-linha"></span>
+            </button>
+            
+            <div class="header-usuario">
+                <span class="saudacao">Olá, <strong>Usuário</strong>!</span>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="header-secao">
+                <h1 class="titulo-pagina">Recomendações</h1>
+            </div>
+
+            <section class="secao-relatorio">
+                <h2 class="secao-titulo">Sugestões personalizadas</h2>
+                <div class="habitos-grid" id="recomendacoesGrid"></div>
+            </section>
+        </main>
+
+        <button class="fab" id="btnNovoHabito" aria-label="Adicionar novo hábito">
+            <span>+</span>
+        </button>
+    </div>
+
+    <div class="modal-backdrop" id="modalTipoBackdrop">
+        <div class="modal modal-pequeno" role="dialog" aria-labelledby="tituloModalTipo" aria-modal="true">
+            <div class="modal-header">
+                <h2 id="tituloModalTipo">Escolha o Tipo de Hábito</h2>
+                <button type="button" class="btn-fechar-modal" id="btnFecharModalTipo" aria-label="Fechar modal">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-descricao">Selecione como você deseja acompanhar este hábito:</p>
+                <div class="tipo-habito-opcoes">
+                    <button type="button" class="tipo-habito-btn" data-tipo="binario">
+                        <span class="tipo-icone">&#10003;</span>
+                        <span class="tipo-nome">Sim ou Não</span>
+                        <span class="tipo-descricao">Ideal para hábitos que você simplesmente faz ou não faz. Ex: Meditar, Tomar vitamina, Acordar cedo.</span>
+                    </button>
+                    <button type="button" class="tipo-habito-btn" data-tipo="mensuravel">
+                        <span class="tipo-icone">&#9776;</span>
+                        <span class="tipo-nome">Mensurável</span>
+                        <span class="tipo-descricao">Para hábitos com quantidade. Ex: Beber 2L de água, Ler 30 páginas, Caminhar 5km.</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="modalHabitoBackdrop">
+        <div class="modal modal-habito modal-habito-avancado" role="dialog" aria-labelledby="tituloModalHabito" aria-modal="true">
+            <div class="modal-header">
+                <h2 id="tituloModalHabito">Novo Hábito</h2>
+                <button type="button" class="btn-fechar-modal" id="btnFecharModalHabito" aria-label="Fechar modal">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="form-habito form-habito-avancado" id="formHabito">
+                    <input type="hidden" id="habitoId" value="">
+                    <input type="hidden" id="tipoHabitoHidden" value="binario">
+
+                    <div class="form-secao form-secao-nome-cor">
+                        <div class="nome-cor-grid">
+                            <div class="campo-grupo nome-habito-grupo">
+                                <label for="nomeHabito">Nome do hábito</label>
+                                <input 
+                                    type="text" 
+                                    id="nomeHabito" 
+                                    name="nomeHabito" 
+                                    placeholder="Ex: Beber água, Meditar, Ler..." 
+                                    required
+                                >
+                            </div>
+                            <div class="campo-grupo campo-cor-compacto">
+                                <label>Cor</label>
+                                <button type="button" class="cor-atalho" id="btnAbrirCores">
+                                    <span class="cor-atalho-bolinha" id="corAtualPreview" aria-hidden="true"></span>
+                                    <span class="cor-atalho-texto">Alterar</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-secao campos-mensuravel" id="camposMensuravel" style="display: none;">
+                        <h3 class="form-secao-titulo">Meta Diária</h3>
+                        <div class="campos-linha">
+                            <div class="campo-grupo campo-pequeno">
+                                <label for="alvoDiario">Alvo</label>
+                                <input type="number" id="alvoDiario" name="alvoDiario" min="1" value="1">
+                            </div>
+                            <div class="campo-grupo campo-medio">
+                                <label for="unidadeHabito">Unidade</label>
+                                <input type="text" id="unidadeHabito" name="unidadeHabito" placeholder="Ex: litros, páginas">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-secao form-secao-frequencia">
+                        <div class="freq-resumo">
+                            <div class="freq-resumo-textos">
+                                <span class="freq-resumo-label">Frequência</span>
+                                <span class="freq-resumo-valor" id="freqResumoTexto">Todos os dias</span>
+                            </div>
+                            <button type="button" class="btn-texto btn-abrir-frequencia" id="btnAbrirFrequencia">Editar</button>
+                        </div>
+                        <input type="hidden" id="tipoFrequencia" value="diario">
+                    </div>
+
+                    <div class="form-secao">
+                        <h3 class="form-secao-titulo">Lembretes</h3>
+                        <div class="lembrete-config lembrete-config-simples" id="lembreteConfig" style="display: none;">
+                            <div class="lembrete-config-header">
+                                <span class="lembrete-label">Horário</span>
+                                <button type="button" class="btn-icone btn-limpar-hora" id="btnLimparHoraLembrete" aria-label="Limpar horário do lembrete">&times;</button>
+                            </div>
+                            <input type="time" id="horaLembrete" class="input-hora" aria-label="Horário do lembrete">
+                        </div>
+                        <div class="lembrete-toggle-container">
+                            <label class="toggle-lembrete">
+                                <input type="checkbox" id="lembreteAtivo">
+                                <span class="toggle-lembrete-slider"></span>
+                                <span class="toggle-lembrete-texto">Ativar lembrete diário</span>
+                            </label>
+                            <div class="dias-semana-resumo" style="display: none;">
+                                <span id="diasResumoTexto">Todos os dias</span>
+                                <button type="button" class="btn-texto" id="btnAbrirDiasModal">Escolher dias</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-acoes">
+                        <button type="button" class="btn-secundario" id="btnCancelarHabito">Cancelar</button>
+                        <button type="submit" class="btn-primario" id="btnSalvarHabito">Salvar Hábito</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="modalPreferenciasBackdrop">
+        <div class="modal modal-pequeno" role="dialog" aria-labelledby="tituloModalPreferencias" aria-modal="true">
+            <div class="modal-header">
+                <h2 id="tituloModalPreferencias">Preferências</h2>
+                <button type="button" class="btn-fechar-modal" id="btnFecharPreferencias" aria-label="Fechar modal">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="pref-list">
+                    <div class="pref-item">
+                        <div class="pref-item-header">
+                            <div class="pref-item-texto">
+                                <div class="pref-item-titulo">
+                                    Modo escuro
+                                    <span class="pref-item-info" tabindex="0" data-info="O tema será aplicado automaticamente em todas as páginas.">i</span>
+                                </div>
+                                <p class="pref-item-descricao">O tema será aplicado automaticamente em todas as páginas.</p>
+                            </div>
+                            <div class="toggle-switch" id="toggleModoEscuro" role="switch" aria-checked="false" tabindex="0">
+                                <div class="toggle-switch-slider"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pref-item">
+                        <div class="pref-item-header">
+                            <div class="pref-item-texto">
+                                <div class="pref-item-titulo">
+                                    Orientação dos dias
+                                    <span class="pref-item-info" tabindex="0" data-info="Quando ativado, o mini calendário começa pelo dia atual à esquerda e mostra os dias anteriores à direita.">i</span>
+                                </div>
+                                <p class="pref-item-descricao">Quando ativado, o mini calendário começa pelo dia atual à esquerda e mostra os dias anteriores à direita.</p>
+                            </div>
+                            <div class="toggle-switch" id="toggleOrientacaoDias" role="switch" aria-checked="false" tabindex="0">
+                                <div class="toggle-switch-slider"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="modalPreferenciasBackdrop"></div>
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
