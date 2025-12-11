@@ -630,6 +630,77 @@ function getTextoDiasLembrete(dias) {
     return dias.map(d => nomesAbreviados[d]).join(', ');
 }
 
+// Verifica se a meta do período atual está cumprida para um hábito.
+// - diario: meta contínua, retorna sempre false
+// - x-semana: conta conclusões na semana atual (dom-sáb) e compara com vezesX
+// - x-mes: conta conclusões no mês atual e compara com vezesX
+// - x-em-y: janela móvel de Y dias (hoje + Y-1 anteriores) e compara com vezesX
+// - personalizado/indefinido: retorna false (neutro)
+function metaDoPeriodoCumprida(habito) {
+    const tipo = habito.tipoFrequencia || 'diario';
+    const vezesXBruto = Number(habito.vezesX);
+    const diasYBruto = Number(habito.diasY);
+    const vezesX = Number.isFinite(vezesXBruto) && vezesXBruto > 0 ? vezesXBruto : 0;
+    const diasY = Number.isFinite(diasYBruto) && diasYBruto > 0 ? diasYBruto : 5;
+    const historico = getHistorico(habito);
+    const hoje = new Date();
+    hoje.setHours(12, 0, 0, 0);
+
+    const formatarChave = (data) => {
+        const d = new Date(data);
+        d.setHours(12, 0, 0, 0);
+        return d.toISOString().split('T')[0];
+    };
+
+    const concluiu = (valor) => habito.tipo === 'binario' ? valor === true : valor >= habito.alvoDiario;
+
+    if (tipo === 'diario') return false;
+
+    if (tipo === 'x-semana') {
+        const inicio = new Date(hoje);
+        inicio.setDate(inicio.getDate() - inicio.getDay()); // domingo
+        const fim = new Date(inicio);
+        fim.setDate(inicio.getDate() + 6); // sábado
+
+        let total = 0;
+        const cursor = new Date(inicio);
+        while (cursor <= fim) {
+            const chave = formatarChave(cursor);
+            if (concluiu(historico[chave])) total++;
+            cursor.setDate(cursor.getDate() + 1);
+        }
+        return vezesX > 0 && total >= vezesX;
+    }
+
+    if (tipo === 'x-mes') {
+        const inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1, 12);
+        const fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0, 12);
+
+        let total = 0;
+        const cursor = new Date(inicio);
+        while (cursor <= fim) {
+            const chave = formatarChave(cursor);
+            if (concluiu(historico[chave])) total++;
+            cursor.setDate(cursor.getDate() + 1);
+        }
+        return vezesX > 0 && total >= vezesX;
+    }
+
+    if (tipo === 'x-em-y') {
+        let total = 0;
+        for (let i = 0; i < diasY; i++) {
+            const data = new Date(hoje);
+            data.setDate(data.getDate() - i);
+            const chave = formatarChave(data);
+            if (concluiu(historico[chave])) total++;
+        }
+        return vezesX > 0 && total >= vezesX;
+    }
+
+    // Personalizado ou desconhecido
+    return false;
+}
+
 // ============================================
 // 3. MENU HAMBÚRGUER E SIDEBAR
 // ============================================
@@ -1125,6 +1196,14 @@ function atualizarCorAtalho() {
     }
 }
 
+function selecionarCorAleatoria() {
+    const radios = Array.from(document.querySelectorAll('input[name=\"corHabito\"]'));
+    if (radios.length === 0) return;
+    const indice = Math.floor(Math.random() * radios.length);
+    radios[indice].checked = true;
+    atualizarCorAtalho();
+}
+
 function atualizarEstadoLembrete() {
     const horaInput = document.getElementById('horaLembrete');
     const lembreteAtivo = document.getElementById('lembreteAtivo');
@@ -1294,10 +1373,8 @@ function limparFormularioHabito() {
     setDiasSelecionados([]);
     atualizarEstadoLembrete();
     
-    // Reset cor
-    const corRadio = document.querySelector('input[name="corHabito"][value="#10b981"]');
-    if (corRadio) corRadio.checked = true;
-    atualizarCorAtalho();
+    // Reset cor (escolhe uma aleatória entre as opções disponíveis)
+    selecionarCorAleatoria();
     
     // Reset frequência temporária
     frequenciaXTemp = 3;
@@ -1788,8 +1865,7 @@ function criarCardHabitoAvancado(habito) {
     }
     
     // Calendário
-    const diasHTML = gerarDiasCalendario(habito, 7);
-    const headerDias = gerarHeaderDias(7);
+    const { diasHTML, headerDias } = gerarDiasCalendario(habito, 7);
     
     card.innerHTML = `
         <div class="habito-card-header">
@@ -1866,41 +1942,74 @@ function criarCardHabitoAvancado(habito) {
     return card;
 }
 
-function gerarHeaderDias(numDias) {
+function gerarHeaderDias(datas) {
     const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-    let html = '';
-    const hoje = new Date();
-    
-    for (let i = numDias - 1; i >= 0; i--) {
-        const data = new Date(hoje);
-        data.setDate(data.getDate() - i);
-        html += `<span class="dia-header">${diasSemana[data.getDay()]}</span>`;
-    }
-    
-    return html;
+    return datas.map(data => `<span class="dia-header">${diasSemana[data.getDay()]}</span>`).join('');
 }
 
 function gerarDiasCalendario(habito, numDias) {
     let html = '';
     const hoje = new Date();
+    hoje.setHours(12, 0, 0, 0);
     const diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
     const historico = getHistorico(habito);
-    
+
+    // Sempre exibimos 7 dias (ou numDias), terminando em hoje; nenhum futuro.
+    const datas = [];
     for (let i = numDias - 1; i >= 0; i--) {
         const data = new Date(hoje);
         data.setDate(data.getDate() - i);
+        data.setHours(12, 0, 0, 0); // normaliza para comparar apenas data
+        datas.push(data);
+    }
+
+    const podeAplicarMeta = habito.tipoFrequencia !== 'diario' && habito.tipoFrequencia !== 'personalizado';
+    const metaCumprida = (habito.tipoFrequencia === 'x-semana'
+        || habito.tipoFrequencia === 'x-mes'
+        || habito.tipoFrequencia === 'x-em-y')
+        ? metaDoPeriodoCumprida(habito) && podeAplicarMeta
+        : false;
+
+    datas.forEach((data, idx) => {
         const chave = data.toISOString().split('T')[0];
         const valor = historico[chave];
         
         let concluido = habito.tipo === 'binario' ? valor === true : valor >= habito.alvoDiario;
         const diaNumero = data.getDate();
         const diaSemana = diasSemana[data.getDay()];
-        const dataLabel = i === 0 ? 'Hoje' : (i === 1 ? 'Ontem' : formatarData(data));
+        const isHoje = data.toDateString() === hoje.toDateString();
+        const dataLabel = isHoje ? 'Hoje' : formatarData(data);
         const statusLabel = concluido ? 'concluído' : 'não concluído';
-        
+        // Meta mínima: acinzentamos quaisquer dias do período atual (até hoje) que ainda não foram concluídos,
+        // para sinalizar que a meta já foi batida. Não exibimos futuros.
+        const mesmaSemana = (() => {
+            const inicioSemana = new Date(hoje);
+            inicioSemana.setDate(inicioSemana.getDate() - inicioSemana.getDay());
+            const fimSemana = new Date(inicioSemana);
+            fimSemana.setDate(inicioSemana.getDate() + (hoje.getDay()));
+            return data >= inicioSemana && data <= fimSemana;
+        })();
+        const mesmoMes = data.getMonth() === hoje.getMonth() && data.getFullYear() === hoje.getFullYear();
+        const dentroJanelaY = (() => {
+            const diasY = habito.diasY || 5;
+            const inicioJanela = new Date(hoje);
+            inicioJanela.setDate(inicioJanela.getDate() - (diasY - 1));
+            return data >= inicioJanela && data <= hoje;
+        })();
+        const aplicaSemana = habito.tipoFrequencia === 'x-semana' && metaCumprida && mesmaSemana;
+        const aplicaMes = habito.tipoFrequencia === 'x-mes' && metaCumprida && mesmoMes;
+        const aplicaJanela = habito.tipoFrequencia === 'x-em-y' && metaCumprida && dentroJanelaY;
+        // Em "Todos os dias" e "Personalizado", nunca acinzentar automaticamente as caixinhas.
+        // Com a UI mostrando só dias passados + hoje, a sinalização ocorre apenas se hoje não estiver concluído.
+        const metaAplicada = podeAplicarMeta && metaCumprida && !concluido && (aplicaSemana || aplicaMes || aplicaJanela);
+        const metaClass = metaAplicada ? 'dia-meta-cumprida' : '';
+        const classeHoje = isHoje ? 'hoje' : '';
+        const disabledAttr = ''; // Meta cumprida apenas sinaliza, não bloqueia interação
+
         html += `
-            <button type="button" class="calendario-dia ${concluido ? 'concluido' : ''}" 
+            <button type="button" class="calendario-dia ${concluido ? 'concluido' : ''} ${metaClass} ${classeHoje}" 
                  data-data="${chave}"
+                 ${disabledAttr}
                  title="${dataLabel}"
                  aria-label="${diaSemana}, dia ${diaNumero}, ${statusLabel}. Clique para ${concluido ? 'desmarcar' : 'marcar'}."
                  aria-pressed="${concluido}">
@@ -1908,9 +2017,12 @@ function gerarDiasCalendario(habito, numDias) {
                 <span class="dia-check" aria-hidden="true">${concluido ? '✓' : ''}</span>
             </button>
         `;
-    }
+    });
     
-    return html;
+    return {
+        diasHTML: html,
+        headerDias: gerarHeaderDias(datas)
+    };
 }
 
 function formatarData(data) {
