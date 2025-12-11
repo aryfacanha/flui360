@@ -961,6 +961,13 @@ function configurarModais() {
             if (e.target === modalBackdrop) fecharModal('modalBackdrop');
         });
     }
+
+    const btnEsqueciSenha = document.getElementById('btnEsqueciSenha');
+    if (btnEsqueciSenha) {
+        btnEsqueciSenha.addEventListener('click', () => {
+            alert('Envie seu e-mail cadastrado e enviaremos um link para redefinição (simulação).');
+        });
+    }
     
     const formCadastro = document.getElementById('formCadastro');
     if (formCadastro) {
